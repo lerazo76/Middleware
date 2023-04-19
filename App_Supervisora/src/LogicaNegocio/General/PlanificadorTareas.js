@@ -24,9 +24,7 @@ request({
     }
 });
 
-module.exports = json{
-    json
-}
+
 
 /* 
 
