@@ -7,22 +7,15 @@ const fs = require('fs');
 let json = JSON.parse(fs.readFileSync('./modelos/modeloCO.json', 'utf8')); /* method to read the json  */
 const request = require("request");
 
-url = "http://localhost:3000/"
+module.exports = {
+    mod_json: json
+}
 
-// Metodo para enviar la informacion
-request({
-    method: 'POST',
-    url: url, 
-    json: true,   
-    body: json
+read_observador();
 
-},(error, response, body)=>{
-    if(!error && response.statusCode == 200){
-        console.log(body);
-    }else{
-        console.log(error);
-    }
-});
+function read_observador(){
+    require('./Orquestador');
+}
 
 
 

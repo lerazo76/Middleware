@@ -7,7 +7,6 @@ const express = require("express");
 const bodyParser = require('body-parser');
 const app = express();
 const fs = require('fs');
-const { log } = require("console");
 const port = process.env.port || 3000;
 let routes;
 
@@ -34,8 +33,6 @@ app.post('/',(req, res) =>{
         }
         
     }
-    console.log(data);
-   
 });
 
 app.listen(port,()=>{
