@@ -1,27 +1,55 @@
 const request = require("request");
-let planificador = require('./PlanificadorTareas')
-let json = planificador.mod_json
-
-url = "http://localhost:3000/"
-
-// for para recorrer todos los tipos de 
-// obtener cada nodo para tener la ip el puerto
-// 
+let planificador = require('./PlanificadorTareas');
+let startApp = require('../../../StartApp.js');
+let json = planificador.mod_json;
+let tipoEjecucion = startApp.tipoEjecucion;
 
 // Metodo para enviar la informacion
-/* funcion para el request */
 /* 3 for  */
-request({
-    method: 'POST',
-    url: url, /* se reemplaza la url obtenida de network interface */
-    json: true,   
-    body: json /* envio todo el json */
-    /* parametro para ejecutar */
 
-},(error, response, body)=>{
-    if(!error && response.statusCode == 200){
-        console.log(body);
-    }else{
-        console.log(error);
+
+/* CODIGO ALEX */
+const containsEntityList = json['ArchitectureSelfAwarenessIoT'].containsEntity
+
+/* for para recorrer cada NODO */
+for (let entity of containsEntityList) {
+    if (entity.$["xsi:type"] == "MonitorIoT:CloudNode" || entity.$["xsi:type"] == "MonitorIoT:FogNode" || entity.$["xsi:type"] == "MonitorIoT:IoTGateway") {
+        console.log("sendInformation = "+entity.$["xsi:type"]);
+        enviarInformacion(entity,json);
+    } 
+}
+
+/* funcion para enviar la informacion, obteniendo el host de cada nodo */
+function enviarInformacion(entity, json){
+    const headers = {
+        'content-type': 'application/json'
     }
-});
+    if (entity.containsResource && entity.containsResource.length > 0) {
+        let host = ''
+        for(let resource of entity.containsResource){
+            if(resource && resource.$['xsi:type'] == "MonitorIoT:NetworkInterface"){
+                host = resource.$.networkAddress
+            }
+        }
+
+        if (host != ""){
+            url = "http://" + host + "/";
+            request({
+                url: url,
+                headers: headers,
+                body: JSON.stringify({
+                    "data": json,
+                    "tipoEjecucion": tipoEjecucion
+                }),
+                method: 'POST'            
+             },(error, response, body)=>{
+                if(!error && response.statusCode == 200){
+                    console.log('MAL');
+                }else{
+                    console.log(error);
+                }
+            });
+        }
+    }
+} 
+

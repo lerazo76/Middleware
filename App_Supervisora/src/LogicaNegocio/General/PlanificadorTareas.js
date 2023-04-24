@@ -3,9 +3,12 @@
     del sistema IoT
 */
 
-const fs = require('fs');
-let json = JSON.parse(fs.readFileSync('./modelos/modeloCO.json', 'utf8')); /* method to read the json  */
+const fs = require('fs'); 
 const request = require("request");
+let StartApp = require('../../../StartApp')
+let filePath = StartApp.filePath
+let tipoEjecucion = StartApp.tipoEjecucion
+let json = JSON.parse(fs.readFileSync('./modelos/modeloCO.json', 'utf8'));
 
 /* CONVERTIR EL JSON EN UN ARREGLO DE OBJETOS */
 /* 3 OBJETOS
@@ -13,10 +16,7 @@ const request = require("request");
     2. NODO F
     3. NODO IOT */
 
-
 /* PRUEBA PARA OBTENER 2 NIVELES */
-
-
 
 module.exports = {
     mod_json: json

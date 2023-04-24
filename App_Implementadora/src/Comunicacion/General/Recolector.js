@@ -7,6 +7,8 @@ const express = require("express");
 const bodyParser = require('body-parser');
 const app = express();
 const fs = require('fs');
+const { tipoEjecucion } = require("../../../../App_Supervisora/StartApp");
+const { log } = require("console");
 const port = process.env.port || 3000;
 let routes;
 
@@ -22,8 +24,8 @@ app.post('/',(req, res) =>{
     let data;
     if(req.body){
         try{
-            data = req.body
-            res.send(data)
+            datos = JSON.stringify(req.body.data, null, 4);
+            tipoEjec = JSON.stringify(req.body.tipoEjecucion, null, 4)
         }catch(err){
             response = {
                 error: true,

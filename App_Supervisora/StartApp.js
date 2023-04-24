@@ -1,19 +1,32 @@
-// 1 STEP
+// Archivo para inicializar la aplicacion
 
 // VARIABLES
 const process = require('process')
 
-/* obtenemos el primer parametro (DIRECTORIO DEL MODELO JSON) */
-/* let indexPath = process.argv.indexOf('--ruta'); */
-let indexPath = process.argv[2]; 
-/* Obtenemos el segundo parametro (QUE APLICACION SE VA A EJECUTAR) */
-/* let indexApp = process.argv.indexOf('--tipoejecucion'); */
-let indexApp = process.argv[3];
+let indexPath = process.argv.indexOf('--ruta'); /* obtenemos el primer parametro, hace referencia a la ruta del modelo json */
+let indexTipoEjecucion = process.argv.indexOf('--tipoEjecucion'); /* obtenemos el segundo parametro, hace referencia al tipo de ejecucion monitoreo y autoconsciencia */
+/* if (indexPath > -1){
+  let filePath = process.argv[2]; 
+  let tipoEjecucion = process.argv[3]; 
+  console.log('ruta');
+}else{
+  console.log('no');
+}
+ */
 
-readObservador();
+let filePath = process.argv[2]; 
+let tipoEjecucion = process.argv[3]; 
+
+/* Exporto las variables */
+module.exports = {
+  filePath : filePath,
+  tipoEjecucion : tipoEjecucion
+}
+
+observador();
 
 // funcion para llamar al observador
-function readObservador(){
+function observador(){
   require('./src/LogicaNegocio/General/Observador');
 };
 

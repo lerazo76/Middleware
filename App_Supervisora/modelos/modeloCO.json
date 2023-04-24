@@ -67,7 +67,7 @@
                             "id": "16",
                             "name": "Interfaz",
                             "connects": "//@containsEntity.3",
-                            "networkAddress": "CloudNode"
+                            "networkAddress": "localhost:3000" 
                         }
                     }
                 ]
