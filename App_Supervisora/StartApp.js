@@ -7,7 +7,7 @@ const process = require('process')
 /* let indexPath = process.argv.indexOf('--ruta'); */
 let indexPath = process.argv[2]; 
 /* Obtenemos el segundo parametro (QUE APLICACION SE VA A EJECUTAR) */
-/* let indexApp = process.argv.indexOf('--aplicacion'); */
+/* let indexApp = process.argv.indexOf('--tipoejecucion'); */
 let indexApp = process.argv[3];
 
 readObservador();

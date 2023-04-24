@@ -7,13 +7,24 @@ const fs = require('fs');
 let json = JSON.parse(fs.readFileSync('./modelos/modeloCO.json', 'utf8')); /* method to read the json  */
 const request = require("request");
 
+/* CONVERTIR EL JSON EN UN ARREGLO DE OBJETOS */
+/* 3 OBJETOS
+    1. NODO CLOUD
+    2. NODO F
+    3. NODO IOT */
+
+
+/* PRUEBA PARA OBTENER 2 NIVELES */
+
+
+
 module.exports = {
     mod_json: json
 }
 
-read_observador();
+orquestador();
 
-function read_observador(){
+function orquestador(){
     require('./Orquestador');
 }
 

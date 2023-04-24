@@ -386,7 +386,7 @@
                                     "id": "15",
                                     "name": "Interfaz",
                                     "connects": "//@containsEntity.4",
-                                    "networkAddress": "FogNode"
+                                    "networkAddress": "localhost:3000"
                                 }
                             }
                         ]
