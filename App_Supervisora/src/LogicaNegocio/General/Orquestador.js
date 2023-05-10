@@ -13,7 +13,9 @@ const containsEntityList = json['ArchitectureSelfAwarenessIoT'].containsEntity
 
 /* for para recorrer cada NODO */
 for (let entity of containsEntityList) {
-    if (entity.$["xsi:type"] == "MonitorIoT:CloudNode" || entity.$["xsi:type"] == "MonitorIoT:FogNode" || entity.$["xsi:type"] == "MonitorIoT:IoTGateway") {
+    //if (entity.$["xsi:type"] == "MonitorIoT:CloudNode" || entity.$["xsi:type"] == "MonitorIoT:FogNode" || entity.$["xsi:type"] == "MonitorIoT:IoTGateway") {
+    if (entity.$["xsi:type"] == "MonitorIoT:FogNode") {
+
         console.log("sendInformation = "+entity.$["xsi:type"]);
         enviarInformacion(entity,json);
     } 

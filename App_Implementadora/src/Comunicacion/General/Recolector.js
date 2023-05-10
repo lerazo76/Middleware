@@ -8,8 +8,7 @@ const bodyParser = require('body-parser');
 const app = express();
 const fs = require('fs');
 const { tipoEjecucion } = require("../../../../App_Supervisora/StartApp");
-const { log } = require("console");
-const port = process.env.port || 3000;
+const port = process.env.port || 9999;
 let routes;
 
 app.use(bodyParser.urlencoded({extended: false}));

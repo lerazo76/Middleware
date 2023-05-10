@@ -67,7 +67,7 @@
                             "id": "16",
                             "name": "Interfaz",
                             "connects": "//@containsEntity.3",
-                            "networkAddress": "localhost:3000" 
+                            "networkAddress": "localhost:9999" 
                         }
                     }
                 ]
@@ -386,7 +386,7 @@
                                     "id": "15",
                                     "name": "Interfaz",
                                     "connects": "//@containsEntity.4",
-                                    "networkAddress": "localhost:3000"
+                                    "networkAddress": "localhost:9998"
                                 }
                             }
                         ]
@@ -494,7 +494,7 @@
                                             "id": "20",
                                             "name": "Interfaz",
                                             "connects": "//@containsEntity.5",
-                                            "networkAddress": "IoTGateway"
+                                            "networkAddress": "localhost:9997" 
                                         }
                                     }
                                 ]
