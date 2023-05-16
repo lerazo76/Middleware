@@ -1,29 +1,28 @@
 const request = require("request");
 let planificador = require("./PlanificadorTareas");
 let startApp = require("../../../StartApp.js");
-let json = planificador.mod_json;
+let json = planificador.json;
 let tipoEjecucion = startApp.tipoEjecucion;
-
-// Metodo para enviar la informacion
-/* 3 for  */
+const fs = require("fs");
 
 /* CODIGO ALEX */
-//ejecucion de la funcion
-const fs = require("fs");
-fs.readFile("../../../modelos/modeloCO.json", "utf-8", (error, data) => { //lectura del json 
+fs.readFile("./modelos/modeloCO.json", "utf-8", (error, data) => { //lectura del json 
   if (error) {
     console.log("error");
   } else {
     data = JSON.parse(data);
     //prueba que si retorna containsreturnvariable en apis
     const nodosAPI = buscarValor(data, "MonitorIoT:API");
-    console.log(nodosAPI);
-    //fin prueba si retorna
+    //console.log(nodosAPI);
     //prueba que si retorna containsdatable en db
     const nodosDB = buscarValor(data, "MonitorIoT:DataBase");
-    console.log(nodosDB);
+    //console.log(nodosDB);
+    //Network Interface
+    const nodosNI = buscarValor(data,"MonitorIoT:NetworkInterface")
+    /* for (var prop in nodosNI){
+      console.log(nodosNI[prop]);
+    } */
     //fin prueba si retorna
-    
     // const nodosAPI2 = buscarValorTerminacion(data, ":API");
     // console.log(nodosAPI2);
   }
@@ -54,23 +53,18 @@ function buscarValor(objeto, parametro) {
 /*FIN CODIGO ALEX */
 
 const containsEntityList = json["ArchitectureSelfAwarenessIoT"].containsEntity;
+/* recorro el arreglo de objetos de nodos de alex */
+
 
 /* for para recorrer cada NODO */
-for (let entity of containsEntityList) {
-    //if (entity.$["xsi:type"] == "MonitorIoT:CloudNode" || entity.$["xsi:type"] == "MonitorIoT:FogNode" || entity.$["xsi:type"] == "MonitorIoT:IoTGateway") {
-    /* if (entity.$["xsi:type"] == "MonitorIoT:FogNode") {
 
-        console.log("sendInformation = "+entity.$["xsi:type"]);
-        enviarInformacion(entity,json);
-    }  */
-    if (
-      entity.$["xsi:type"] == "MonitorIoT:CloudNode" ||
-      entity.$["xsi:type"] == "MonitorIoT:FogNode" ||
-      entity.$["xsi:type"] == "MonitorIoT:IoTGateway"
-    ) {
-      console.log("sendInformation = " + entity.$["xsi:type"]);
-      enviarInformacion(entity, json);
-    }
+/* recorrido del objeto */
+for (let entity of containsEntityList) {
+    if (entity.$["xsi:type"] == "MonitorIoT:CloudNode" || entity.$["xsi:type"] == "MonitorIoT:FogNode" || entity.$["xsi:type"] == "MonitorIoT:IoTGateway") {
+    //if (entity.$["xsi:type"] === "MonitorIoT:CloudNode"){ 
+      console.log("sendInformation = "+entity.$["xsi:type"]);
+      enviarInformacion(entity,json);
+    }  
 }
 
 /* funcion para enviar la informacion, obteniendo el host de cada nodo */
@@ -79,13 +73,9 @@ function enviarInformacion(entity, json) {
     "content-type": "application/json",
   };
   if (entity.containsResource && entity.containsResource.length > 0) {
-    let host = "";
-    for (let resource of entity.containsResource) {
-      if (resource && resource.$["xsi:type"] == "MonitorIoT:NetworkInterface") {
-        host = resource.$.networkAddress;
-      }
-    }
-
+    var host;
+    nodosNI = buscarValor(entity.containsResource,"MonitorIoT:NetworkInterface")
+    host = nodosNI[0].objetoPadre.$.networkAddress;
     if (host != "") {
       url = "http://" + host + "/";
       request(

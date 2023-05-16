@@ -25,6 +25,7 @@ app.post('/',(req, res) =>{
         try{
             datos = JSON.stringify(req.body.data, null, 4);
             tipoEjec = JSON.stringify(req.body.tipoEjecucion, null, 4)
+            console.log(datos);
         }catch(err){
             response = {
                 error: true,

@@ -1,25 +1,26 @@
 /* Este componente se encarga de comparar la nueva version detectada del modelo
-    arquitectura de monitoreo cn la configuracion de monitoreo en ejecucion 
+    arquitectura de monitoreo con la configuracion de monitoreo en ejecucion 
     del sistema IoT
 */
 
 const fs = require('fs'); 
-const request = require("request");
 let StartApp = require('../../../StartApp')
 let filePath = StartApp.filePath
-let tipoEjecucion = StartApp.tipoEjecucion
-let json = JSON.parse(fs.readFileSync('./modelos/modeloCO.json', 'utf8'));
+let json = JSON.parse(fs.readFileSync(filePath+'/modeloCO.json', 'utf8'));
 
-/* CONVERTIR EL JSON EN UN ARREGLO DE OBJETOS */
-/* 3 OBJETOS
+/* CONVERTIR EL JSON EN UN ARREGLO DE OBJETOS 
+   3 OBJETOS
     1. NODO CLOUD
     2. NODO F
     3. NODO IOT */
 
-/* PRUEBA PARA OBTENER 2 NIVELES */
+/* colocar aqui el codigo de alex */
+
+/* lee el archivo llama a la funcion
+convierte el json en objeto */
 
 module.exports = {
-    mod_json: json
+    json: json
 }
 
 orquestador();
