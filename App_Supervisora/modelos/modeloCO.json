@@ -12,7 +12,8 @@
                     "xsi:type": "MonitorIoT:CloudNode",
                     "isPartOf": "//@containsIoTSystem.0",
                     "id": "2",
-                    "name": "GoogleCloud"
+                    "name": "GoogleCloud",
+                    "portmiddlewareselfaware":"9999"
                 },
                 "containsResource": [
                     {
