@@ -14,13 +14,45 @@ let json = JSON.parse(fs.readFileSync(filePath+'/modeloCO.json', 'utf8'));
     2. NODO F
     3. NODO IOT */
 
-/* colocar aqui el codigo de alex */
+/*fs.readFile(filePath+"/modeloCO.json", "utf-8", (error, data) => { //lectura del json 
+    if (error) {
+      console.log("error");
+    } else {
+      data = JSON.parse(data);
+      const nodosAPI = buscarValor(data, "MonitorIoT:API");
+      const nodosDB = buscarValor(data, "MonitorIoT:DataBase");
+      const nodosNI = buscarValor(data,"MonitorIoT:NetworkInterface")
+    }
+  });*/
+  
+//Funcion para buscar en el json el parametro que se envie (API's, BD's, BROKER's)
+function buscarValor(objeto, parametro) {
+  const resultados = [];
+  const pila = [{ objeto, objetoPadre: null, keyPadre: null }];
+  while (pila.length > 0) {
+    const { objeto: obj, objetoPadre, keyPadre } = pila.pop();
+    for (const key in obj) {
+      if (obj[key] === parametro) {
+        const resultado = {
+          valor: obj[key],
+          keyPadre,
+          objetoPadre: Object.assign({}, objetoPadre, { [keyPadre]: obj }),
+        };
+      resultados.push(resultado);
+      }else if (typeof obj[key] === "object") {
+          pila.push({ objeto: obj[key], objetoPadre: obj, keyPadre: key });
+      }
+    }
+  }
+  return resultados;
+}
 
-/* lee el archivo llama a la funcion
-convierte el json en objeto */
+nodos = buscarValor(json,"MonitorIoT:CloudNode")
+//console.log(nodos[0].objetoPadre.$.selfAwareMiddlewarePort);
 
 module.exports = {
-    json: json
+    json: json,
+    arreglo: nodos
 }
 
 orquestador();

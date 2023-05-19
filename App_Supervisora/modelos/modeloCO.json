@@ -68,7 +68,7 @@
                             "id": "16",
                             "name": "Interfaz",
                             "connects": "//@containsEntity.3",
-                            "networkAddress": "localhost:9999" 
+                            "networkAddress": "localhost" 
                         }
                     }
                 ]
@@ -388,7 +388,7 @@
                                     "id": "15",
                                     "name": "Interfaz",
                                     "connects": "//@containsEntity.4",
-                                    "networkAddress": "localhost:9998"
+                                    "networkAddress": "localhost"
                                 }
                             }
                         ]
@@ -498,7 +498,7 @@
                                             "id": "20",
                                             "name": "Interfaz",
                                             "connects": "//@containsEntity.5",
-                                            "networkAddress": "localhost:9997" 
+                                            "networkAddress": "localhost" 
                                         }
                                     }
                                 ]

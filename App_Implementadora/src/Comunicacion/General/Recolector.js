@@ -24,8 +24,9 @@ app.post('/',(req, res) =>{
     if(req.body){
         try{
             datos = JSON.stringify(req.body.data, null, 4);
+            arreglo = JSON.stringify(req.body.objetos, null, 4)
             tipoEjec = JSON.stringify(req.body.tipoEjecucion, null, 4)
-            console.log(datos);
+            console.log(arreglo);
         }catch(err){
             response = {
                 error: true,
