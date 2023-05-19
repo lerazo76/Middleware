@@ -13,7 +13,7 @@
                     "isPartOf": "//@containsIoTSystem.0",
                     "id": "2",
                     "name": "GoogleCloud",
-                    "portmiddlewareselfaware":"9999"
+                    "selfAwareMiddlewarePort":"9999"
                 },
                 "containsResource": [
                     {
@@ -86,7 +86,8 @@
                             "xsi:type": "MonitorIoT:FogNode",
                             "isPartOf": "//@containsIoTSystem.0",
                             "id": "5",
-                            "name": "MiniServer"
+                            "name": "MiniServer",
+                            "selfAwareMiddlewarePort":"9997"
                         },
                         "hasProperty": [
                             {
@@ -430,8 +431,10 @@
                                     "xsi:type": "MonitorIoT:IoTGateway",
                                     "isPartOf": "//@containsIoTSystem.0",
                                     "id": "19",
-                                    "name": "RaspberryPi3"
+                                    "name": "RaspberryPi3",
+                                    "selfAwareMiddlewarePort":"9998"
                                 },
+                                
                                 "containsResource": [
                                     {
                                         "$": {
