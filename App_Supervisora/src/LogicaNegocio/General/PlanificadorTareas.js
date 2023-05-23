@@ -3,12 +3,99 @@
     del sistema IoT
 */
 
-const fs = require('fs'); 
+const fs = require("fs");
 const request = require("request");
-let StartApp = require('../../../StartApp')
-let filePath = StartApp.filePath
-let tipoEjecucion = StartApp.tipoEjecucion
-let json = JSON.parse(fs.readFileSync('./modelos/modeloCO.json', 'utf8'));
+let StartApp = require("../../../StartApp");
+let filePath = StartApp.filePath;
+let tipoEjecucion = StartApp.tipoEjecucion;
+let json = JSON.parse(fs.readFileSync("./modelos/modeloCO.json", "utf8"));
+
+/*CODIGO ALEX, FUNCION PARA BUSCAR EN EL JSON LOS NODOS Y CONVERTIRLOS A ARREGLOS DE OBJETOS INCLUYENDO EL NUMERO DE NIVELES DESEADO */
+const fs = require("fs");
+fs.readFile("modeloCO.json", "utf-8", (error, data) => {
+  //LECTURA DEL JSON, BRANDON CREO QUE ESTO NO IRIA ME AVISAS
+  if (error) {
+    console.log("error");
+  } else {
+    data = JSON.parse(data);
+    const arregloNodos = [];
+    const nodosCloud = buscarValor(data, "MonitorIoT:CloudNode", 4);
+    const nodosFog = buscarValor(data, "MonitorIoT:FogNode", 4);
+    const nodosIotGateway = buscarValor(data, "MonitorIoT:IoTGateway", 4);
+    arregloNodos.push();
+    // console.log(JSON.stringify(nodosCloud, null, 2));
+  }
+});
+
+function buscarValor(objeto, parametro, nivel) {
+  const resultados = [];
+  const arrayformat = [];
+  const pila = [{ objeto, objetoPadre: null, keyPadre: null }];
+  while (pila.length > 0) {
+    const { objeto: obj, objetoPadre, keyPadre } = pila.pop();
+    for (const key in obj) {
+      if (obj[key] === parametro) {
+        const resultado = {
+          // tipo: obj[key],
+          objetoPadre: Object.assign({}, objetoPadre, { [keyPadre]: obj }),
+        };
+        resultados.push(resultado);
+      } else if (typeof obj[key] === "object") {
+        pila.push({ objeto: obj[key], objetoPadre: obj, keyPadre: key });
+      }
+    }
+  }
+  for (let i = 0; i < resultados.length; i++) {
+    //recorrer el arreglo resultados si se encontro mas de una coincidencia del parametro y trabajar con cada una
+    objetoPadreActual = resultados[i].objetoPadre; //obtener la instancia de objeto padre
+    //Separar objetoPadreActual en el numero de niveles indicado
+    let objNivelesEstruct = estructurarObj(objetoPadreActual, nivel);
+    arrayformat.push(objNivelesEstruct);
+  }
+  return arrayformat;
+}
+
+function estructurarObj(obj, nivelMax = Infinity) {
+  function descomponer(obj, nivel = 1, clavePadre = "") {
+    if (nivel > nivelMax) {
+      return obj;
+    }
+    const atributos = obj["$"]; //obtener los atributos del objeto actual
+    const clavesAnidadas = Object.keys(obj).filter((clave) => clave !== "$"); //obtener las subclaves excepto $
+    const objetoAplanado = { ...atributos }; //instancia de objeto aplanado
+    if (nivel < nivelMax && clavesAnidadas.length > 0) {
+      //verificar el nivel y la existencia de claves anidadas
+      for (const clave of clavesAnidadas) {
+        //recorrer claves anidadas
+        if (Array.isArray(obj[clave])) {
+          //si clave es un array llamar recursivamente a descomponer
+          objetoAplanado[clave] = []; //array que tendra los resultados de descomponer cada elemento del array
+          obj[clave].forEach((item, indice) => {
+            const objetoAnidado = descomponer(
+              item,
+              nivel + 1,
+              `${clavePadre}.${clave}[${indice}]` //se actualiza la clave del nivel superior para que se refleje la jerarquia de niveles
+            );
+            objetoAplanado[clave].push(objetoAnidado); //se agrega los resultados al objeto vacio inicializado anteriormente
+          });
+        } else {
+          //si no es un array
+          const objetoAnidado = descomponer(
+            //se llama a la función descomponer para el objeto anidado
+            obj[clave],
+            nivel + 1, //se incrementa el nivel
+            `${clavePadre}.${clave}` //se actualiza la clave del nivel superior para que se refleje la jerarquia de niveles
+          );
+          objetoAplanado[clave] = objetoAnidado; // se agrega los resultados a objetoAplanado
+        }
+      }
+    }
+    return objetoAplanado;
+  }
+  return descomponer(obj);
+}
+
+/* FIN CODIGO ALEX, FUNCION PARA BUSCAR EN EL JSON LOS NODOS Y CONVERTIRLOS A ARREGLOS DE OBJETOS INCLUYENDO EL NUMERO DE NIVELES DESEADO */
 
 /* CONVERTIR EL JSON EN UN ARREGLO DE OBJETOS */
 /* 3 OBJETOS
@@ -19,16 +106,14 @@ let json = JSON.parse(fs.readFileSync('./modelos/modeloCO.json', 'utf8'));
 /* PRUEBA PARA OBTENER 2 NIVELES */
 
 module.exports = {
-    mod_json: json
-}
+  mod_json: json,
+};
 
 orquestador();
 
-function orquestador(){
-    require('./Orquestador');
+function orquestador() {
+  require("./Orquestador");
 }
-
-
 
 /* 
 
