@@ -1,11 +1,8 @@
-var fs = require('fs')
 const ck = require('chokidar')
 let startApp = require('../../../StartApp.js')
 let path = startApp.filePath
-let tipoEjecucion = startApp.tipoEjecucion
 
 cambiosModelo();
-
 
 function cambiosModelo() /* Funcion para observar si se crea o se modifica el modelo json, para implementar o reconfigurar los recursos de monitoreo */
 {

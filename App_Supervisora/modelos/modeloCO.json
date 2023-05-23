@@ -12,7 +12,8 @@
                     "xsi:type": "MonitorIoT:CloudNode",
                     "isPartOf": "//@containsIoTSystem.0",
                     "id": "2",
-                    "name": "GoogleCloud"
+                    "name": "GoogleCloud",
+                    "selfAwareMiddlewarePort":"9999"
                 },
                 "containsResource": [
                     {
@@ -67,7 +68,7 @@
                             "id": "16",
                             "name": "Interfaz",
                             "connects": "//@containsEntity.3",
-                            "networkAddress": "localhost:3000" 
+                            "networkAddress": "localhost" 
                         }
                     }
                 ]
@@ -85,7 +86,8 @@
                             "xsi:type": "MonitorIoT:FogNode",
                             "isPartOf": "//@containsIoTSystem.0",
                             "id": "5",
-                            "name": "MiniServer"
+                            "name": "MiniServer",
+                            "selfAwareMiddlewarePort":"9997"
                         },
                         "hasProperty": [
                             {
@@ -386,7 +388,7 @@
                                     "id": "15",
                                     "name": "Interfaz",
                                     "connects": "//@containsEntity.4",
-                                    "networkAddress": "localhost:3000"
+                                    "networkAddress": "localhost"
                                 }
                             }
                         ]
@@ -429,8 +431,10 @@
                                     "xsi:type": "MonitorIoT:IoTGateway",
                                     "isPartOf": "//@containsIoTSystem.0",
                                     "id": "19",
-                                    "name": "RaspberryPi3"
+                                    "name": "RaspberryPi3",
+                                    "selfAwareMiddlewarePort":"9998"
                                 },
+                                
                                 "containsResource": [
                                     {
                                         "$": {
@@ -494,7 +498,7 @@
                                             "id": "20",
                                             "name": "Interfaz",
                                             "connects": "//@containsEntity.5",
-                                            "networkAddress": "IoTGateway"
+                                            "networkAddress": "localhost" 
                                         }
                                     }
                                 ]

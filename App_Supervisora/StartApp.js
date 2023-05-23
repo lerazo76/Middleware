@@ -1,8 +1,6 @@
 // Archivo para inicializar la aplicacion
 
 // VARIABLES
-const process = require('process')
-
 let indexPath = process.argv.indexOf('--ruta'); /* obtenemos el primer parametro, hace referencia a la ruta del modelo json */
 let indexTipoEjecucion = process.argv.indexOf('--tipoEjecucion'); /* obtenemos el segundo parametro, hace referencia al tipo de ejecucion monitoreo y autoconsciencia */
 /* if (indexPath > -1){
