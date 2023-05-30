@@ -26,7 +26,7 @@ for(let entity of arreglo){
     enviarInformacion(host, port,json);
   }
 }
-
+/*  */
 /* funcion para enviar la informacion, obteniendo el host de cada nodo */
 function enviarInformacion(host, port, json) {
   const headers = {
