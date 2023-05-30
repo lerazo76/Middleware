@@ -24,6 +24,9 @@ fs.readFile("modeloCO.json", "utf-8", (error, data) => {
     const nodosIotGateway = buscarValor(data, "MonitorIoT:IoTGateway", 4);
     arregloNodos.push();
     // console.log(JSON.stringify(nodosCloud, null, 2));
+
+    //para cambiar el path por el valor, solo se llama a la funcion
+    cambiarValorPropiedad(nodosCloud[0], "usesProtocol", data);
   }
 });
 
@@ -94,6 +97,66 @@ function estructurarObj(obj, nivelMax = Infinity) {
   }
   return descomponer(obj);
 }
+
+/*SUBFUNCION PARA CAMBIAR EL PATH DE UN ATRIBUTO DEL ARREGLO DE OBJETOS DE LOS NODOS AL VALOR CORRESPONDIENTE */
+function cambiarValorPropiedad(objeto, propiedad, objson) { //FUNCION PARA CAMBIAR EL PATH DE UNA PROPIEDAD POR EL VALOR 
+  for (var key in objeto) {
+    if (typeof objeto[key] === "object") {
+      cambiarValorPropiedad(objeto[key], propiedad, objson); // Llamada recursiva
+    } else if (key === propiedad) {
+      valorcambiar = objeto[key]; //obtener el valor de la propiedad para poder buscar en el json
+      numrutas = valorcambiar.split(" "); //verificar si tiene uno o dos path
+      if (numrutas.length > 1) {
+        //caso dos rutas o mas
+        let arraynuevRutas = [];
+        numrutas.forEach((element) => {
+          ruta = transformaraRuta(element); //conseguir la ruta del elemento 
+          ruta = "ArchitectureSelfAwarenessIoT." + ruta; //se agrega la key inicial a la ruta para poder acceder
+          nuevoValor = buscarValorConRuta(objson, ruta); //llamado a la funcion para buscar el valor con la ruta armada
+          arraynuevRutas.push(nuevoValor); //almacenar en un array los valores
+          ;
+        }); 
+        objeto[key] = arraynuevRutas;  //como una propiedad tiene dos o mas valores se agrega el array
+      } else {
+        ruta = transformaraRuta(valorcambiar);
+        ruta = "ArchitectureSelfAwarenessIoT." + ruta ;
+        nuevoValor = buscarValorConRuta(objson, ruta);
+        objeto[key] = nuevoValor;
+      }
+    }
+  }
+}
+
+function buscarValorConRuta(objeto, ruta) {
+  const propiedades = ruta.split("."); // Dividir la ruta en propiedades separadas por puntos 
+  let valor = objeto; // Inicializar "valor" con el objeto de entrada
+  for (let prop of propiedades) { // Iterar sobre cada propiedad en el arreglo "propiedades"
+    valor = valor[prop]; // Acceder a la propiedad actual en el objeto "valor"
+    if (valor === undefined) { // Si el valor es indefinido,la ruta no es válida
+      return undefined;
+    }
+  }
+  valor = obtenerParesClaveValor(valor["$"]); // Obtener los pares clave-valor del objeto en la propiedad "$"
+  return valor; //Devolver el valor buscado con la ruta
+}
+
+function obtenerParesClaveValor(objeto) { 
+  const resultado = {}; // Objeto vacío para almacenar los pares clave-valor resultantes
+  for (let clave in objeto) { // Iterar sobre cada clave en el objeto de entrada
+    resultado[clave] = objeto[clave]; // Asignar el valor correspondiente a la clave en el objeto de entrada al objeto resultado
+  }
+  return resultado; // Devolver el objeto resultado 
+}
+
+function transformaraRuta(cadena) { 
+  const sinBarras = cadena.replace(/\//g, ''); // Eliminar todas las barras diagonales ('/') de la cadena
+  let sinBarrasYarroba = sinBarras.replace(/@/g, (coincidencia, desplazamiento) => { // Reemplazar todas las apariciones del carácter '@' y cambiarlos por punto
+    return desplazamiento === 0 ? coincidencia : '.'; // 
+  });
+  sinBarrasYarroba = sinBarrasYarroba.slice(1); 
+  return sinBarrasYarroba; // Devolver el valor final de que es la ruta
+}
+/* FIN SUBFUNCION PARA CAMBIAR EL PATH DE UN ATRIBUTO DEL ARREGLO DE OBJETOS DE LOS NODOS AL VALOR CORRESPONDIENTE */
 
 /* FIN CODIGO ALEX, FUNCION PARA BUSCAR EN EL JSON LOS NODOS Y CONVERTIRLOS A ARREGLOS DE OBJETOS INCLUYENDO EL NUMERO DE NIVELES DESEADO */
 
