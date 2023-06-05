@@ -8,7 +8,7 @@ const bodyParser = require('body-parser');
 const app = express();
 const fs = require('fs');
 const { tipoEjecucion } = require("../../../../App_Supervisora/StartApp");
-const port = process.env.port || 9999;
+const port = process.env.port || 9998;
 let routes;
 
 app.use(bodyParser.urlencoded({extended: false}));
@@ -26,7 +26,10 @@ app.post('/',(req, res) =>{
             datos = JSON.stringify(req.body.data, null, 4);
             arreglo = JSON.stringify(req.body.objetos, null, 4)
             tipoEjec = JSON.stringify(req.body.tipoEjecucion, null, 4)
+            /* console.log(arreglo); */
+            
             console.log(arreglo);
+            console.log("DATOS NODO CLOUD");
         }catch(err){
             response = {
                 error: true,

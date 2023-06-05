@@ -19,13 +19,37 @@ for (let entity of containsEntityList) {
     }  
 }*/
 
-for(let entity of arreglo){
+/* for(let entity of arreglo){
+ 
   if(entity.valor == "MonitorIoT:CloudNode"){
     let port = entity.objetoPadre.$.selfAwareMiddlewarePort;
     let host = entity.objetoPadre.containsResource[1].$.networkAddress;
     enviarInformacion(host, port,json);
   }
+} */
+
+
+// arreglo -arregloNodos
+// entity - nodoComputacion
+for(let entity of arreglo){
+  if((entity[0]['xsi:type'] == "MonitorIoT:CloudNode") || (entity[0]['xsi:type'] == "MonitorIoT:FogNode") || (entity[0]['xsi:type'] == "MonitorIoT:IoTGateway")){
+    // datos - propiedades
+    for(let datos of entity){
+      console.log(datos);
+      for(let red of datos.containsResource){
+        if(red['xsi:type']=='MonitorIoT:NetworkInterface'){ 
+          let host = red.networkAddress;
+          let port = entity[0].selfAwareMiddlewarePort;
+          //console.log(`Enviando datos al Nodo ${entity[0]['xsi:type']} port: ${port}` );
+          // pasar todo el json
+          // pasar todo el modeloObjeto
+          enviarInformacion(host, port, datos)
+        }
+      }
+    }
+  } 
 }
+
 /*  */
 /* funcion para enviar la informacion, obteniendo el host de cada nodo */
 function enviarInformacion(host, port, json) {
@@ -37,11 +61,14 @@ function enviarInformacion(host, port, json) {
       url = "http://" + host + ":" + port + "/";
       request(
         {
+          // enviando modelo de arquitectura y autoconciencia nodo y la IP
+          // modeloObjeto
+          // modeloJson
           url: url,
           headers: headers,
           body: JSON.stringify({
             data: json,
-            objetos: arreglo,
+            objetos: json,
             tipoEjecucion: tipoEjecucion,
           }),
           method: "POST",

@@ -11,8 +11,8 @@ let tipoEjecucion = StartApp.tipoEjecucion;
 let json = JSON.parse(fs.readFileSync("./modelos/modeloCO.json", "utf8"));
 
 /*CODIGO ALEX, FUNCION PARA BUSCAR EN EL JSON LOS NODOS Y CONVERTIRLOS A ARREGLOS DE OBJETOS INCLUYENDO EL NUMERO DE NIVELES DESEADO */
-const fs = require("fs");
-fs.readFile("modeloCO.json", "utf-8", (error, data) => {
+
+/* fs.readFile("./modelos/modeloCO.json", "utf-8", (error, data) => {
   //LECTURA DEL JSON, BRANDON CREO QUE ESTO NO IRIA ME AVISAS
   if (error) {
     console.log("error");
@@ -22,10 +22,14 @@ fs.readFile("modeloCO.json", "utf-8", (error, data) => {
     const nodosCloud = buscarValor(data, "MonitorIoT:CloudNode", 4);
     const nodosFog = buscarValor(data, "MonitorIoT:FogNode", 4);
     const nodosIotGateway = buscarValor(data, "MonitorIoT:IoTGateway", 4);
-    arregloNodos.push();
+    arregloNodos.push(nodosCloud);
+    arregloNodos.push(nodosFog);
+    arregloNodos.push(nodosIotGateway);
+
+    console.log(arregloNodos);
     // console.log(JSON.stringify(nodosCloud, null, 2));
   }
-});
+}); */
 
 function buscarValor(objeto, parametro, nivel) {
   const resultados = [];
@@ -115,7 +119,7 @@ function estructurarObj(obj, nivelMax = Infinity) {
   });*/
   
 //Funcion para buscar en el json el parametro que se envie (API's, BD's, BROKER's)
-function buscarValor(objeto, parametro) {
+/* function buscarValor(objeto, parametro) {
   const resultados = [];
   const pila = [{ objeto, objetoPadre: null, keyPadre: null }];
   while (pila.length > 0) {
@@ -134,14 +138,23 @@ function buscarValor(objeto, parametro) {
     }
   }
   return resultados;
-}
+} */
 
-nodos = buscarValor(json,"MonitorIoT:CloudNode")
+
+const arregloNodos = [];
+const nodosCloud = buscarValor(json, "MonitorIoT:CloudNode", 4);
+const nodosFog = buscarValor(json, "MonitorIoT:FogNode", 4);
+const nodosIotGateway = buscarValor(json, "MonitorIoT:IoTGateway", 4);
+arregloNodos.push(nodosCloud);
+arregloNodos.push(nodosFog);
+arregloNodos.push(nodosIotGateway);
+
+
 //console.log(nodos[0].objetoPadre.$.selfAwareMiddlewarePort);
 
 module.exports = {
     json: json,
-    arreglo: nodos
+    arreglo: arregloNodos
 }
 
 orquestador();

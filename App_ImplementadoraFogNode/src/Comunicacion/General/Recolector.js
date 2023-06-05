@@ -9,7 +9,7 @@ const app = express();
 const fs = require('fs');
 const { tipoEjecucion } = require("../../../../App_Supervisora/StartApp");
 const { log } = require("console");
-const port = process.env.port || 9998;
+const port = process.env.port || 9997;
 let routes;
 
 app.use(bodyParser.urlencoded({extended: false}));
@@ -25,7 +25,12 @@ app.post('/',(req, res) =>{
     if(req.body){
         try{
             datos = JSON.stringify(req.body.data, null, 4);
+            arreglo = JSON.stringify(req.body.objetos, null, 4)
             tipoEjec = JSON.stringify(req.body.tipoEjecucion, null, 4)
+            // resiviendo nuevo modelo del supervisor
+            // guardar el json en el directorio
+            console.log(arreglo);
+            console.log("DATOS NODO FOGNODE");
         }catch(err){
             response = {
                 error: true,
