@@ -1,38 +1,15 @@
-/* Este componente se encarga de comparar la nueva version detectada del modelo
-    arquitectura de monitoreo con la configuracion de monitoreo en ejecucion 
-    del sistema IoT
+/* PLANIFICADOR TAREAS
+  se encarga de comparar la nueva version detectada del modelo arquitectura de monitoreo con la configuracion de monitoreo 
+  en ejecucion del sistema.
 */
 
 const fs = require("fs");
-const request = require("request");
 let StartApp = require("../../../StartApp");
 let filePath = StartApp.filePath;
 let tipoEjecucion = StartApp.tipoEjecucion;
-let json = JSON.parse(fs.readFileSync("./modelos/modeloCO.json", "utf8"));
+let json = JSON.parse(fs.readFileSync("./modelos/Modelo.json", "utf8"));
 
 /*CODIGO ALEX, FUNCION PARA BUSCAR EN EL JSON LOS NODOS Y CONVERTIRLOS A ARREGLOS DE OBJETOS INCLUYENDO EL NUMERO DE NIVELES DESEADO */
-
-/* fs.readFile("./modelos/modeloCO.json", "utf-8", (error, data) => {
-  //LECTURA DEL JSON, BRANDON CREO QUE ESTO NO IRIA ME AVISAS
-  if (error) {
-    console.log("error");
-  } else {
-    data = JSON.parse(data);
-    const arregloNodos = [];
-    const nodosCloud = buscarValor(data, "MonitorIoT:CloudNode", 4);
-    const nodosFog = buscarValor(data, "MonitorIoT:FogNode", 4);
-    const nodosIotGateway = buscarValor(data, "MonitorIoT:IoTGateway", 4);
-    arregloNodos.push(nodosCloud);
-    arregloNodos.push(nodosFog);
-    arregloNodos.push(nodosIotGateway);
-
-    console.log(arregloNodos);
-    // console.log(JSON.stringify(nodosCloud, null, 2));
-
-    //para cambiar el path por el valor, solo se llama a la funcion
-    cambiarValorPropiedad(nodosCloud[0], "usesProtocol", data);
-  }
-}); */
 
 function buscarValor(objeto, parametro, nivel) {
   const resultados = [];
@@ -159,51 +136,9 @@ function transformaraRuta(cadena) {
   });
   sinBarrasYarroba = sinBarrasYarroba.slice(1); 
   return sinBarrasYarroba; // Devolver el valor final de que es la ruta
-}
-/* FIN SUBFUNCION PARA CAMBIAR EL PATH DE UN ATRIBUTO DEL ARREGLO DE OBJETOS DE LOS NODOS AL VALOR CORRESPONDIENTE */
+} /* FIN SUBFUNCION PARA CAMBIAR EL PATH DE UN ATRIBUTO DEL ARREGLO DE OBJETOS DE LOS NODOS AL VALOR CORRESPONDIENTE */
 
-/* FIN CODIGO ALEX, FUNCION PARA BUSCAR EN EL JSON LOS NODOS Y CONVERTIRLOS A ARREGLOS DE OBJETOS INCLUYENDO EL NUMERO DE NIVELES DESEADO */
-
-/* CONVERTIR EL JSON EN UN ARREGLO DE OBJETOS */
-/* 3 OBJETOS
-    1. NODO CLOUD
-    2. NODO F
-    3. NODO IOT */
-
-/*fs.readFile(filePath+"/modeloCO.json", "utf-8", (error, data) => { //lectura del json 
-    if (error) {
-      console.log("error");
-    } else {
-      data = JSON.parse(data);
-      const nodosAPI = buscarValor(data, "MonitorIoT:API");
-      const nodosDB = buscarValor(data, "MonitorIoT:DataBase");
-      const nodosNI = buscarValor(data,"MonitorIoT:NetworkInterface")
-    }
-  });*/
-  
-//Funcion para buscar en el json el parametro que se envie (API's, BD's, BROKER's)
-/* function buscarValor(objeto, parametro) {
-  const resultados = [];
-  const pila = [{ objeto, objetoPadre: null, keyPadre: null }];
-  while (pila.length > 0) {
-    const { objeto: obj, objetoPadre, keyPadre } = pila.pop();
-    for (const key in obj) {
-      if (obj[key] === parametro) {
-        const resultado = {
-          valor: obj[key],
-          keyPadre,
-          objetoPadre: Object.assign({}, objetoPadre, { [keyPadre]: obj }),
-        };
-      resultados.push(resultado);
-      }else if (typeof obj[key] === "object") {
-          pila.push({ objeto: obj[key], objetoPadre: obj, keyPadre: key });
-      }
-    }
-  }
-  return resultados;
-} */
-
-
+/* Convertir el modeloJSON en un arreglo de objetos, haciendo un llamado a la funcion buscarValor */
 const arregloNodos = [];
 const nodosCloud = buscarValor(json, "MonitorIoT:CloudNode", 4);
 const nodosFog = buscarValor(json, "MonitorIoT:FogNode", 4);
@@ -211,54 +146,15 @@ const nodosIotGateway = buscarValor(json, "MonitorIoT:IoTGateway", 4);
 arregloNodos.push(nodosCloud);
 arregloNodos.push(nodosFog);
 arregloNodos.push(nodosIotGateway);
-
-
-//console.log(nodos[0].objetoPadre.$.selfAwareMiddlewarePort);
+console.log('\nCreando Modelo de Objetos......................\n');
 
 module.exports = {
-    json: json,
-    arreglo: arregloNodos
+    modeloJSON: json, // contiene todo el modelo JSON
+    modeloOBJETO: arregloNodos // contiene los nodos CloudNode, FogNode, IoTGateway
 }
 
-orquestador();
+orquestador(); // Llamamos al archivo Orquestador
 
 function orquestador() {
   require("./Orquestador");
 }
-
-/* 
-
-const firstKey = Object.keys(json);
-const contenido = Object.keys(json[firstKey]); 
-let sujeto = '';
-contenido.shift();
-let ar_nodos = [];
-
-add_json_array(contenido, ar_nodos, json);
-read_property_element(ar_nodos);
-
-
-function add_json_array(cont_json, array, json){
-    cont_json.forEach(element => {
-        array.push(getNodes(json, element));
-    });
-}
-// function to return the elements of a json 
-function getNodes(json, array){
-    var boxes = Object.keys(json).map(key => json[key]);
-    return boxes[0][array][0];
-}
-// function to read array elements 
-function read_array(array){
-    array.forEach(element=>{
-        console.log(element);
-    })    
-}
-// function to read monitoring properties 
-function read_property_element(array){
-    array.forEach(element =>{
-        if(element['$']['xsi:type']){
-            console.log(element['$']['xsi:type']);
-        }
-    })
-} */

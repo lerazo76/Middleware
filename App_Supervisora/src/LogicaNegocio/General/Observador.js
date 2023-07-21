@@ -32,5 +32,6 @@ function cambiosModelo() /* Funcion para observar si se crea o se modifica el mo
 function planificador()
 {
     require('./PlanificadorTareas.js');
+    //require('./Planificador.js');
 } 
 

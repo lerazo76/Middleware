@@ -1,0 +1,94 @@
+[
+    {
+        "xsi:type": "MonitorIoT:IoTGateway",
+        "isPartOf": "//@containsIoTSystem.0/@containsIoTSubSystem.0",
+        "id": "9",
+        "name": "RaspberryPI3 ",
+        "description": "Puerta de enlace en la que se ejecutan aplicaciones y APIs de software para recolectar los datos crudos desde los sensores DHT11 y MQ-7.",
+        "isGrouped": "//@containsEntityCategory.0",
+        "controls": "//@containsEntity.1/@containsSubPhysicalEntity.1/@containsComputingNode.0 //@containsEntity.1/@containsSubPhysicalEntity.0/@containsComputingNode.0",
+        "gatewayType": "Microcontroller",
+        "selfAwareMiddlewarePort": "9999",
+        "containsResource": [
+            {
+                "xsi:type": "MonitorIoT:Application",
+                "isPartOf": "//@containsIoTSystem.0/@containsIoTSubSystem.0",
+                "id": "15",
+                "name": "controladorAmbienteCasa",
+                "description": "Aplicación de software que invoca a las APIs correspondientes, a fin de obtener los datos de temperatura, humedad y CO desde los sensores. Luego, envía estos datos al nodo Fog, por medio de un servicio web o broker, para su respectivo almacenamiento.",
+                "type": "Desktop",
+                "hasLinkAppToService": "//@containsLink.12",
+                "hasLinkAppToAPI": "//@containsLink.7 //@containsLink.8",
+                "hasLinkAppToTopic": "//@containsLink.11"
+            },
+            {
+                "xsi:type": "MonitorIoT:API",
+                "isPartOf": "//@containsIoTSystem.0/@containsIoTSubSystem.0",
+                "id": "12",
+                "name": "obtenerTemperaturaHumedad",
+                "description": "Función API que obtiene la temperatura y humedad desde el sensor DHT11.",
+                "instructions": "let a=Math.random() * (50 - 10) + 10; a=a.toFixed(2);let b=Math.random() * (50 - 10) + 10; b=b.toFixed(2);return {\"temp\":a,\"hum\":b}",
+                "hasLinkAppToAPI": "//@containsLink.7",
+                "hasLinkAPIToIoTDevice": "//@containsLink.25",
+                "containsParameter": [
+                    {
+                        "ordinal": "3",
+                        "name": "idSensor",
+                        "dataType": "Integer",
+                        "receives": "//@containsEntityCategory.2/@hasPropertyTemplate.0"
+                    }
+                ],
+                "containsReturnVariable": [
+                    {
+                        "ordinal": "1",
+                        "name": "temperatura",
+                        "dataType": "Float",
+                        "returns": "//@containsEntityCategory.1/@hasPropertyTemplate.0"
+                    },
+                    {
+                        "ordinal": "2",
+                        "name": "humedad",
+                        "dataType": "Float",
+                        "returns": "//@containsEntityCategory.1/@hasPropertyTemplate.1"
+                    }
+                ]
+            },
+            {
+                "xsi:type": "MonitorIoT:API",
+                "isPartOf": "//@containsIoTSystem.0/@containsIoTSubSystem.0",
+                "id": "13",
+                "name": "obtenerCO",
+                "description": "Función que obtiene la concentración de CO desde el sensor MQ-7.",
+                "instructions": "let a=Math.random() * (1000 - 0) + 0; a=a.toFixed(2); return { \"co\": a }",
+                "hasLinkAppToAPI": "//@containsLink.8",
+                "hasLinkAPIToIoTDevice": "//@containsLink.6",
+                "containsParameter": [
+                    {
+                        "ordinal": "2",
+                        "name": "idSensor",
+                        "dataType": "Integer",
+                        "receives": "//@containsEntityCategory.2/@hasPropertyTemplate.0"
+                    }
+                ],
+                "containsReturnVariable": [
+                    {
+                        "ordinal": "1",
+                        "name": "CO",
+                        "dataType": "Float",
+                        "returns": "//@containsEntityCategory.1/@hasPropertyTemplate.2"
+                    }
+                ]
+            },
+            {
+                "xsi:type": "MonitorIoT:NetworkInterface",
+                "isPartOf": "//@containsIoTSystem.0/@containsIoTSubSystem.0",
+                "id": "35",
+                "name": "Wi-Fi - Raspberry PI 3",
+                "description": "Adaptador de red Wi-Fi de la puerta de enlace Raspberry PI 3.",
+                "connects": "//@containsEntity.2",
+                "macAddress": "DC-A6-32-4A-FC-68",
+                "networkAddress": "localhost"
+            }
+        ]
+    }
+]
