@@ -20,7 +20,7 @@
           "isGrouped": "//@containsEntityCategory.0",
           "serviceModel": "PaaS",
           "platform": "Node.js, PostgreSQL",
-	        "selfAwareMiddlewarePort": "9998"
+          "selfAwareMiddlewarePort": "9998"
         },
         "containsResource": [
           {
