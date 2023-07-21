@@ -64,13 +64,14 @@ function estructurarObj(obj, nivelMax = Infinity) {
           });
         } else {
           //si no es un array
-          const objetoAnidado = descomponer(
-            //se llama a la función descomponer para el objeto anidado
-            obj[clave],
-            nivel + 1, //se incrementa el nivel
-            `${clavePadre}.${clave}` //se actualiza la clave del nivel superior para que se refleje la jerarquia de niveles
-          );
-          objetoAplanado[clave] = objetoAnidado; // se agrega los resultados a objetoAplanado
+          // const objetoAnidado = descomponer(
+          //   //se llama a la función descomponer para el objeto anidado
+          //   obj[clave],
+          //   nivel + 1, //se incrementa el nivel
+          //   `${clavePadre}.${clave}` //se actualiza la clave del nivel superior para que se refleje la jerarquia de niveles
+          // );
+          // objetoAplanado[clave] = objetoAnidado; // se agrega los resultados a objetoAplanado
+          objetoAplanado[clave] = obj[clave]; //al ser un valor no se tiene que dividir ni recorrer varias veces
         }
       }
     }
