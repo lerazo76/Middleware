@@ -21,7 +21,7 @@ modelo.forEach((resource, index) => {
         if(propiedades['xsi:type'] == 'MonitorIoT:API'){
             nuevaAPI = codigoApis(propiedades);
             console.log(nuevaAPI);
-            eval(nuevaAPI);
+            //eval(nuevaAPI);
         }
     })
 });
@@ -30,7 +30,7 @@ function ImplementadorApis(){
     console.log('Enviando APIS a ImplementadorApis.js......................');
     require('../Monitoreo/ImplementadorApis');
 }
-ImplementadorApis();
+//ImplementadorApis();
 
 function ImplementadorBD(){
     require('../General/ImplementadorBD')

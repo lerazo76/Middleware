@@ -36,7 +36,7 @@
               "usesProtocol": "//@containsEntity.4/@containsProtocol.1"
             },
             "containsDataTable": [
-              {
+              { 
                 "$": {
                   "name": "ResumenDiarioCO",
                   "persistenceType": "Permanent",
