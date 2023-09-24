@@ -1,0 +1,30 @@
+exports.codigoenviarapp= function(){
+    var Codigoo="";
+    Codigoo+="    const body = {} \n";
+    Codigoo+="    let name = apinames[i] \n";
+    Codigoo+="    console.log(name)\n";
+    Codigoo+="    body[name] = device[name]();\n";
+    //Insertar Parametros
+    Codigoo+="    if(rutastipo[i]===1){\n";
+    Codigoo+="    console.log(\"******** Send Data Service: \", rutas[i], \" \" + JSON.stringify(body),\" ********\")\n";
+    Codigoo+="    request({\n";
+    Codigoo+="            url: rutas[i],\n";
+    Codigoo+="            headers: headers,\n";
+    Codigoo+="            body: JSON.stringify({body,\"link\":linkappservortop[i]}),\n";   
+    Codigoo+="            method: 'POST'\n";
+    Codigoo+="        },\n";
+    Codigoo+="        (error, response, body) => {\n";
+    Codigoo+="            if (!error && response.statusCode == 200) {\n";
+    Codigoo+="                console.log(body);\n";
+    Codigoo+="            } else {\n";
+    Codigoo+="                console.log(error)\n";
+    Codigoo+="            }\n";
+    Codigoo+="        }\n";
+    Codigoo+="    );           \n"       ;
+    Codigoo+="    }\n";
+    Codigoo+="    else{\n";
+    Codigoo+="    rutas[i] && console.log(\"******** Send Data Topic: \", topico[i].$.name, \" \" + JSON.stringify(body), \" ********\")\n";
+    Codigoo+="    rutas[i] && topico[i] && client.publish(topico[i].$.name, JSON.stringify({body,\"link\":linkappservortop[i]}))   \n";
+    Codigoo+="    }\n";    
+    return Codigoo;
+};

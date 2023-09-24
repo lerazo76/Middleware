@@ -1,0 +1,2192 @@
+Primero se inicializa StartApp.js
+Segundo recolector.js 
+Tercero EjecutorTareas.js
+
+Dependiendo del parametro tipoEjecucion se va a ejecutar
+- EjecutorTareasMonitoreo 
+- EjecutorTareasAutoconsciencia 
+
+
+--- implementadorbd
+let modelo = require('../../../modelos/modeloObjeto.json')
+let dataStore, network;
+
+console.log('\n\x1b[32m%s\x1b[0m', 'Implementando la estructura de las bases de datos que almacenan los datos de monitoreo');
+
+// Recorro el modelo creado, obteniendo los datos de la Base de Datos y de la Red
+modelo.forEach(resource => {
+    resource.containsResource.forEach(properties => {
+        if (properties['xsi:type'] === 'MonitorIoT:DataBase') {
+            dataStore = properties;
+        } else if (properties["xsi:type"] === "MonitorIoT:NetworkInterface") {
+            network = properties;
+        }
+    })
+});
+
+// Funcion para crear una conexion
+function crearConexion(network, dataStore){
+    const dbname = dataStore.name; // nombre de la base de datos
+    const user = dataStore.user ? dataStore.user : "user"; 
+    const password = dataStore.password ? dataStore.password : "****";
+    const host = network.networkAddress;
+
+    // Mientras no corresponda a la IP del modelo, mando quemado la ip y clave
+    //var uri = dataStore.uri ? dataStore.$.uri : name + "://" + user + ":" + password + "@" + host + ":" + port + "/" + dbname;
+    var uri = "postgres://postgres:postgres@localhost:5432/postgresqllocal"
+    const { Client } = require('pg');
+
+    // Creo un nuevo client para realizar la conexion a la BD
+    client = new Client({ connectionString: uri });
+    /* client.connect(err => {
+        if(err){console.log(err)}
+    }) */
+    return client;
+}
+
+const { Pool } = require('pg');
+
+const pool = new Pool(network, dataStore, {
+    user: dataStore.user ? dataStore.user : "user",
+    host: network.networkAddress,
+    database: dataStore.name,
+    password: dataStore.password ? dataStore.password : "****",
+    port: 5432, // Puerto por defecto de PostgreSQL
+    max: 20,    // Número máximo de conexiones en el pool
+    idleTimeoutMillis: 30000, // Tiempo en milisegundos para que una conexión inactiva se cierre automáticamente
+    connectionTimeoutMillis: 2000, // Tiempo en milisegundos para establecer una nueva conexión
+});
+
+
+if (network && dataStore){
+    /*const dbname = dataStore.name; // nombre de la base de datos
+    const user = dataStore.user ? dataStore.user : "user"; 
+    const password = dataStore.password ? dataStore.password : "****";
+    const host = network.networkAddress;
+
+    // Mientras no corresponda a la IP del modelo, mando quemado la ip y clave
+    //var uri = dataStore.uri ? dataStore.$.uri : name + "://" + user + ":" + password + "@" + host + ":" + port + "/" + dbname;*/
+    var uri = "postgres://postgres:postgres@localhost:5432/postgresqllocal"
+
+    // Creo una instancia de POSTGRES
+    const { Client } = require('pg');
+
+    // Creo un nuevo client para realizar la conexion a la BD
+    //client = new Client({ connectionString: uri });
+
+    client = crearConexion(network, dataStore)
+
+    try{
+        client.connect(err=>{
+            if(err){
+                // En caso de tener algun error, modifico la URI ya sea por problemas de Sintaxis
+                let x = uri.split("/");
+                uri = "";
+                for (var i = 0; i < x.length - 1; i++) {
+                    if (i === 0) {
+                        uri = uri + x[i];
+                    } else {
+                        uri = uri + "/" + x[i];
+                    }
+                }
+
+                // Creo un nuevo cliente
+                client = new Client({ connectionString: uri });
+                client.connect(err => {
+                    if(err){
+                        console.error('No mismo existe', err.stack);
+                    }else{
+                        // Creo la BD
+                        console.log('\n\x1b[32m%s\x1b[0m', `Base de datos ${x[x.length-1]} implementada (ok)`);
+                        client.query('CREATE DATABASE '+x[x.length-1], (err, res) =>{
+                            if(err) throw err;
+                            client.end(); // finalizo conexion
+                            uri = uri + "/" + x[x.length-1]
+                            // Nueva conexion con la nueva URI modificada
+                            client = new Client({ connectionString: uri });
+                            client.connect(err => {
+                                if(err){
+                                    console.log('No se pudo conectar: ', err.stack);
+                                }else{
+                                    //console.log('Conexion exitosa: ', uri);
+                                    // Creamos las tablas
+                                    dataStore.containsDataTable.forEach(tabla => {
+                                        
+                                        client.query(crearTbPostgres(tabla), err, res =>{
+                                            if(err){
+                                                throw err;
+                                            }else{
+                                                let nombreTabla = tabla.name
+                                                console.log('\n\x1b[32m%s\x1b[0m', `Tabla ${nombreTabla} implementada (ok)`);
+                                                module.exports = {
+                                                    connection: client
+                                                }
+                                            }
+                                        })
+                                    })
+
+                                }
+                            })
+                        })
+                    }
+                })
+                
+            }else{
+                //console.log('Conectado a la primera...');
+                //client.end();
+                module.exports = {
+                    connection: client
+                }
+            }
+        })
+    }catch(error){
+        console.log('No se conecto...');
+    }
+}
+
+
+// Funcion para crear las tablas correspondientes a las Bases de Datos
+function crearTbPostgres(tabla){
+    var nombre = tabla.name;    
+    var consulta = "CREATE TABLE IF NOT EXISTS " + tabla.name + "(\n";
+    consulta += "id serial PRIMARY KEY";
+
+    tabla.composedOfDataColumn.forEach(column => {
+        var tipodato;
+        var longitud;
+        switch(column.dataType){
+            case "Byte":
+                tipodato="bytea";
+                longitud="";
+                break;
+            case "Integer":
+                tipodato="Integer";
+                longitud="";
+                break;
+            case "Long":
+                tipodato="bigint";
+                longitud="";
+                break;
+            case "Float":
+                tipodato="real";
+                longitud="";
+                break;
+            case "Double":
+                tipodato="double precision";
+                longitud="";
+                break;
+            case "String":
+                tipodato="varchar";
+                longitud="(250)";
+                break;
+            case "Date":
+                tipodato="timestamp";
+                longitud="";
+                break;
+            case "Boolean":
+                tipodato="boolean";
+                longitud="";
+                break;                  
+        }
+        consulta += ",\n"+column.name+" "+tipodato+" "+longitud+" NOT NULL";
+    });
+    consulta+=");";
+    return consulta;
+};
+
+// para que se usa esto
+/* "containsProtocol": [
+                    {
+                        "$": {
+                            "isUsedByMiddleware": "//@containsEntity.1/@containsComputingNode.0/@containsResource.2",
+                            "id": "28",
+                            "name": "MQTT",
+                            "port": "1883"
+                        }
+                    }
+                ] */
+//const uri = dataStore.uri ? dataStore.uri : name + "://" + user + ":" + password + "@" + host + ":" + port + "/" + dbname;
+//const uri = dataStore.uri ? dataStore.uri : "MQTT" + "://" + user + ":" + password + "@" + host + ":" + 1883 + "/" + dbname;
+
+/* console.log(uri); */
+
+/* const { Client } = require('pg');
+
+const client = new Client({
+  user: 'postgres',
+  host: 'localhost',
+  database: 'postgres',
+  password: 'admin',
+  port: 5432, // Puerto por defecto de PostgreSQL
+}); */
+
+// Conectarse a la base de datos
+/* client.connect()
+  .then(() => {
+    console.log('Conexión exitosa a la base de datos');
+
+    // Ejecutar una consulta
+    client.query('SELECT * FROM personas')
+      .then(result => {
+        // Manipular los datos obtenidos
+        const rows = result.rows;
+        console.log(rows); // Mostrar los datos en la consola
+
+        // Realizar otras operaciones con los datos obtenidos
+        // ...
+      })
+      .catch(err => console.error('Error al ejecutar la consulta', err))
+      .finally(() => {
+        // Cerrar la conexión cuando ya no sea necesaria
+        client.end()
+          .then(() => console.log('Conexión cerrada correctamente'))
+          .catch(err => console.error('Error al cerrar la conexión', err));
+      });
+  })
+  .catch(err => console.error('Error al conectar a la base de datos', err)); */
+
+/*try {
+    client.connect(err => {
+        if (err) {
+            console.error('Error de conexion: ', err.stack);
+            let x = uri.split("/");
+            uri = "";
+            for (var i = 0; i < x.length - 1; i++) {
+                if (i === 0) {
+                    uri = uri + x[i];
+                }
+                else {
+                    uri = uri + "/" + x[i];
+                }
+            }
+            client = new Client({ connectionString: uri });
+            client.connect(err => {
+                if (err) {
+                    console.error('No mismo existe', err.stack);
+                }
+                else {
+                    console.log('Conectado');
+                    client.query('CREATE DATABASE ' + x[x.length - 1], (err, res) => {
+                        if (err) throw err;
+                        console.log(res);
+                        uri = uri + "/" + x[x.length - 1];
+                        client.end();
+                        client = new Client({ connectionString: uri });
+                        client.connect(err => {
+                            if (err) {
+                                console.error('pendejo', err.stack);
+                            } else {
+                                console.log('si funco: ' + uri);
+                                //crear tablas
+                                dataStore.containsDataTable.forEach(tabla => {
+                                    client.query(base.crearTbPostgres(tabla), (err, res) => {
+                                        if (err) {
+                                            throw err;
+                                        }
+                                        else {
+                                            console.log("tablas creada");
+                                            fs.writeFile('./baseAnterior/basean.json', JSON.stringify(dataStore), 'utf8', (err) => { });
+                                        }
+                                    });
+                                });
+                            }
+                        });
+                    });
+                }
+            });
+        }
+        else {
+            console.log('Conectado');
+            //crear tablas
+            let bandera = 0;
+
+            try {
+                fs.lstatSync('./baseAnterior/basean.json').isFile();
+                const xml = fs.readFileSync('baseAnterior/basean.json', 'utf8');
+                if (JSON.stringify(dataStore) === xml) {
+                    bandera = 1;
+                }
+            } catch (error) {
+                bandera = 2
+            }
+
+            //OBTENER BASE DE DATOS VIEJA
+
+
+            if (bandera == 2) {
+                fs.writeFile('./baseAnterior/basean.json', JSON.stringify(dataStore), 'utf8', (err) => { console.log(err) });
+                base.respaldarBdPostgres(uri);
+                let cs = fs.readFileSync('baseAnterior/base.sql', 'utf8').toString();
+                let destino = "http://localhost:9912/FF";//deberia sacarse del modelo
+                let nombres = "_postgress_" + uri.split("/")[uri.split("/").length - 1];
+                base.enviarArchivo(destino, cs, nombres);
+                dataStore.containsDataTable.forEach(tabla => {
+                    client.query("drop table if exists " + tabla.$.name, (err, res) => {
+                        if (err) {
+                            console.log("err: ", err);
+                            console.log("res: ", res);
+                            throw err;
+                        }
+                        else {
+                            console.log("tablas borrada: " + tabla.$.name);
+                            client.query(base.crearTbPostgres(tabla), (err, res) => {
+                                if (err) {
+                                    throw err;
+                                }
+                                else {
+                                    console.log("tablas creada: " + tabla.$.name);
+                                }
+                            });
+                        }
+                    });
+                });
+            }
+
+            if (bandera === 0) {
+                console.log("entraaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
+                let cs = fs.readFileSync('baseAnterior/basean.json', 'utf8');
+                let oldBase = JSON.parse(cs);
+                console.log("dataStore:", dataStore);
+                fs.writeFile('./baseAnterior/basean.json', JSON.stringify(dataStore), 'utf8', (err) => { });
+                base.respaldarBdPostgres(uri);
+                let sqlAux = fs.readFileSync('baseAnterior/base.sql').toString();
+                let destino = "http://localhost:9912/FF";//deberia sacarse del modelo
+                let nombres = "_postgress_" + uri.split("/")[uri.split("/").length - 1];
+                base.enviarArchivo(destino, sqlAux, nombres);
+
+                let aleteredTables = [];
+
+
+                ///Obtener eliminación de campos
+                for (let i = 0; i < oldBase.containsDataTable.length; i++) {
+                    let oldTable = oldBase.containsDataTable[i].$.name;;
+                    let tableFlag = true;
+                    for (let j = 0; j < dataStore.containsDataTable.length; j++) {
+                        let newTableName = dataStore.containsDataTable[j].$.name;
+
+                        if (newTableName == oldTable) {
+                            tableFlag = false;
+                            for (let m = 0; m < oldBase.containsDataTable[i].composedOfDataColumn.length; m++) {
+                                let columnFlag = true;
+                                let oldColumn = oldBase.containsDataTable[i].composedOfDataColumn[m].$.name
+
+                                for (let n = 0; n < dataStore.containsDataTable[j].composedOfDataColumn.length; n++) {
+                                    let newColumn = dataStore.containsDataTable[j].composedOfDataColumn[n].$.name
+
+                                    if (oldColumn == newColumn) {
+                                        columnFlag = false;
+                                    }
+                                }
+
+                                if (columnFlag) {
+                                    aleteredTables.push(newTableName);
+                                    console.log("Se borra la tabla 1q: " + "drop table " + oldTable)
+                                    client.query("drop table if exists " + oldTable, (err, res) => {
+                                        if (err) {
+                                            throw err;
+                                        }
+                                        else {
+                                            console.log("tablas borrada: " + oldTable);
+                                            client.query(base.crearTbPostgres(dataStore.containsDataTable[j]), (err, res) => {
+                                                if (err) {
+                                                    throw err;
+                                                }
+                                                else {
+                                                    console.log("tabla creada: " + oldTable);
+                                                }
+                                            });
+
+                                        }
+                                    });
+                                }
+
+                            }
+                        }
+                    }
+
+                    if (tableFlag) {
+                        console.log("cayo");
+                        console.log("Se borra la tabla: " + "drop table " + oldTable)
+                        client.query("drop table if exists " + oldTable, (err, res) => {
+                            if (err) {
+                                console.log("pendejada");
+                                throw err;
+                            }
+                            else {
+                                console.log("tablas borrada: " + oldTable);
+                            }
+                        });
+                    }
+                }
+
+                ///Obtener alteración a campos
+                ///Obtener agregación de campos
+                for (let i = 0; i < dataStore.containsDataTable.length; i++) {
+                    let newTable = dataStore.containsDataTable[i].$.name;
+                    let tableFlag = true;
+                    for (let j = 0; j < oldBase.containsDataTable.length; j++) {
+                        let oldTable = oldBase.containsDataTable[j].$.name;
+                        let alteredTableFlag = true;
+
+                        for (let k = 0; k < aleteredTables.length; k++) {
+                            if (newTable == aleteredTables[k]) {
+                                alteredTableFlag = false;
+                            }
+                        }
+
+                        if (newTable == oldTable && alteredTableFlag) {
+                            tableFlag = false;
+                            for (let m = 0; m < dataStore.containsDataTable[i].composedOfDataColumn.length; m++) {
+                                let columnFlag = true;
+                                let newColumn = dataStore.containsDataTable[i].composedOfDataColumn[m].$.name
+
+                                for (let n = 0; n < oldBase.containsDataTable[j].composedOfDataColumn.length; n++) {
+                                    let oldColumn = oldBase.containsDataTable[i].composedOfDataColumn[n].$.name
+
+                                    if (oldColumn == newColumn) {
+                                        columnFlag = false;
+                                        if (oldBase.containsDataTable[i].composedOfDataColumn[n].$.dataType != dataStore.containsDataTable[i].composedOfDataColumn[m].$.dataType) {
+                                            let type = base.correctorDataType(dataStore.containsDataTable[i].composedOfDataColumn[m].$.dataType);
+                                            console.log("Cambio de tipo de dato de columna: " + "alter table " + newTable + " alter column " + newColumn + " type " + type[0] + " " + type[1]);
+                                            client.query("alter table " + newTable + " alter column " + newColumn + " type " + type[0] + " " + type[1], (err, res) => {
+                                                if (err) {
+                                                    console.log("eliminar tabla: " + "drop table if exists " + newTable);
+                                                    client.query("drop table if exists " + newTable, (err, res) => {
+                                                        if (err) {
+                                                            throw err;
+                                                        }
+                                                        else {
+                                                            console.log("tabla borrada: " + base.crearTbPostgres(dataStore.containsDataTable[i]));
+                                                            client.query(base.crearTbPostgres(dataStore.containsDataTable[i]), (err, res) => {
+                                                                if (err) {
+                                                                    throw err;
+                                                                }
+                                                                else {
+                                                                    console.log("tabla creada ff: " + newTable);
+                                                                }
+                                                            });
+                                                        }
+                                                    });
+                                                }
+                                                else {
+                                                    console.log("tabla alterada: " + newTable);
+                                                    console.log("columna alterada: " + newColumn);
+                                                    console.log("tipo alterado: " + type[0] + " " + type[1]);
+                                                }
+                                            });
+                                        }
+                                    }
+                                }
+
+                                if (columnFlag) {
+                                    let type = base.correctorDataType(dataStore.containsDataTable[i].composedOfDataColumn[m].$.dataType);
+                                    console.log("Agregar columna: " + "alter table " + newTable + " add column " + newColumn + " " + type[0] + " " + type[1]);
+                                    client.query("alter table " + newTable + " add column " + newColumn + " " + type[0] + " " + type[1], (err, res) => {
+                                        if (err) {
+                                            throw err;
+                                        }
+                                        else {
+                                            console.log("tabla alterada: " + newTable);
+                                            console.log("columna creada: " + newColumn);
+                                        }
+                                    });
+                                    break;
+                                }
+
+                            }
+                        }
+                    }
+
+
+                    if (tableFlag) {
+                        console.log("Crear la tabla: " + base.crearTbPostgres(dataStore.containsDataTable[i]));
+                        client.query(base.crearTbPostgres(dataStore.containsDataTable[i]), (err, res) => {
+                            if (err) {
+                                throw err;
+                            }
+                            else {
+                                console.log("tablas creada: " + newTable);
+                            }
+                        });
+                    }
+                }
+
+                //OBTENER BASE DE DATOS VIEJA
+
+            }
+        }
+    }); 
+}
+catch (error) {
+    console.log('nel');
+}*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+------------ IMPLEMENTADORSERVICIOS
+
+
+const request = require('request');
+const express = require("express");
+const router = express.Router();
+//const localConfig = require("./config/localConfig");
+//const globalConfig = require("./config/globalConfig");
+const localConfig = require('../../../modelos/modeloObjeto.json')
+const globalConfig = require('../../../modelos/modeloJSON.json')
+
+//const db = require("./ConectorBD");
+//let device = require("./device");
+//let codes = require('./Funciones/Codigos');
+//let ProtRef = require('./Funciones/ProtocolosReferencias');
+//var base = require('./Funciones/BD');
+
+var db = require('../../LogicaNegocio/General/ImplementadorBD');
+var conexion = db.connection;
+
+
+console.log('\n\x1b[32m%s\x1b[0m', 'Implementando los servicios web ...');
+
+function aux(url){
+        const headers = {
+            'content-type':'application/json'
+        };
+        request({
+            url: url+"/3",
+            headers: headers,
+            method: 'POST'
+        },
+        (error, response, body) => {
+            if (!error && response.statusCode === 200) {
+                console.log(body);
+            }
+            else {
+                console.log(error);
+            }
+        });   
+}
+
+// Función que simplifica el proceso de llamada a saveData, permitiendo que se use de manera más conveniente al esperar la resolución de la promesa utilizando await
+postMethod = async (tableInfo, values, tableref) => {
+    return await saveData(tableInfo, values,tableref);   
+};
+
+// Funcion que genera un query para realizar la insercion de la informacion en la Base de Datos
+saveData = async (tableInfo, value, tableref) => {
+    let result;
+    let query = "INSERT INTO ";
+    query += tableInfo.$.name + " (";
+    let params = "";
+    let data = [];
+    tableInfo.composedOfDataColumn && tableInfo.composedOfDataColumn.length > 0 && tableInfo.composedOfDataColumn.map((column, i) => {
+        query += column.$.name + ((tableInfo.composedOfDataColumn.length - 1 !== i) ? "," : ")");
+        data.push(value[column.$.name]);
+        params += "$" + (i + 1) + ((tableInfo.composedOfDataColumn.length - 1 !== i) ? "," : ")");
+    });
+    query += " VALUES (" + params + " RETURNING *";
+    try {
+        console.log(query);
+        console.log(data);
+        //crear conexiones
+        console.log(localConfig.$.id);
+        let refe=tableref.split("|");
+        if(localConfig.$["xsi:type"]+"|"+localConfig.$.id+"|"+localConfig.$.name===refe[0]+"|"+refe[1]+"|"+refe[2]){
+            console.log("usar db");
+            result = await conexion.query(
+                query,
+                data
+            );
+        }
+        else{
+            //conectar a externa
+            let client2;
+            var uri = refe[3];
+            var tipo=uri.split(":")[0];
+            switch(tipo){
+                case 'postgres':
+                const { Client }=require("pg");
+                console.log(uri);
+                client2 = new Client({connectionString: uri});
+                try{   
+                    client2.connect(err => {
+                        if (err) {
+                            console.log('No Conectado');
+                        }    
+                        else {
+                            console.log('Conectado');
+                        }
+                    }); 
+                }catch(error){
+                    console.log('nel');
+                }
+                break;
+            default:
+                console.log("No se encontro una base de datos soportada");
+            } 
+            result = await client2.query(query,data); 
+            client2.end();
+        }
+        //     
+        return result.rows;
+    } catch (err) {
+        return err;
+    }
+};
+
+// Funcion que genera un query de consulta, para obtener informacion de cada tabla de la Base de Datos
+getRegistrosBD = async (dbTable, tableref)  => {
+    let query = "SELECT * FROM ";
+
+    query += dbTable;
+    let results;
+
+    try {
+        let refe=tableref.split("|");
+        if(localConfig.$["xsi:type"]+"|"+localConfig.$.id+"|"+localConfig.$.name===refe[0]+"|"+refe[1]+"|"+refe[2]){
+            console.log("usar db");
+            results = await conexion.query(query);
+        }
+        else{
+            //conectar a externa
+            let client2;
+            var uri = refe[3];
+            var tipo=uri.split(":")[0];
+            switch(tipo){
+                case 'postgres':
+                const { Client }=require("pg");
+                console.log(uri);
+                client2 = new Client({connectionString: uri});
+                try{   
+                    client2.connect(err => {
+                        if (err) {
+                            console.log('No Conectado');
+                        } 
+                        else {
+                            console.log('Conectado');
+                        }
+                    }); 
+                }
+                catch(error){
+                    console.log('nel');
+                }
+                break;
+            default:
+                console.log("No se encontro una base de datos soportada");
+            }
+            let results = await client2.query(query);
+            client2.end();
+        }  
+        return results.rows;
+        
+    } catch (err) {
+        return err;
+    }
+}
+
+
+getMethod = async (dbTable)  => {    
+    const db = require('../../LogicaNegocio/General/DB');
+
+    await db.connect(); 
+    /* var uri = "postgres://postgres:postgres@localhost:5432/postgresqllocal"
+    // Creo una instancia de POSTGRES
+    const { Client } = require('pg');
+    // Creo un nuevo client para realizar la conexion a la BD
+    client = new Client({ connectionString: uri });
+    client.connect(err => {
+        if(err){console.log(err)}
+    }) */
+    
+   /*  try {
+        let query = "SELECT * FROM ";
+        query += dbTable.toLowerCase();
+        let results = await db.query(query);
+        client.end();
+        return results.rows;
+    } catch (err) {
+        console.log(err);
+        return err;
+    } */
+
+    try {
+        const result = await db.query('SELECT * FROM usuarios');
+        console.log('Resultados:', result);
+    } catch (error) {
+        console.error('Error en la consulta:', error);
+    }
+}
+
+async function consultaEjemplo() {
+    await db.connect(); // Conexión única establecida
+
+    try {
+        const result = await db.query('SELECT * FROM usuarios');
+        console.log('Resultados:', result);
+    } catch (error) {
+        console.error('Error en la consulta:', error);
+    }
+}
+
+// Buscamos el servidor de aplicaciones web que pública los servicios RESTful para el intercambio, agregación y almacenamiento de datos
+let middleware;
+localConfig && localConfig.forEach(resource => {
+    resource.containsResource && resource.containsResource.forEach( propiedades => {
+        if(propiedades["xsi:type"] == "MonitorIoT:Middleware"){
+             middleware = propiedades;
+        }
+    })
+})
+
+let tipo;
+middleware && middleware.containsService && middleware.containsService.length > 0 && middleware.containsService.forEach((api) => {
+
+    console.log('\n\x1b[32m%s\x1b[0m', `Servicio web ${api.name} implementado (OK)`);
+
+    // Obtengo todos los enlaces de conexion para almacenar la informacion en su respectiva tabla de la Base de Datos
+    let hasLinkServiceToDataTable;
+    if (api.hasLinkServiceToDataTable) {    
+        // Busco y separo cada link correspondiente para las conexiones a la DB     
+        hasLinkServiceToDataTable = api.hasLinkServiceToDataTable.split(" ");
+        
+        // REVISAR ESTA PARTE DEL CODIGO ----> OJOOOOOOOOOOOO
+        // Verificar si se puede tener mas de un link 
+        // Revisar containsLink 22 y 23
+
+        hasLinkServiceToDataTable = api.hasLinkServiceToDataTable.split(" ");
+        let dataflow;
+        hasLinkServiceToDataTable && hasLinkServiceToDataTable.forEach(linkService => {
+             dataflow=globalConfig["ArchitectureSelfAwarenessIoT"].containsLink[linkService.split(".")[1]].$.supports;
+        })
+
+        //let dataflow=globalConfig["ArchitectureSelfAwarenessIoT"].containsLink[hasLinkServiceToDataTable[0].split(".")[1]].$.supports;
+        if(dataflow){
+            tipo=globalConfig["ArchitectureSelfAwarenessIoT"].containsDataFlow[dataflow.split(".")[1]].$.dataFlowType;
+            
+            if(tipo){      
+                // Creo los Servicios Web 
+                let result;
+                router["get"]("/"+api.endPoint, (req, res, next) => {
+                    localConfig.forEach(async resource => {
+                        if (resource && resource.containsResource) {
+                            for (const properties of resource.containsResource) {
+                                if (properties['xsi:type'] === 'MonitorIoT:DataBase') {
+                                    if (properties && properties.containsDataTable) {
+                                        for (const tablas of properties.containsDataTable) {
+                                            const tableName = tablas.name.toLowerCase();
+                                            result = await getMethod(tableName);                                       
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }); 
+                    res.send(result);
+                });
+
+                
+                
+                /*router["get"]("/" + api.endPoint + "/2", async (req, res, next) => {
+                    let result;
+                    let tableInfo;
+                    let tableref;
+                    if (hasLinkServiceToDataTable.length > 0) {
+                        for(var i=0;i<hasLinkServiceToDataTable.length;i++){
+                            const linkRef = hasLinkServiceToDataTable[i].split("/@");
+                            let index = linkRef[1].split(".")[1];
+                            let tipo=globalConfig["ArchitectureSelfAwarenessIoT"].containsLink[index].$.type;
+                            tableInfo = base.getTableInfo(globalConfig, index);
+                            tableref=base.getTablenodo(globalConfig, index);
+                            if(tipo){ }
+                            else{
+                                console.log("******** Get Data ********");
+                                result = await getMethod(tableInfo,tableref);
+                                return res.json(result);
+                            }
+                        }
+                    }
+                });*/
+                
+                /*router[api.method ? api.method.toLowerCase() : "get"]("/" + api.endPoint + "/3", async (req, res, next) => {
+                    let result;
+                    let tableInfo;
+                    let tableref;
+                    if (hasLinkServiceToDataTable.length > 0) {
+                        for(var i=0;i<hasLinkServiceToDataTable.length;i++){
+                            const linkRef = hasLinkServiceToDataTable[i].split("/@");
+                            let index = linkRef[1].split(".")[1];
+                            let tipo=globalConfig["ArchitectureSelfAwarenessIoT"].containsLink[index].$.type;
+                            let df=globalConfig["ArchitectureSelfAwarenessIoT"].containsLink[index].$.supports;
+                            tableInfo = base.getTableInfo(globalConfig, index);
+                            tableref=base.getTablenodo(globalConfig, index);
+                            if(tipo){
+                                console.log("******** Post Data ********");
+                                let columna=tableInfo.composedOfDataColumn;
+                                let data={};
+                                for(var f=0;f<columna.length;f++){                      
+                                    if(columna[f].$.dataColumnType){
+                                       //metadata
+                                        if(columna[f].$.formulaExpression){            
+                                           eval("function temp(){"+columna[f].$.formulaExpression+"}");
+                                           let val=temp();
+                                           data[columna[f].$.name] = val;  
+                                        }
+                                        else{}
+                                    }
+                                    else{
+                                        let qr=columna[f].$.hasRuleAsDestination.split(" ");
+                                        for(var qi=0;qi<qr.length;qi++){
+                                            let qrr=qr[qi].split("/@")[1];
+                                            if(df==="//@"+qrr){
+                                                let r=qr[qi].split("/@");
+                                                let rut=globalConfig["ArchitectureSelfAwarenessIoT"].containsDataFlow[r[1].split(".")[1]].containsDataMappingRule[r[2].split(".")[1]].$.relatesSourceColumn;
+                                                let mappingRule=globalConfig["ArchitectureSelfAwarenessIoT"].containsDataFlow[r[1].split(".")[1]].containsDataMappingRule[r[2].split(".")[1]];
+                                                let rr=ProtRef.getReferencestrace(globalConfig,rut);
+                                                let sourceDataTable=rr[rr.length-2];
+                                                let sourceColumn=rr[rr.length-1].$.name;
+                                                tableref2=base.getTablenodo(globalConfig,sourceDataTable.$.hasLinkServiceToDatable.split(".")[sourceDataTable.$.hasLinkServiceToDatable.split(".").length-1]);
+                                                let data2 = await getMethod(sourceDataTable,tableref2);
+                                                let result = 0;
+                                                if (data2.length > 0) {
+                                                    if (mappingRule.$.aggregationOperation === "Mean") {
+                                                        data2.forEach(e => {
+                                                            result += parseInt(e[sourceColumn]);
+                                                        });
+                                                        result = result / data2.length;
+                                                    } else if (mappingRule.$.aggregationOperation === "Sum") {
+                                                        data2.forEach(e => {
+                                                            result += parseInt(e[sourceColumn]);
+                                                        });
+                                                    }
+                                                    // another operations
+                                                }
+                                                data[columna[f].$.name] = result;
+                                                qi=qr.length;                                    
+                                            }
+                                        }
+                                    }
+                                }
+                                result = await postMethod(tableInfo, data, tableref);
+                                console.log(result);
+                            }
+                        }
+                    }
+                });*/
+            }else{
+
+            }
+        }   
+
+        // Obtenemos todos los enlaces
+        /*hasLinkServiceToDataTable.forEach(async links =>{ comentado
+            console.log(links);
+
+            // Obtenemos los containsDataFlow 
+            let dataflow;
+            if (globalConfig["ArchitectureSelfAwarenessIoT"].containsLink[links.split(".")[1]].$.supports){
+               dataflow = globalConfig["ArchitectureSelfAwarenessIoT"].containsLink[links.split(".")[1]].$.supports;
+            }
+            if (dataflow){
+                // Obtenemos los dataFlowType
+                if(globalConfig["ArchitectureSelfAwarenessIoT"].containsDataFlow[dataflow.split(".")[1]].$.dataFlowType){
+                    tipo = globalConfig["ArchitectureSelfAwarenessIoT"].containsDataFlow[dataflow.split(".")[1]].$.dataFlowType;
+                    console.log(tipo,"\n");
+
+                    if(tipo){
+                        console.log(api.method);
+                        router[api.method ? api.method.toLowerCase() : "get"]("/" + api.endPoint + "/3", async (req, res, next) => {
+                            
+                            console.log(api.endPoint);
+                            let result;
+                            let tableInfo;
+                            let tableref;
+                            if (hasLinkServiceToDataTable.length > 0) {
+                                for(var i=0;i<hasLinkServiceToDataTable.length;i++){
+                                    const linkRef = hasLinkServiceToDataTable[i].split("/@");
+                                    let index = linkRef[1].split(".")[1];
+                                    let tipo=globalConfig["ArchitectureSelfAwarenessIoT"].containsLink[index].$.type;
+                                    let df=globalConfig["ArchitectureSelfAwarenessIoT"].containsLink[index].$.supports;
+                                    tableInfo = base.getTableInfo(globalConfig, index);
+                                    tableref=base.getTablenodo(globalConfig, index);
+                                    if(tipo){
+                                        console.log("******** Post Data ********");
+                                        let columna=tableInfo.composedOfDataColumn;
+                                        let data={};
+                                        for(var f=0;f<columna.length;f++){                      
+                                            if(columna[f].$.dataColumnType){
+                                               //metadata
+                                                if(columna[f].$.formulaExpression){            
+                                                   eval("function temp(){"+columna[f].$.formulaExpression+"}");
+                                                   let val=temp();
+                                                   data[columna[f].$.name] = val;  
+                                                }
+                                                else{}
+                                            }
+                                            else{
+                                                let qr=columna[f].$.hasRuleAsDestination.split(" ");
+                                                for(var qi=0;qi<qr.length;qi++){
+                                                    let qrr=qr[qi].split("/@")[1];
+                                                    if(df==="//@"+qrr){
+                                                        let r=qr[qi].split("/@");
+                                                        let rut=globalConfig["ArchitectureSelfAwarenessIoT"].containsDataFlow[r[1].split(".")[1]].containsDataMappingRule[r[2].split(".")[1]].$.relatesSourceColumn;
+                                                        let mappingRule=globalConfig["ArchitectureSelfAwarenessIoT"].containsDataFlow[r[1].split(".")[1]].containsDataMappingRule[r[2].split(".")[1]];
+                                                        let rr=ProtRef.getReferencestrace(globalConfig,rut);
+                                                        let sourceDataTable=rr[rr.length-2];
+                                                        let sourceColumn=rr[rr.length-1].$.name;
+                                                        tableref2=base.getTablenodo(globalConfig,sourceDataTable.$.hasLinkServiceToDatable.split(".")[sourceDataTable.$.hasLinkServiceToDatable.split(".").length-1]);
+                                                        let data2 = await getMethod(sourceDataTable,tableref2);
+                                                        let result = 0;
+                                                        if (data2.length > 0) {
+                                                            if (mappingRule.$.aggregationOperation === "Mean") {
+                                                                data2.forEach(e => {
+                                                                    result += parseInt(e[sourceColumn]);
+                                                                });
+                                                                result = result / data2.length;
+                                                            } else if (mappingRule.$.aggregationOperation === "Sum") {
+                                                                data2.forEach(e => {
+                                                                    result += parseInt(e[sourceColumn]);
+                                                                });
+                                                            }
+                                                            // another operations
+                                                        }
+                                                        data[columna[f].$.name] = result;
+                                                        qi=qr.length;                                    
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        //result = await postMethod(tableInfo, data, tableref);
+                                        //console.log(result);
+                                    }
+                                }
+                            }
+                        });
+                        let dataflow2;
+                        const dataFlowRef = dataflow.split("/@");
+                        if(dataFlowRef.length > 0){
+                            let index = 0;
+                            const auxList = dataFlowRef[1].split(".");
+                            index = auxList[1];
+                            dataflow2 = globalConfig["ArchitectureSelfAwarenessIoT"].containsDataFlow[index];
+                        }
+                        let time = 1000000;
+                        const unitOfTime = dataflow2.$.unitOfTime ? dataflow2.$.unitOfTime : "Milisencond";
+                        const timeIntervalBetweenFlows = dataflow2.$.flowExecutionTimeInterval !== "" ? dataflow2.$.flowExecutionTimeInterval : 60000;
+                        // Agregamos tiempo adicional
+                        unitOfTime === "Milisecond" ? time = timeIntervalBetweenFlows * 1 : unitOfTime === "Second" ? time = timeIntervalBetweenFlows * 1000 : time = timeIntervalBetweenFlows * 60000;
+                        /* setInterval(async () => {
+                            let url=ProtRef.getServiceURI(globalConfig, hasLinkServiceToDataTable[0].split("/@")[1].split(".")[1]);
+                            let x=aux(url);
+                        },2000); */ // time
+
+                    /*}else{
+
+                    }
+                }   
+            }
+        }) comentado */
+
+        
+        
+         
+        
+        /* //tipo = globalConfig["ArchitectureSelfAwarenessIoT"].containsDataFlow[dataflow.split(".")[1]].dataFlowType;
+        if (dataflow){
+            //console.log(globalConfig["ArchitectureSelfAwarenessIoT"].containsDataFlow[dataflow.split(".")[1]].$);
+            //tipo = globalConfig["ArchitectureSelfAwarenessIoT"].containsDataFlow[dataflow.split(".")[1]].$.dataFlowType;
+            globalConfig["ArchitectureSelfAwarenessIoT"].containsDataFlow.forEach( resource => {
+                //console.log(resource['$'].dataflow);
+            })
+        } */
+
+        //console.log(tipo);
+
+    } 
+
+})
+
+module.exports = router;
+
+
+
+saveData = async (consulta) => {
+    try{
+        let result = await conexion.query(consulta);
+        return result.rows;
+    }catch(err){
+        return err;
+    }
+}
+
+postRegistrosBD = async () => {
+    let query = "INSERT INTO cargacpufog(id, cargacpu, nrosensorescontrolados, idcpu, fechahora)"
+    query += `values ( ${2}, ${6}, ${2}, ${5}, '08-08-2023 01:55')`;
+    try {
+        const result = await saveData(query);
+        console.log('Result:', result);
+        return result;
+    } catch (error) {
+        console.error('Error:', error);
+        throw error;
+    }
+}
+
+//let res = postRegistrosBD();
+
+// Metodo que recorre el modelo buscando la base de datos para realizar consultas a las tablas
+/* localConfig.forEach(async resource => {
+    if (resource && resource.containsResource) {
+        for (const properties of resource.containsResource) {
+            if (properties['xsi:type'] === 'MonitorIoT:DataBase') {
+                if (properties && properties.containsDataTable) {
+                    for (const tablas of properties.containsDataTable) {
+                        const tableName = tablas.name.toLowerCase();
+                        console.log(tableName);
+                        let result = await getRegistrosBD(tablas.name.toLowerCase());
+                        console.log(result);
+                    }
+                }
+            }
+        }
+    }
+}); */
+
+
+// async. Se coloca antes de una expresión que retorna una promesa
+// await, la ejecución de la función async se detiene hasta que la promesa se resuelva o rechace. 
+/* const getMethod = async (dbTable)  => {
+    try {
+        let query = "SELECT * FROM ";
+        query += dbTable.toLowerCase();
+        let results = await conexion.query(query);
+        //console.log('Promesa resuelta:', results.rows);
+        return results.rows;
+    } catch (error) {
+        return error;
+      //console.error('Promesa rechazada:', error);
+    }
+  } */
+
+// method to get data in Database
+/*getMethod = async (dbTable,tableref) => {
+    let query = "SELECT * FROM ";
+    query += dbTable.$.name;
+    let results;
+    try {
+        let refe=tableref.split("|");
+        if(localConfig.$["xsi:type"]+"|"+localConfig.$.id+"|"+localConfig.$.name===refe[0]+"|"+refe[1]+"|"+refe[2]){
+            console.log("usar db");
+            results = await conexion.query(query);
+        }
+        else{
+            //conectar a externa
+            let client2;
+            var uri = refe[3];
+            var tipo=uri.split(":")[0];
+            switch(tipo){
+                case 'postgres':
+                const { Client }=require("pg");
+                console.log(uri);
+                client2 = new Client({connectionString: uri});
+                try{   
+                    client2.connect(err => {
+                        if (err) {
+                            console.log('No Conectado');
+                        } 
+                        else {
+                            console.log('Conectado');
+                        }
+                    }); 
+                }
+                catch(error){
+                    console.log('nel');
+                }
+                break;
+            default:
+                console.log("No se encontro una base de datos soportada");
+            }
+            let results = await client2.query(query);
+            client2.end();
+        }  
+        return results.rows;
+    } catch (err) {
+        return err;
+    }
+};*/
+
+//module.exports = router;
+
+
+----------------------- IMPLEMENTADORDB
+let modelo = require('../../../modelos/modeloObjeto.json')
+let globalConfig = require('../../../modelos/modeloJSON.json')
+let dataStore, network;
+let client;
+
+// Funcion para obtener los protocolos de la Base de Datos para poder realizar la conexion
+function getLocalProtocol (globalConfig, index){
+    const netList1 = globalConfig["ArchitectureSelfAwarenessIoT"].containsEntity[index[1].split(".")[1]];
+    const protocol = netList1.containsProtocol[index[2].split(".")[1]];
+    if (protocol) {
+        return {
+            port: protocol.$.port,
+            name: protocol.$.name
+        };
+    } else {
+      return "";
+    }
+};
+
+// Funcion para obtener el link de enlace de conexion a la base de datos 
+function getlinkDataBase(network, dataStore){
+    if(dataStore){
+        const dbname = dataStore.name;
+        const user = dataStore.user ? dataStore.user : "user";
+        const password = dataStore.password ? dataStore.password : "****";
+        const host = network.networkAddress;
+        const {port,name} = getLocalProtocol(globalConfig, dataStore.usesProtocol.split("/@"));
+        //return dataStore.uri ? dataStore.uri : name + "://" + user + ":" + password + "@" + host + ":" + port + "/" + dbname;
+        return "postgres://postgres:postgres@localhost:5432/postgresqllocal";
+    }
+}
+
+// Recorro el modelo creado, obteniendo los datos de la Base de Datos y de la Red
+modelo.forEach(resource => {
+    resource.containsResource.forEach(properties => {
+        if (properties['xsi:type'] === 'MonitorIoT:DataBase') {
+            dataStore = properties;
+        } else if (properties["xsi:type"] === "MonitorIoT:NetworkInterface") {
+            network = properties;
+        }
+    })
+});
+
+// En caso de existir datos para crear las Bases de Datos y Tablas
+if (network && dataStore){
+    // Obtengo el link de conexion 
+    var uri = getlinkDataBase(network, dataStore);
+    // Creo una instancia de POSTGRES
+    const { Client } = require('pg');
+    // Creo un nuevo client para realizar la conexion a la BD
+    client = new Client({ connectionString: uri });
+
+    client.connect(err=>{
+        if(err){
+            console.log('err');
+        }else{
+            console.log('ok');
+        }
+    })
+
+    try{
+        
+        client.connect(err=>{
+            if(err){
+                // En caso de tener algun error, modifico la URI ya sea por problemas de Sintaxis
+                let x = uri.split("/");
+                uri = "";
+                for (var i = 0; i < x.length - 1; i++) {
+                    if (i === 0) {
+                        uri = uri + x[i];
+                    } else {
+                        uri = uri + "/" + x[i];
+                    }
+                }
+                
+                // Creo un nuevo cliente con la nueva uri
+                client = new Client({ connectionString: uri });
+                client.connect(err => {
+                    if(err){
+                        console.error('No mismo existe', err.stack);
+                    }else{
+                       
+                        // Creo una nueva base de datos
+                        console.log('\n\x1b[32m%s\x1b[0m', 'Implementando la estructura de las bases de datos que almacenan los datos de monitoreo');
+                        console.log('\n\x1b[32m%s\x1b[0m', `Base de datos ${x[x.length-1]} implementada (ok)`);
+                        client.query('CREATE DATABASE '+x[x.length-1], (err, res) =>{
+                            if(err) throw err;
+                            // finalizo conexion
+                            client.end(); 
+                            uri = uri + "/" + x[x.length-1]
+                            // Nueva conexion con la nueva URI modificada
+                            client = new Client({ connectionString: uri });
+                            client.connect(err => {
+                                if(err){
+                                    console.log('No se pudo conectar: ', err.stack);
+                                }else{
+                                    // Creamos las tablas
+                                    dataStore.containsDataTable.forEach(tabla => {
+                                        client.query(crearTbPostgres(tabla), err, res =>{
+                                            if(err){
+                                                throw err;
+                                            }else{
+                                                let nombreTabla = tabla.name
+                                                console.log('\n\x1b[32m%s\x1b[0m', `Tabla ${nombreTabla} implementada (ok)`);
+                                                //client.end();
+                                            }
+                                        })
+                                    })
+
+                                }
+                            })
+                        })
+                        //client.end()
+                    }
+                })                 
+            }else{
+                console.log('\n\x1b[32m%s\x1b[0m', 'Implementando la estructura de las bases de datos que almacenan los datos de monitoreo');
+                client.end();
+            }
+        })
+    }catch(error){
+        console.log('No se conecto...');
+    }
+}
+
+
+// Funcion para crear las tablas correspondientes a las Bases de Datos
+function crearTbPostgres(tabla){
+    var nombre = tabla.name;    
+    var consulta = "CREATE TABLE IF NOT EXISTS " + tabla.name + "(\n";
+    consulta += "id serial PRIMARY KEY";
+
+    tabla.composedOfDataColumn.forEach(column => {
+        var tipodato;
+        var longitud;
+        switch(column.dataType){
+            case "Byte":
+                tipodato="bytea";
+                longitud="";
+                break;
+            case "Integer":
+                tipodato="Integer";
+                longitud="";
+                break;
+            case "Long":
+                tipodato="bigint";
+                longitud="";
+                break;
+            case "Float":
+                tipodato="real";
+                longitud="";
+                break;
+            case "Double":
+                tipodato="double precision";
+                longitud="";
+                break;
+            case "String":
+                tipodato="varchar";
+                longitud="(250)";
+                break;
+            case "Date":
+                tipodato="timestamp";
+                longitud="";
+                break;
+            case "Boolean":
+                tipodato="boolean";
+                longitud="";
+                break;                  
+        }
+        consulta += ",\n"+column.name+" "+tipodato+" "+longitud+" NOT NULL";
+    });
+    consulta+=");";
+    return consulta;
+};
+
+client.end();
+
+// para que se usa esto
+/* "containsProtocol": [
+                    {
+                        "$": {
+                            "isUsedByMiddleware": "//@containsEntity.1/@containsComputingNode.0/@containsResource.2",
+                            "id": "28",
+                            "name": "MQTT",
+                            "port": "1883"
+                        }
+                    }
+                ] */
+//const uri = dataStore.uri ? dataStore.uri : name + "://" + user + ":" + password + "@" + host + ":" + port + "/" + dbname;
+//const uri = dataStore.uri ? dataStore.uri : "MQTT" + "://" + user + ":" + password + "@" + host + ":" + 1883 + "/" + dbname;
+
+/* console.log(uri); */
+
+/* const { Client } = require('pg');
+
+const client = new Client({
+  user: 'postgres',
+  host: 'localhost',
+  database: 'postgres',
+  password: 'admin',
+  port: 5432, // Puerto por defecto de PostgreSQL
+}); */
+
+// Conectarse a la base de datos
+/* client.connect()
+  .then(() => {
+    console.log('Conexión exitosa a la base de datos');
+
+    // Ejecutar una consulta
+    client.query('SELECT * FROM personas')
+      .then(result => {
+        // Manipular los datos obtenidos
+        const rows = result.rows;
+        console.log(rows); // Mostrar los datos en la consola
+
+        // Realizar otras operaciones con los datos obtenidos
+        // ...
+      })
+      .catch(err => console.error('Error al ejecutar la consulta', err))
+      .finally(() => {
+        // Cerrar la conexión cuando ya no sea necesaria
+        client.end()
+          .then(() => console.log('Conexión cerrada correctamente'))
+          .catch(err => console.error('Error al cerrar la conexión', err));
+      });
+  })
+  .catch(err => console.error('Error al conectar a la base de datos', err)); */
+
+/*try {
+    client.connect(err => {
+        if (err) {
+            console.error('Error de conexion: ', err.stack);
+            let x = uri.split("/");
+            uri = "";
+            for (var i = 0; i < x.length - 1; i++) {
+                if (i === 0) {
+                    uri = uri + x[i];
+                }
+                else {
+                    uri = uri + "/" + x[i];
+                }
+            }
+            client = new Client({ connectionString: uri });
+            client.connect(err => {
+                if (err) {
+                    console.error('No mismo existe', err.stack);
+                }
+                else {
+                    console.log('Conectado');
+                    client.query('CREATE DATABASE ' + x[x.length - 1], (err, res) => {
+                        if (err) throw err;
+                        console.log(res);
+                        uri = uri + "/" + x[x.length - 1];
+                        client.end();
+                        client = new Client({ connectionString: uri });
+                        client.connect(err => {
+                            if (err) {
+                                console.error('pendejo', err.stack);
+                            } else {
+                                console.log('si funco: ' + uri);
+                                //crear tablas
+                                dataStore.containsDataTable.forEach(tabla => {
+                                    client.query(base.crearTbPostgres(tabla), (err, res) => {
+                                        if (err) {
+                                            throw err;
+                                        }
+                                        else {
+                                            console.log("tablas creada");
+                                            fs.writeFile('./baseAnterior/basean.json', JSON.stringify(dataStore), 'utf8', (err) => { });
+                                        }
+                                    });
+                                });
+                            }
+                        });
+                    });
+                }
+            });
+        }
+        else {
+            console.log('Conectado');
+            //crear tablas
+            let bandera = 0;
+
+            try {
+                fs.lstatSync('./baseAnterior/basean.json').isFile();
+                const xml = fs.readFileSync('baseAnterior/basean.json', 'utf8');
+                if (JSON.stringify(dataStore) === xml) {
+                    bandera = 1;
+                }
+            } catch (error) {
+                bandera = 2
+            }
+
+            //OBTENER BASE DE DATOS VIEJA
+
+
+            if (bandera == 2) {
+                fs.writeFile('./baseAnterior/basean.json', JSON.stringify(dataStore), 'utf8', (err) => { console.log(err) });
+                base.respaldarBdPostgres(uri);
+                let cs = fs.readFileSync('baseAnterior/base.sql', 'utf8').toString();
+                let destino = "http://localhost:9912/FF";//deberia sacarse del modelo
+                let nombres = "_postgress_" + uri.split("/")[uri.split("/").length - 1];
+                base.enviarArchivo(destino, cs, nombres);
+                dataStore.containsDataTable.forEach(tabla => {
+                    client.query("drop table if exists " + tabla.$.name, (err, res) => {
+                        if (err) {
+                            console.log("err: ", err);
+                            console.log("res: ", res);
+                            throw err;
+                        }
+                        else {
+                            console.log("tablas borrada: " + tabla.$.name);
+                            client.query(base.crearTbPostgres(tabla), (err, res) => {
+                                if (err) {
+                                    throw err;
+                                }
+                                else {
+                                    console.log("tablas creada: " + tabla.$.name);
+                                }
+                            });
+                        }
+                    });
+                });
+            }
+
+            if (bandera === 0) {
+                console.log("entraaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
+                let cs = fs.readFileSync('baseAnterior/basean.json', 'utf8');
+                let oldBase = JSON.parse(cs);
+                console.log("dataStore:", dataStore);
+                fs.writeFile('./baseAnterior/basean.json', JSON.stringify(dataStore), 'utf8', (err) => { });
+                base.respaldarBdPostgres(uri);
+                let sqlAux = fs.readFileSync('baseAnterior/base.sql').toString();
+                let destino = "http://localhost:9912/FF";//deberia sacarse del modelo
+                let nombres = "_postgress_" + uri.split("/")[uri.split("/").length - 1];
+                base.enviarArchivo(destino, sqlAux, nombres);
+
+                let aleteredTables = [];
+
+
+                ///Obtener eliminación de campos
+                for (let i = 0; i < oldBase.containsDataTable.length; i++) {
+                    let oldTable = oldBase.containsDataTable[i].$.name;;
+                    let tableFlag = true;
+                    for (let j = 0; j < dataStore.containsDataTable.length; j++) {
+                        let newTableName = dataStore.containsDataTable[j].$.name;
+
+                        if (newTableName == oldTable) {
+                            tableFlag = false;
+                            for (let m = 0; m < oldBase.containsDataTable[i].composedOfDataColumn.length; m++) {
+                                let columnFlag = true;
+                                let oldColumn = oldBase.containsDataTable[i].composedOfDataColumn[m].$.name
+
+                                for (let n = 0; n < dataStore.containsDataTable[j].composedOfDataColumn.length; n++) {
+                                    let newColumn = dataStore.containsDataTable[j].composedOfDataColumn[n].$.name
+
+                                    if (oldColumn == newColumn) {
+                                        columnFlag = false;
+                                    }
+                                }
+
+                                if (columnFlag) {
+                                    aleteredTables.push(newTableName);
+                                    console.log("Se borra la tabla 1q: " + "drop table " + oldTable)
+                                    client.query("drop table if exists " + oldTable, (err, res) => {
+                                        if (err) {
+                                            throw err;
+                                        }
+                                        else {
+                                            console.log("tablas borrada: " + oldTable);
+                                            client.query(base.crearTbPostgres(dataStore.containsDataTable[j]), (err, res) => {
+                                                if (err) {
+                                                    throw err;
+                                                }
+                                                else {
+                                                    console.log("tabla creada: " + oldTable);
+                                                }
+                                            });
+
+                                        }
+                                    });
+                                }
+
+                            }
+                        }
+                    }
+
+                    if (tableFlag) {
+                        console.log("cayo");
+                        console.log("Se borra la tabla: " + "drop table " + oldTable)
+                        client.query("drop table if exists " + oldTable, (err, res) => {
+                            if (err) {
+                                console.log("pendejada");
+                                throw err;
+                            }
+                            else {
+                                console.log("tablas borrada: " + oldTable);
+                            }
+                        });
+                    }
+                }
+
+                ///Obtener alteración a campos
+                ///Obtener agregación de campos
+                for (let i = 0; i < dataStore.containsDataTable.length; i++) {
+                    let newTable = dataStore.containsDataTable[i].$.name;
+                    let tableFlag = true;
+                    for (let j = 0; j < oldBase.containsDataTable.length; j++) {
+                        let oldTable = oldBase.containsDataTable[j].$.name;
+                        let alteredTableFlag = true;
+
+                        for (let k = 0; k < aleteredTables.length; k++) {
+                            if (newTable == aleteredTables[k]) {
+                                alteredTableFlag = false;
+                            }
+                        }
+
+                        if (newTable == oldTable && alteredTableFlag) {
+                            tableFlag = false;
+                            for (let m = 0; m < dataStore.containsDataTable[i].composedOfDataColumn.length; m++) {
+                                let columnFlag = true;
+                                let newColumn = dataStore.containsDataTable[i].composedOfDataColumn[m].$.name
+
+                                for (let n = 0; n < oldBase.containsDataTable[j].composedOfDataColumn.length; n++) {
+                                    let oldColumn = oldBase.containsDataTable[i].composedOfDataColumn[n].$.name
+
+                                    if (oldColumn == newColumn) {
+                                        columnFlag = false;
+                                        if (oldBase.containsDataTable[i].composedOfDataColumn[n].$.dataType != dataStore.containsDataTable[i].composedOfDataColumn[m].$.dataType) {
+                                            let type = base.correctorDataType(dataStore.containsDataTable[i].composedOfDataColumn[m].$.dataType);
+                                            console.log("Cambio de tipo de dato de columna: " + "alter table " + newTable + " alter column " + newColumn + " type " + type[0] + " " + type[1]);
+                                            client.query("alter table " + newTable + " alter column " + newColumn + " type " + type[0] + " " + type[1], (err, res) => {
+                                                if (err) {
+                                                    console.log("eliminar tabla: " + "drop table if exists " + newTable);
+                                                    client.query("drop table if exists " + newTable, (err, res) => {
+                                                        if (err) {
+                                                            throw err;
+                                                        }
+                                                        else {
+                                                            console.log("tabla borrada: " + base.crearTbPostgres(dataStore.containsDataTable[i]));
+                                                            client.query(base.crearTbPostgres(dataStore.containsDataTable[i]), (err, res) => {
+                                                                if (err) {
+                                                                    throw err;
+                                                                }
+                                                                else {
+                                                                    console.log("tabla creada ff: " + newTable);
+                                                                }
+                                                            });
+                                                        }
+                                                    });
+                                                }
+                                                else {
+                                                    console.log("tabla alterada: " + newTable);
+                                                    console.log("columna alterada: " + newColumn);
+                                                    console.log("tipo alterado: " + type[0] + " " + type[1]);
+                                                }
+                                            });
+                                        }
+                                    }
+                                }
+
+                                if (columnFlag) {
+                                    let type = base.correctorDataType(dataStore.containsDataTable[i].composedOfDataColumn[m].$.dataType);
+                                    console.log("Agregar columna: " + "alter table " + newTable + " add column " + newColumn + " " + type[0] + " " + type[1]);
+                                    client.query("alter table " + newTable + " add column " + newColumn + " " + type[0] + " " + type[1], (err, res) => {
+                                        if (err) {
+                                            throw err;
+                                        }
+                                        else {
+                                            console.log("tabla alterada: " + newTable);
+                                            console.log("columna creada: " + newColumn);
+                                        }
+                                    });
+                                    break;
+                                }
+
+                            }
+                        }
+                    }
+
+
+                    if (tableFlag) {
+                        console.log("Crear la tabla: " + base.crearTbPostgres(dataStore.containsDataTable[i]));
+                        client.query(base.crearTbPostgres(dataStore.containsDataTable[i]), (err, res) => {
+                            if (err) {
+                                throw err;
+                            }
+                            else {
+                                console.log("tablas creada: " + newTable);
+                            }
+                        });
+                    }
+                }
+
+                //OBTENER BASE DE DATOS VIEJA
+
+            }
+        }
+    }); 
+}
+catch (error) {
+    console.log('nel');
+}*/
+
+
+**************---------------- IMPLEMENTADORSERVICIOS
+const request = require('request');
+const express = require("express");
+const router = express.Router();
+const localConfig = require('../../../modelos/modeloObjeto.json');
+const globalConfig = require('../../../modelos/modeloJSON.json');
+const gestorManipulacion = require('../../LogicaNegocio/General/GestorManipulacionBD')
+const bd = require('../../Datos/BD');
+const e = require('express');
+
+console.log('\n\x1b[32m%s\x1b[0m', 'Implementando los servicios web ...');
+
+function aux(url){
+    const headers = {
+        'content-type':'application/json'
+    };
+    request({
+        url: url+"/3",
+        headers: headers,
+        method: 'POST'
+    },
+    (error, response, body) => {
+        if (!error && response.statusCode === 200) {
+            console.log(body);
+        }else {
+            console.log(error);
+        }
+    });   
+}
+
+// Buscamos el servidor de aplicaciones web que pública los servicios RESTful para el intercambio, agregación y almacenamiento de datos
+let middleware;
+localConfig && localConfig.forEach(resource => {
+    resource.containsResource && resource.containsResource.forEach( propiedades => {
+        if(propiedades["xsi:type"] == "MonitorIoT:Middleware"){
+             middleware = propiedades;
+        }
+    })
+})
+
+let tipo;
+middleware && middleware.containsService && middleware.containsService.length > 0 && middleware.containsService.forEach((api) => {
+    
+    console.log('\n\x1b[32m%s\x1b[0m', `Servicio web ${api.name} implementado (OK)`);
+    
+    // Obtengo todos los enlaces de conexion para almacenar la informacion en su respectiva tabla de la Base de Datos
+    let hasLinkServiceToDataTable;
+
+    if (api.hasLinkServiceToDataTable) {    
+        // Busco y separo cada link correspondiente para las conexiones a la DB     
+        hasLinkServiceToDataTable = api.hasLinkServiceToDataTable.split(" ");
+        
+        // REVISAR ESTA PARTE DEL CODIGO ----> OJOOOOOOOOOOOO
+        // Verificar si se puede tener mas de un link 
+        // Revisar containsLink 22 y 23
+
+        // Link de enlace a la tabla que va a realizar la consulta
+        hasLinkServiceToDataTable = api.hasLinkServiceToDataTable.split(" ");
+        let dataflow;
+        hasLinkServiceToDataTable && hasLinkServiceToDataTable.forEach(linkService => {
+             dataflow=globalConfig["ArchitectureSelfAwarenessIoT"].containsLink[linkService.split(".")[1]].$.supports;
+        })
+    }
+    console.log(tipo);
+
+
+        let result;
+        let tableInfo;
+        let tableref;
+        // Si existen servicios a la base de datos creamos (select, insert, update o delete)
+        if (hasLinkServiceToDataTable.length > 0) {
+            for(var i=0;i<hasLinkServiceToDataTable.length;i++){
+                const linkRef = hasLinkServiceToDataTable[i].split("/@");
+                let index = linkRef[1].split(".")[1];
+                let tipo=globalConfig["ArchitectureSelfAwarenessIoT"].containsLink[index].$.type;
+                let df=globalConfig["ArchitectureSelfAwarenessIoT"].containsLink[index].$.supports;
+
+                // Obtenemos la informacion de las tablas a realizar los servicios
+                tableInfo = bd.getTableInfo(globalConfig, index);
+                // Obtengo la direcciones de la base de datos
+                tableref = bd.getTablenodo(globalConfig,index);
+
+                if(tipo){
+                    // Obtengo las respectivas columnas de las tablas para crear el servicio
+                    let columna=tableInfo.composedOfDataColumn;
+                    let data={};
+                    
+                    // Recorremos cada columna encontrada
+                    for(var f=0;f<columna.length;f++){     
+                        //console.log(columna[f].$.name,  " -- " ,columna[f].$.dataColumnType);
+                        
+                        if(columna[f].$.dataColumnType){
+                           //metadata
+                           //console.log('1 ',columna[f].$.name,  " -- " ,columna[f].$.dataColumnType);
+                           
+                            if(columna[f].$.formulaExpression){            
+                               eval("function temp(){"+columna[f].$.formulaExpression+"}");
+                               let val=temp();
+                               data[columna[f].$.name] = val;  
+                            }
+                            else{}
+                        }else{
+                            //let qr=columna[f].$.hasRuleAsDestination.split(" ");
+                            let qr=columna[f].$.hasRulePropertyToDataColumn.split(" ");
+                            for(var qi=0;qi<qr.length;qi++){
+                                let qrr=qr[qi].split("/@")[1];
+                                if(df==="//@"+qrr){
+                                    
+
+                                    // Obtenemos los enlaces
+                                    let r = qr[qi].split("/@");
+                                    // Obtenemos la ruta de la base de datos para poder crear los servicios
+                                    let rut=globalConfig["ArchitectureSelfAwarenessIoT"].containsDataFlow[r[1].split(".")[1]].containsDataMappingRule[r[2].split(".")[1]].$.relatesColumn;
+                                    
+                                    let mappingRule=globalConfig["ArchitectureSelfAwarenessIoT"].containsDataFlow[r[1].split(".")[1]].containsDataMappingRule[r[2].split(".")[1]];
+                                    // Obtenemos la base de datos y las tablas con las que se va a crear el servicio
+                                    let rr=bd.getReferencestrace(globalConfig,rut);   
+                                    // Informacion de la tabla                                
+                                    let sourceDataTable=rr[rr.length-2];
+                                    // Nombre de la tabla 
+                                    console.log(rr);
+
+                                    let sourceColumn=rr[rr.length-1].$.name;
+                                    console.log(sourceColumn);
+                                    // Obtenemos el nodo al que hace referencia la tabla
+                                    tableref2 = bd.getTablenodo(globalConfig,sourceDataTable.$.hasLinkServiceToDatable.split(".")[sourceDataTable.$.hasLinkServiceToDatable.split(".").length-1]);
+                                    
+                                    console.log('2 ', columna[f].$.name, ' -- ', tableref2);
+
+                                    let data2 = gestorManipulacion.getMethod(sourceDataTable,tableref2);
+                                    let result = 0;
+
+                                    data2.then(res => {
+                                        //console.log(res);
+                                        /* res.forEach(r => {
+                                           
+                                            console.log(r);
+                                        }) */
+                                    }).catch(err => {
+                                        console.log('Error');
+                                    })
+                                }
+                            }
+                        }
+                        /*else{
+                            //console.log(columna[f].$.hasRuleAsDestination);
+                            let qr=columna[f].$.hasRuleAsDestination.split(" ");
+                            
+                            for(var qi=0;qi<qr.length;qi++){
+                                let qrr=qr[qi].split("/@")[1];
+                                if(df==="//@"+qrr){
+                                    // Obtenemos los enlaces
+                                    let r = qr[qi].split("/@");
+                                    // Obtenemos la ruta de la base de datos para poder crear los servicios
+                                    let rut=globalConfig["ArchitectureSelfAwarenessIoT"].containsDataFlow[r[1].split(".")[1]].containsDataMappingRule[r[2].split(".")[1]].$.relatesColumn;
+                                    let mappingRule=globalConfig["ArchitectureSelfAwarenessIoT"].containsDataFlow[r[1].split(".")[1]].containsDataMappingRule[r[2].split(".")[1]];
+                                    // Obtenemos la base de datos y las tablas con las que se va a crear el servicio
+                                    let rr=bd.getReferencestrace(globalConfig,rut);   
+                                    // Informacion de la tabla                                
+                                    let sourceDataTable=rr[rr.length-2];
+                                    // Nombre de la tabla 
+                                    let sourceColumn=rr[rr.length-1].$.name;
+                                    // Obtenemos el nodo al que hace referencia la tabla
+                                    tableref2 = bd.getTablenodo(globalConfig,sourceDataTable.$.hasLinkServiceToDatable.split(".")[sourceDataTable.$.hasLinkServiceToDatable.split(".").length-1]);
+                                    
+                                   
+
+                                    let data2 = gestorManipulacion.getMethod(sourceDataTable,tableref2);
+                                    let result = 0;
+
+                                    data2.then(res => {
+                                        if (mappingRule.$.aggregationOperation === "Mean") {
+                                            res.forEach(e => {
+                                                result += parseInt(e[sourceColumn]);
+                                            });
+                                            result = result / data2.length;
+                                        } else if (mappingRule.$.aggregationOperation === "Sum") {
+                                            res.forEach(e => {
+                                                result += parseInt(e[sourceColumn]);
+                                            });
+                                        }
+                                    }).catch(err =>{
+                                        console.log('Error en la consulta');
+                                    }) 
+                                    
+                                    data[columna[f].$.name] = result;
+                                    qi=qr.length; 
+                                    
+                                }
+                            }
+                        }*/
+                    }
+                    /* console.log(data); */
+                    result = gestorManipulacion.postMethod(tableInfo, data, tableref);
+                    /* result.then(res => {
+                        console.log(res);
+                    }) */
+                    
+                }
+            }
+        }
+
+        //let dataflow=globalConfig["ArchitectureSelfAwarenessIoT"].containsLink[hasLinkServiceToDataTable[0].split(".")[1]].$.supports;
+        if(dataflow){
+            tipo=globalConfig["ArchitectureSelfAwarenessIoT"].containsDataFlow[dataflow.split(".")[1]].$.dataFlowType;
+            
+            if(tipo){      
+                // Creo los Servicios Web 
+                let result;
+                router["get"]("/"+api.endPoint, (req, res, next) => {
+                    localConfig.forEach(async resource => {
+                        if (resource && resource.containsResource) {
+                            for (const properties of resource.containsResource) {
+                                if (properties['xsi:type'] === 'MonitorIoT:DataBase') {
+                                    if (properties && properties.containsDataTable) {
+                                        for (const tablas of properties.containsDataTable) {
+                                            const tableName = tablas.name.toLowerCase();
+                                            result = await gestorManipulacion.getMethod(tableName);
+                                            console.log(result);                                 
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }); 
+                    res.send(result);
+                });
+
+                
+                
+                /* router["get"]("/" + api.endPoint + "/2", async (req, res, next) => {
+                    let result;
+                    let tableInfo;
+                    let tableref;
+                    if (hasLinkServiceToDataTable.length > 0) {
+                        for(var i=0;i<hasLinkServiceToDataTable.length;i++){
+                            const linkRef = hasLinkServiceToDataTable[i].split("/@");
+                            let index = linkRef[1].split(".")[1];
+                            let tipo=globalConfig["ArchitectureSelfAwarenessIoT"].containsLink[index].$.type;
+                            tableInfo = base.getTableInfo(globalConfig, index);
+                            tableref=base.getTablenodo(globalConfig, index);
+                            if(tipo){ }
+                            else{
+                                console.log("******** Get Data ********");
+                                result = await getMethod(tableInfo,tableref);
+                                return res.json(result);
+                            }
+                        }
+                    }
+                }); */
+                
+                /*router[api.method ? api.method.toLowerCase() : "get"]("/" + api.endPoint + "/3", async (req, res, next) => {
+                    let result;
+                    let tableInfo;
+                    let tableref;
+                    if (hasLinkServiceToDataTable.length > 0) {
+                        for(var i=0;i<hasLinkServiceToDataTable.length;i++){
+                            const linkRef = hasLinkServiceToDataTable[i].split("/@");
+                            let index = linkRef[1].split(".")[1];
+                            let tipo=globalConfig["ArchitectureSelfAwarenessIoT"].containsLink[index].$.type;
+                            let df=globalConfig["ArchitectureSelfAwarenessIoT"].containsLink[index].$.supports;
+                            tableInfo = base.getTableInfo(globalConfig, index);
+                            tableref=base.getTablenodo(globalConfig, index);
+                            if(tipo){
+                                console.log("******** Post Data ********");
+                                let columna=tableInfo.composedOfDataColumn;
+                                let data={};
+                                for(var f=0;f<columna.length;f++){                      
+                                    if(columna[f].$.dataColumnType){
+                                       //metadata
+                                        if(columna[f].$.formulaExpression){            
+                                           eval("function temp(){"+columna[f].$.formulaExpression+"}");
+                                           let val=temp();
+                                           data[columna[f].$.name] = val;  
+                                        }
+                                        else{}
+                                    }
+                                    else{
+                                        let qr=columna[f].$.hasRuleAsDestination.split(" ");
+                                        for(var qi=0;qi<qr.length;qi++){
+                                            let qrr=qr[qi].split("/@")[1];
+                                            if(df==="//@"+qrr){
+                                                let r=qr[qi].split("/@");
+                                                let rut=globalConfig["ArchitectureSelfAwarenessIoT"].containsDataFlow[r[1].split(".")[1]].containsDataMappingRule[r[2].split(".")[1]].$.relatesSourceColumn;
+                                                let mappingRule=globalConfig["ArchitectureSelfAwarenessIoT"].containsDataFlow[r[1].split(".")[1]].containsDataMappingRule[r[2].split(".")[1]];
+                                                let rr=ProtRef.getReferencestrace(globalConfig,rut);
+                                                let sourceDataTable=rr[rr.length-2];
+                                                let sourceColumn=rr[rr.length-1].$.name;
+                                                tableref2=base.getTablenodo(globalConfig,sourceDataTable.$.hasLinkServiceToDatable.split(".")[sourceDataTable.$.hasLinkServiceToDatable.split(".").length-1]);
+                                                let data2 = await getMethod(sourceDataTable,tableref2);
+                                                let result = 0;
+                                                if (data2.length > 0) {
+                                                    if (mappingRule.$.aggregationOperation === "Mean") {
+                                                        data2.forEach(e => {
+                                                            result += parseInt(e[sourceColumn]);
+                                                        });
+                                                        result = result / data2.length;
+                                                    } else if (mappingRule.$.aggregationOperation === "Sum") {
+                                                        data2.forEach(e => {
+                                                            result += parseInt(e[sourceColumn]);
+                                                        });
+                                                    }
+                                                    // another operations
+                                                }
+                                                data[columna[f].$.name] = result;
+                                                qi=qr.length;                                    
+                                            }
+                                        }
+                                    }
+                                }
+                                result = await postMethod(tableInfo, data, tableref);
+                                console.log(result);
+                            }
+                        }
+                    }
+                });*/
+            }else{
+
+            }
+        }   
+
+        // Obtenemos todos los enlaces
+        /*hasLinkServiceToDataTable.forEach(async links =>{ comentado
+            console.log(links);
+
+            // Obtenemos los containsDataFlow 
+            let dataflow;
+            if (globalConfig["ArchitectureSelfAwarenessIoT"].containsLink[links.split(".")[1]].$.supports){
+               dataflow = globalConfig["ArchitectureSelfAwarenessIoT"].containsLink[links.split(".")[1]].$.supports;
+            }
+            if (dataflow){
+                // Obtenemos los dataFlowType
+                if(globalConfig["ArchitectureSelfAwarenessIoT"].containsDataFlow[dataflow.split(".")[1]].$.dataFlowType){
+                    tipo = globalConfig["ArchitectureSelfAwarenessIoT"].containsDataFlow[dataflow.split(".")[1]].$.dataFlowType;
+                    console.log(tipo,"\n");
+
+                    if(tipo){
+                        console.log(api.method);
+                        router[api.method ? api.method.toLowerCase() : "get"]("/" + api.endPoint + "/3", async (req, res, next) => {
+                            
+                            console.log(api.endPoint);
+                            let result;
+                            let tableInfo;
+                            let tableref;
+                            if (hasLinkServiceToDataTable.length > 0) {
+                                for(var i=0;i<hasLinkServiceToDataTable.length;i++){
+                                    const linkRef = hasLinkServiceToDataTable[i].split("/@");
+                                    let index = linkRef[1].split(".")[1];
+                                    let tipo=globalConfig["ArchitectureSelfAwarenessIoT"].containsLink[index].$.type;
+                                    let df=globalConfig["ArchitectureSelfAwarenessIoT"].containsLink[index].$.supports;
+                                    tableInfo = base.getTableInfo(globalConfig, index);
+                                    tableref=base.getTablenodo(globalConfig, index);
+                                    if(tipo){
+                                        console.log("******** Post Data ********");
+                                        let columna=tableInfo.composedOfDataColumn;
+                                        let data={};
+                                        for(var f=0;f<columna.length;f++){                      
+                                            if(columna[f].$.dataColumnType){
+                                               //metadata
+                                                if(columna[f].$.formulaExpression){            
+                                                   eval("function temp(){"+columna[f].$.formulaExpression+"}");
+                                                   let val=temp();
+                                                   data[columna[f].$.name] = val;  
+                                                }
+                                                else{}
+                                            }
+                                            else{
+                                                let qr=columna[f].$.hasRuleAsDestination.split(" ");
+                                                for(var qi=0;qi<qr.length;qi++){
+                                                    let qrr=qr[qi].split("/@")[1];
+                                                    if(df==="//@"+qrr){
+                                                        let r=qr[qi].split("/@");
+                                                        let rut=globalConfig["ArchitectureSelfAwarenessIoT"].containsDataFlow[r[1].split(".")[1]].containsDataMappingRule[r[2].split(".")[1]].$.relatesSourceColumn;
+                                                        let mappingRule=globalConfig["ArchitectureSelfAwarenessIoT"].containsDataFlow[r[1].split(".")[1]].containsDataMappingRule[r[2].split(".")[1]];
+                                                        let rr=ProtRef.getReferencestrace(globalConfig,rut);
+                                                        let sourceDataTable=rr[rr.length-2];
+                                                        let sourceColumn=rr[rr.length-1].$.name;
+                                                        tableref2=base.getTablenodo(globalConfig,sourceDataTable.$.hasLinkServiceToDatable.split(".")[sourceDataTable.$.hasLinkServiceToDatable.split(".").length-1]);
+                                                        let data2 = await getMethod(sourceDataTable,tableref2);
+                                                        let result = 0;
+                                                        if (data2.length > 0) {
+                                                            if (mappingRule.$.aggregationOperation === "Mean") {
+                                                                data2.forEach(e => {
+                                                                    result += parseInt(e[sourceColumn]);
+                                                                });
+                                                                result = result / data2.length;
+                                                            } else if (mappingRule.$.aggregationOperation === "Sum") {
+                                                                data2.forEach(e => {
+                                                                    result += parseInt(e[sourceColumn]);
+                                                                });
+                                                            }
+                                                            // another operations
+                                                        }
+                                                        data[columna[f].$.name] = result;
+                                                        qi=qr.length;                                    
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        //result = await postMethod(tableInfo, data, tableref);
+                                        //console.log(result);
+                                    }
+                                }
+                            }
+                        });
+                        let dataflow2;
+                        const dataFlowRef = dataflow.split("/@");
+                        if(dataFlowRef.length > 0){
+                            let index = 0;
+                            const auxList = dataFlowRef[1].split(".");
+                            index = auxList[1];
+                            dataflow2 = globalConfig["ArchitectureSelfAwarenessIoT"].containsDataFlow[index];
+                        }
+                        let time = 1000000;
+                        const unitOfTime = dataflow2.$.unitOfTime ? dataflow2.$.unitOfTime : "Milisencond";
+                        const timeIntervalBetweenFlows = dataflow2.$.flowExecutionTimeInterval !== "" ? dataflow2.$.flowExecutionTimeInterval : 60000;
+                        // Agregamos tiempo adicional
+                        unitOfTime === "Milisecond" ? time = timeIntervalBetweenFlows * 1 : unitOfTime === "Second" ? time = timeIntervalBetweenFlows * 1000 : time = timeIntervalBetweenFlows * 60000;
+                        /* setInterval(async () => {
+                            let url=ProtRef.getServiceURI(globalConfig, hasLinkServiceToDataTable[0].split("/@")[1].split(".")[1]);
+                            let x=aux(url);
+                        },2000); */ // time
+
+                    /*}else{
+
+                    }
+                }   
+            }
+        }) comentado */
+
+        
+        
+         
+        
+        /* //tipo = globalConfig["ArchitectureSelfAwarenessIoT"].containsDataFlow[dataflow.split(".")[1]].dataFlowType;
+        if (dataflow){
+            //console.log(globalConfig["ArchitectureSelfAwarenessIoT"].containsDataFlow[dataflow.split(".")[1]].$);
+            //tipo = globalConfig["ArchitectureSelfAwarenessIoT"].containsDataFlow[dataflow.split(".")[1]].$.dataFlowType;
+            globalConfig["ArchitectureSelfAwarenessIoT"].containsDataFlow.forEach( resource => {
+                //console.log(resource['$'].dataflow);
+            })
+        } */
+
+        //console.log(tipo);
+
+    //} 
+
+})
+
+module.exports = router;
+
+
+
+/* saveData = async (consulta) => {
+    try{
+        let result = await conexion.query(consulta);
+        return result.rows;
+    }catch(err){
+        return err;
+    }
+}
+
+postRegistrosBD = async () => {
+    let query = "INSERT INTO cargacpufog(id, cargacpu, nrosensorescontrolados, idcpu, fechahora)"
+    query += `values ( ${2}, ${6}, ${2}, ${5}, '08-08-2023 01:55')`;
+    try {
+        const result = await saveData(query);
+        console.log('Result:', result);
+        return result;
+    } catch (error) {
+        console.error('Error:', error);
+        throw error;
+    }
+} */
+
+//let res = postRegistrosBD();
+
+// Metodo que recorre el modelo buscando la base de datos para realizar consultas a las tablas
+/* localConfig.forEach(async resource => {
+    if (resource && resource.containsResource) {
+        for (const properties of resource.containsResource) {
+            if (properties['xsi:type'] === 'MonitorIoT:DataBase') {
+                if (properties && properties.containsDataTable) {
+                    for (const tablas of properties.containsDataTable) {
+                        const tableName = tablas.name.toLowerCase();
+                        console.log(tableName);
+                        let result = await getRegistrosBD(tablas.name.toLowerCase());
+                        console.log(result);
+                    }
+                }
+            }
+        }
+    }
+}); */
+
+
+// async. Se coloca antes de una expresión que retorna una promesa
+// await, la ejecución de la función async se detiene hasta que la promesa se resuelva o rechace. 
+/* const getMethod = async (dbTable)  => {
+    try {
+        let query = "SELECT * FROM ";
+        query += dbTable.toLowerCase();
+        let results = await conexion.query(query);
+        //console.log('Promesa resuelta:', results.rows);
+        return results.rows;
+    } catch (error) {
+        return error;
+      //console.error('Promesa rechazada:', error);
+    }
+  } */
+
+// method to get data in Database
+/*getMethod = async (dbTable,tableref) => {
+    let query = "SELECT * FROM ";
+    query += dbTable.$.name;
+    let results;
+    try {
+        let refe=tableref.split("|");
+        if(localConfig.$["xsi:type"]+"|"+localConfig.$.id+"|"+localConfig.$.name===refe[0]+"|"+refe[1]+"|"+refe[2]){
+            console.log("usar db");
+            results = await conexion.query(query);
+        }
+        else{
+            //conectar a externa
+            let client2;
+            var uri = refe[3];
+            var tipo=uri.split(":")[0];
+            switch(tipo){
+                case 'postgres':
+                const { Client }=require("pg");
+                console.log(uri);
+                client2 = new Client({connectionString: uri});
+                try{   
+                    client2.connect(err => {
+                        if (err) {
+                            console.log('No Conectado');
+                        } 
+                        else {
+                            console.log('Conectado');
+                        }
+                    }); 
+                }
+                catch(error){
+                    console.log('nel');
+                }
+                break;
+            default:
+                console.log("No se encontro una base de datos soportada");
+            }
+            let results = await client2.query(query);
+            client2.end();
+        }  
+        return results.rows;
+    } catch (err) {
+        return err;
+    }
+};*/
+
+//module.exports = router;

@@ -1,15 +1,14 @@
-/* PLANIFICADOR TAREAS
-  se encarga de comparar la nueva version detectada del modelo arquitectura de monitoreo con la configuracion de monitoreo 
-  en ejecucion del sistema.
-*/
+// PLANIFICADOR TAREAS
+// Se encarga de comparar la nueva version detectada del modelo arquitectura de monitoreo con la configuracion de monitoreo en ejecucion del sistema.
 
 const fs = require("fs");
 let StartApp = require("../../../StartApp");
+const { log } = require("console");
 let filePath = StartApp.filePath;
 let tipoEjecucion = StartApp.tipoEjecucion;
 let json = JSON.parse(fs.readFileSync("./modelos/Modelo.json", "utf8"));
 
-/*CODIGO ALEX, FUNCION PARA BUSCAR EN EL JSON LOS NODOS Y CONVERTIRLOS A ARREGLOS DE OBJETOS INCLUYENDO EL NUMERO DE NIVELES DESEADO */
+// FUNCION PARA BUSCAR EN EL JSON LOS NODOS Y CONVERTIRLOS A ARREGLOS DE OBJETOS INCLUYENDO EL NUMERO DE NIVELES DESEADO 
 
 function buscarValor(objeto, parametro, nivel) {
   const resultados = [];
@@ -137,9 +136,22 @@ function transformaraRuta(cadena) {
   });
   sinBarrasYarroba = sinBarrasYarroba.slice(1); 
   return sinBarrasYarroba; // Devolver el valor final de que es la ruta
-} /* FIN SUBFUNCION PARA CAMBIAR EL PATH DE UN ATRIBUTO DEL ARREGLO DE OBJETOS DE LOS NODOS AL VALOR CORRESPONDIENTE */
+} // FIN SUBFUNCION PARA CAMBIAR EL PATH DE UN ATRIBUTO DEL ARREGLO DE OBJETOS DE LOS NODOS AL VALOR CORRESPONDIENTE
 
-/* Convertir el modeloJSON en un arreglo de objetos, haciendo un llamado a la funcion buscarValor */
+
+// Verificamos el tipo de ejecucion ya sea Monitoreo o Monitoreo y Autoconciencia
+if (tipoEjecucion == 2) {
+  console.log('\n\x1b[32m%s\x1b[0m', 'MOTOR DE SINCRONIZACION DE RECURSOS DE MONITOREO');
+  console.log('\x1b[32m%s\x1b[0m', 'Planificando tareas de implementación o reconfiguración de artefactos de monitoreo...');
+  console.log('\n\x1b[34m%s\x1b[0m', 'MOTOR DE SINCRONIZACION DE RECURSOS DE AUTOCONSCIENCIA');
+  console.log('\x1b[34m%s\x1b[0m', 'Planificando tareas de implementación o reconfiguración de artefactos de autoconsciencia...');
+}else{
+  console.log('\x1b[32m%s\x1b[0m', 'MOTOR DE SINCRONIZACION DE RECURSOS DE MONITOREO');
+  console.log('\x1b[32m%s\x1b[0m', 'Planificando tareas de implementación o reconfiguración de artefactos de monitoreo...');
+}
+
+
+// Convertir el modeloJSON en un arreglo de objetos, identificamos los nodos de computacion Edge, Fog y Cloud
 const arregloNodos = [];
 const nodosCloud = buscarValor(json, "MonitorIoT:CloudNode", 4);
 const nodosFog = buscarValor(json, "MonitorIoT:FogNode", 4);
@@ -147,15 +159,15 @@ const nodosIotGateway = buscarValor(json, "MonitorIoT:IoTGateway", 4);
 arregloNodos.push(nodosCloud);
 arregloNodos.push(nodosFog);
 arregloNodos.push(nodosIotGateway);
-console.log('\nCreando Modelo de Objetos......................\n');
 
 module.exports = {
     modeloJSON: json, // contiene todo el modelo JSON
     modeloOBJETO: arregloNodos // contiene los nodos CloudNode, FogNode, IoTGateway
 }
 
-orquestador(); // Llamamos al archivo Orquestador
+orquestador(); 
 
+// Llamamos al archivo Orquestador
 function orquestador() {
   require("./Orquestador");
 }

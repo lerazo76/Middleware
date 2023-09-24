@@ -119,7 +119,7 @@
                             "isGrouped": "//@containsEntityCategory.0",
                             "deploymentModel": "Private",
                             "platform": "Node.js, PostgreSQL, Mosquitto",
-                            "selfAwareMiddlewarePort": "9997"
+                            "selfAwareMiddlewarePort": "9999"
                         },
                         "hasProperty": [
                             {
@@ -490,7 +490,7 @@
                             "isGrouped": "//@containsEntityCategory.0",
                             "controls": "//@containsEntity.1/@containsSubPhysicalEntity.1/@containsComputingNode.0 //@containsEntity.1/@containsSubPhysicalEntity.0/@containsComputingNode.0",
                             "gatewayType": "Microcontroller",
-                            "selfAwareMiddlewarePort": "9999"
+                            "selfAwareMiddlewarePort": "9997"
                         },
                         "containsResource": [
                             {
