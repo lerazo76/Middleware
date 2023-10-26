@@ -1,4 +1,3 @@
-module.exports = {evalProcess};
 
 function evalProcess(evaluated, actions, process, metricValue)
 {
@@ -9,7 +8,6 @@ function evalProcess(evaluated, actions, process, metricValue)
     let evaluation = [];
 
     let res = eval('(function() {'+evaluated+'}())');
-
     if(Array.isArray(actions))
     {
         actions.forEach(element => 
@@ -20,17 +18,19 @@ function evalProcess(evaluated, actions, process, metricValue)
             if(res >= lowerThreshold &&  res <= upperThreshold)
             {
                 advisor = true;
-                evaluation = [res, element['name'], element['interpretation'], (element['recommends'] ?? '')];
-                
-                console.log('------------------------------------------------------------------------------');
-                console.log(process['nombre']+'\t'+process['proceso']+
-                '\nMetric Name: '+(process['mdidName'] ?? process['mindName'])+
-                '\nMetric Value: '+metricValue+
-                '\nIndicator Name: '+process['inidName']+
-                '\nIndicator Value: '+res+
-                '\nThreshold: '+element['name']+
-                '\nInterpretation: '+element['interpretation']+
-                '\nRecommendation: '+(element['recommends'] ?? ''));
+                evaluation = [res, element['name'], element['interpretation'], (element['recommends'] ?? 'Ninguna')]; //name es umbral en la BDA 
+                // console.log('------------------------------------------------------------------------------');
+                // console.log(process['nombre']+'\t'+process['tipoProceso']+
+                // '\nMetric Name: '+(process['mdidName'] ?? process['mindName'])+
+                // '\nMetric Value: '+metricValue+
+                // '\nIndicator Name: '+process['inidName']+
+                // '\nIndicator Value: '+res+
+                // '\nThreshold: '+element['name']+
+                // '\nInterpretation: '+element['interpretation']+
+                // '\nRecommendation: '+(element['recommends'] ?? ''));
+                // if (element['recommends'] && element['recommends']['description'] !== undefined) {
+                //     console.log('\nRecomendation: '+ element['recommends']['description']);
+                // }
             }
             else if(!advisor)
             {
@@ -41,17 +41,9 @@ function evalProcess(evaluated, actions, process, metricValue)
     else
     {
         evaluation = [res, '', '', ''];
-        
-    //     console.log('------------------------------------------------------------------------------');
-    //     console.log(process['nombre']+'\t'+process['proceso']+
-    //     '\nMetric Name: '+process['propiedad']+
-    //     '\nMetric Value: '+metricValue+
-    //     '\nIndicator Name: '+(process['argumentoFuncion'])+
-    //     '\nIndicator Value: '+res+
-    //     '\nThreshold: No definido',
-    //     '\nInterpretation: No definido',
-    //     '\nRecommendation: No definido');
     }
-
     return evaluation;
 }
+
+
+module.exports = {evalProcess};

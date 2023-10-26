@@ -1,45 +1,120 @@
-// const data = require("../../../modelos/modeloJSON.json");
-const data = require("../../../modelos/modeloJSON1.json");
+//const importarmodelo = require("../../../../App_Supervisora/src/LogicaNegocio/General/PlanificadorTareas"); //revisar error de dependencias 
+//circulares, el codigo de un archvio se ejecuta cuando solo quiero importar el modelo 
+//const modelo = importarmodelo.modeloJSON;
 
-//extraer los procesos de autconsciencia
-const procesosenjson = buscarValor(data, "ControlAmbiental", 8); //corregir que la busqueda no sea 'Control Ambiental'
+// const fs = require("fs");
+// const modelo = JSON.parse(fs.readFileSync("../../../modelos/modelotesisf.json", "utf-8"));
+const modelo = require("../../../modelos/modelotesisfcopyCOLECTIVO.json"); 
+const modeloNodo = require("../../../modelos/modeloObjeto.json"); 
+const nodoComputacion = modeloNodo[0]["xsi:type"];
+// const BDnodo = buscarValor(modeloNodo, "")
+
+// const BDnodoComputacion = modeloNodo[0]["containsResource"][0]["name"];
+// console.log("Nodo desde modelo objeto ", nodoComputacion);
+
+
+//extraer los procesos de autoconsciencia
+const procesosenjson = buscarValor(modelo, "ControlAmbiental", 8); //corregir que la busqueda no sea 'Control Ambiental'
 //cambiar paths por objetos necesarios para procesos pre-reflexivos y reflexivos
-cambiarValorPropiedad(procesosenjson, "collectsProperty", data, "$"); //cambiar las rutas por los pares clave:valor del objeto relacionado en la propiedad "$"
-cambiarValorPropiedad(procesosenjson, "columns_paths", data, "$"); //cambiar las rutas por los pares clave:valor del objeto relacionado en la propiedad "$" //PREGUNTAR
-//PREGUNTAR BIEN LO DE LAS TABLAS DE LAS BASES DE DATOS Y SUS COLUMNAS RESPECTIVAS
-cambiarValorPropiedad(procesosenjson, "produces", data, "$"); //cambiar las rutas por los pares clave:valor del objeto relacionado en la propiedad "$"
-cambiarValorPropiedad(procesosenjson, "captures", data, "$"); //cambiar las rutas por los pares clave:valor del objeto relacionado en la propiedad "$"
-cambiarValorPropiedad(procesosenjson, "isImplementedBy", data, "$"); //cambiar las rutas por los pares clave:valor del objeto relacionado en la propiedad "$"
-cambiarValorPropiedad(procesosenjson, "uses", data, "containsThreshold"); //cambiar las rutas por los pares clave:valor del objeto relacionado en la propiedad "containsThreshold"
-cambiarValorPropiedad(procesosenjson, "recommends", data, "$");
+cambiarValorPropiedad(procesosenjson, "collectsProperty", modelo, "$"); //cambiar las rutas por los pares clave:valor del objeto relacionado en la propiedad "$"
+// cambiarValorPropiedad(procesosenjson, "columns_paths", modelo, "$"); //cambiar las rutas por los pares clave:valor del objeto relacionado en la propiedad "$" //PREGUNTAR
+//ACTUALIZACION NO CAMBIAR AQUI SI NO MAPEAR LA CONEXION DE BD, TABLA Y COLUMNA PARA CADA PROCESO
+cambiarValorPropiedad(procesosenjson, "produces", modelo, "$"); //cambiar las rutas por los pares clave:valor del objeto relacionado en la propiedad "$"
+// cambiarValorPropiedad(procesosenjson, "captures", modelo, "$"); //cambiar las rutas por los pares clave:valor del objeto relacionado en la propiedad "$"
+//AQUI REALIZO CAMBIO AL MAPEO DE CAPTURES YA QUE EL ASPECTO SE RELACIONA AL OBJETO ES DECIR TOC DOBLE BUSQUEDA
+procesosenjson.forEach((element) => {
+  if (element.hasOwnProperty("containsSelfAwarenessProcess")) {
+    element["containsSelfAwarenessProcess"].forEach((item) => {
+      rutaaspecto = item["captures"];
+      // console.log("ruta aspecto proceso", item['name'], "; ",rutaaspecto);
+      rutaaspectomapeada = "ArchitectureSelfAwarenessIoT."+ transformaraRuta(rutaaspecto);
+      // console.log("ruta aspecto mapeada ", rutaaspectomapeada);
+      //verificar si tiene objeto relacionado o no (caso de ser colectivo no tiene objeto relacionado)
+      try{
+        rutaobjeto = buscarValorConRuta(modelo, rutaaspectomapeada, "belongsTo");
+        if(rutaobjeto){
+          rutaobjetomapeada = "ArchitectureSelfAwarenessIoT."+ transformaraRuta(rutaobjeto);
+          // console.log("ruta objeto mapeada ", rutaobjetomapeada);
+          objetoAutconsciencia = buscarValorConRuta(modelo, rutaobjetomapeada, "$");
+          // console.log("objeto autoconsciencia ", objetoAutconsciencia );
+          item["objetoautoconsciencia"] = objetoAutconsciencia;
+        }else{
+          item["objetoautoconsciencia"] = null;
+        }
+      }catch(e){
+        console.log("Error mapeo ", e)
+      }
+    });
+  }
+});
+//luego de esto si mapeo el captures para obtener el aspecto de autoconsciencia
+cambiarValorPropiedad(procesosenjson, "captures", modelo);  //no se envia "$" ya que se necesita todo el objeto con sus propiedades
+//FIN CAMBIO MAPEO CAPTURES
+//mapeo isDerivedFrom de los aspectos colectivos para tener sus aspectos hijos
+cambiarValorPropiedad(procesosenjson,"isDerivedFrom",modelo);
+cambiarValorPropiedad(procesosenjson,"isCaptured",modelo);
+//fin mapeo isDerivedFrom
+cambiarValorPropiedad(procesosenjson, "isImplementedBy", modelo, "$"); //cambiar las rutas por los pares clave:valor del objeto relacionado en la propiedad "$"
+cambiarValorPropiedad(procesosenjson, "uses", modelo, "containsThreshold"); //cambiar las rutas por los pares clave:valor del objeto relacionado en la propiedad "containsThreshold"
+cambiarValorPropiedad(procesosenjson, "recommends", modelo, "$");
 //adicionales
-cambiarValorPropiedad(procesosenjson, "relatesParameter", data, "$");
-cambiarValorPropiedad(procesosenjson, "relatesMetric", data, "$");
-
+cambiarValorPropiedad(procesosenjson, "relatesParameter", modelo, "$");
+cambiarValorPropiedad(procesosenjson, "relatesMetric", modelo, "$");
+//obtener el nodo de comptuacion
+cambiarValorPropiedad(procesosenjson,"computingNode", modelo, "$");
+// cambiarValorPropiedad(procesosenjson, "relatesMetaData", modelo, "$");
 //dividir los procesos segun su identificacion (pre-reflexivos o reflexivos)
 let arregloProcesosDiv = dividirProcesos(procesosenjson);
 const prereflexivos = arregloProcesosDiv["pre-reflexive"];
 const reflexivos = arregloProcesosDiv["reflexive"];
 const entidad = arregloProcesosDiv["entity"];
 
+
 module.exports = {
-  pro_prereflexivos: prereflexivos,
-  pro_reflexivos: reflexivos,
-  entidad : entidad,
-  
+  prereflexivos,
+  reflexivos,
+  entidad,
+  buscarValorConRuta,
+  obtenerParesClaveValor,
+  transformaraRuta,
+  cambiarValorPropiedad,
+  modelo,
 };
 
-//llamar a las funciones/archivos correspondientes a cada tarea (implementardemoniospre, implementardemoniosre, implmentadorfunciones...)
-ImplementadorDemoniosPrereflexivos();
 
-function ImplementadorDemoniosPrereflexivos() {
-  console.log(
-    "Enviando demonios pre-reflexivos a ImplementadorDemoniosPreReflexivos.js"
-  );
-  require("../Autoconsciencia/ImplementadorDemoniosPreReflexivos");
+ejecutarTareasAutoconsciencia(nodoComputacion);
+
+function ejecutarTareasAutoconsciencia(nodoComputacion){
+
+  console.log('\x1b[34m%s\x1b[0m',"Comparando la nueva versión del modelo de autoconsciencia con la versión actual en ejecución...");
+  console.log('\x1b[34m%s\x1b[0m',"Planificando tareas de implentacion o reconfiguracion de artefactos de autoconsciencia...");
+  console.log("Identificando los nodos de computacion (Edge, Fog y Cloud) especificados en el modelo y sus configuraciones de red...");
+  console.log("Distribuyendo la nueva version de los modelos y los planes de implementacion de los recursos de autoconsciencia...");
+
+  //llamar al implementadorBD
+
+  console.log("Implementando/reconfigurando los recursos de operacionalizacion...");
+  //llamar al implementadorfunciones
+  //llamar a los servicios web
+  //llamar a los procesos reflexivos y pre-reflexivos
+
+  ImplementadorDemoniosPreReflexivos(nodoComputacion);
+  ImplementadorDemoniosReflexivos();  
+  
 }
 
-//FUNCION PARA CAMBIAR EL PATH DE UNA PROPIEDAD POR EL VALOR
+
+async function ImplementadorDemoniosPreReflexivos(nodoComputacion) {
+  const execute = require("../Autoconsciencia/ImplementadorDemoniosPreReflexivos");
+  await execute.ejecutarDemoniosControlados(nodoComputacion);
+}
+
+async function ImplementadorDemoniosReflexivos() {
+  const execute = require("../Autoconsciencia/ImplementadorDemoniosReflexivos");
+  await execute.ejecutarDemoniosControlados();
+}
+
+//funcion para cambiar un path por el valor de la propiedad, pasando como parametro que propiedad extraer
 function cambiarValorPropiedad(objeto, propiedad, objson, propiedadExtraer) {
   //FUNCION PARA CAMBIAR EL PATH DE UNA PROPIEDAD POR EL VALOR
   for (var key in objeto) {
@@ -55,7 +130,7 @@ function cambiarValorPropiedad(objeto, propiedad, objson, propiedadExtraer) {
         numrutas.forEach((element) => {
           ruta = transformaraRuta(element); //conseguir la ruta del elemento
           ruta = "ArchitectureSelfAwarenessIoT." + ruta; //se agrega la key inicial a la ruta para poder acceder
-        //   console.log("ruta 2 mas: ", ruta);
+          //   console.log("ruta 2 mas: ", ruta);
           nuevoValor = buscarValorConRuta(objson, ruta, propiedadExtraer); //llamado a la funcion para buscar el valor con la ruta armada
           arraynuevRutas.push(nuevoValor); //almacenar en un array los valores
         });
@@ -65,6 +140,7 @@ function cambiarValorPropiedad(objeto, propiedad, objson, propiedadExtraer) {
         ruta = "ArchitectureSelfAwarenessIoT." + ruta;
         // console.log("ruta 1 sola: ", ruta);
         nuevoValor = buscarValorConRuta(objson, ruta, propiedadExtraer);
+        //fin cambios
         objeto[key] = nuevoValor;
       }
       //   }
@@ -72,11 +148,12 @@ function cambiarValorPropiedad(objeto, propiedad, objson, propiedadExtraer) {
   }
 }
 
+//subfuncion para cambiar el path de una propiedad por el valor
 function buscarValorConRuta(objeto, ruta, propiedadExtraer) {
   const propiedades = ruta.split("."); // Dividir la ruta en propiedades separadas por puntos
-//   console.log("propiedades: ", propiedades);
+  //   console.log("propiedades: ", propiedades);
   let valor = objeto; // Inicializar "valor" con el objeto de entrada
-//   console.log(".......................");
+  //   console.log(".......................");
   for (let prop of propiedades) {
     // Iterar sobre cada propiedad en el arreglo "propiedades"
     valor = valor[prop]; // Acceder a la propiedad actual en el objeto "valor"
@@ -86,16 +163,19 @@ function buscarValorConRuta(objeto, ruta, propiedadExtraer) {
       return undefined;
     }
   }
-
-  valor = obtenerParesClaveValor(valor[`${propiedadExtraer}`]); // Obtener los pares clave-valor del objeto en la propiedad "$"
-//   valor = obtenerParesClaveValor(valor, propiedadExtraer); //mejora en caso que no tenga la propiedad buscada deje igual
-  // valor = obtenerParesClaveValor(valor["containsThreshold"]); //para el caso de obtener las recomendaciones
+  if(propiedadExtraer != null){ //verifica si se envio la propiedad a extraer y obtiene los pares clave valor de esa propiedad
+    valor = obtenerParesClaveValor(valor[`${propiedadExtraer}`]); 
+  }
   return valor; //Devolver el valor buscado con la ruta
 }
 
+//subfuncion para cambiar el path de una propiedad por el valor y obtener los pares clave
 function obtenerParesClaveValor(objeto) {
   if (!objeto) {
     return objeto; // Si el objeto es nulo o undefined, devolverlo sin cambios
+  }
+  if (!Array.isArray(objeto)) {
+    return objeto; // Si el objeto no es un array, devolverlo sin cambios
   }
   const resultado = {}; // Objeto vacío para almacenar los pares clave-valor resultantes
   for (let clave in objeto) {
@@ -105,6 +185,7 @@ function obtenerParesClaveValor(objeto) {
   return resultado; // Devolver el objeto resultado
 }
 
+/*
 //version mejorada
 // function obtenerParesClaveValor(objeto, propiedadExtraer) {
 //   if (!objeto || typeof objeto !== "object") {
@@ -125,6 +206,9 @@ function obtenerParesClaveValor(objeto) {
 // }
 //fin version mejorada
 
+*/
+
+//subfuncion para cambiar el path de una propiedad por el valor y transformar el path a una ruta accesible
 function transformaraRuta(cadena) {
   const sinBarras = cadena.replace(/\//g, ""); // Eliminar todas las barras diagonales ('/') de la cadena
   let sinBarrasYarroba = sinBarras.replace(
@@ -138,7 +222,7 @@ function transformaraRuta(cadena) {
   return sinBarrasYarroba; // Devolver el valor final de que es la ruta
 }
 
-//FUNCION PARA DIVIDIR LOS PROCESOS, SEPARARLOS EN REFLEXIVOS O PRE-REFLEXIVOS
+//Funcion para clasificar los procesos en reflexivos y pre-reflexivos
 function dividirProcesos(nodoprocesos) {
   let preReflexive = [];
   let reflexive = [];
@@ -148,8 +232,8 @@ function dividirProcesos(nodoprocesos) {
     // console.log(typeof element);
     if (element.hasOwnProperty("containsSelfAwarenessProcess")) {
       sujeto = element["id"] + "," + element["name"];
-    //   sujeto = element["name"] + "," + element["id"];
-      //   console.log("sujeto: ", sujeto);
+      //   sujeto = element["name"] + "," + element["id"];
+      // console.log("sujeto: ", sujeto);
       element["containsSelfAwarenessProcess"].forEach((item) => {
         let content = Object.entries(item);
         if (item["xsi:type"] === "pre-reflexive") {
@@ -162,7 +246,7 @@ function dividirProcesos(nodoprocesos) {
   });
   let process = {
     entity: sujeto,
-    // // dataBaseConnection: [nodo[1]],
+    // // modeloBaseConnection: [nodo[1]],
     "pre-reflexive": preReflexive,
     reflexive: reflexive,
   };
@@ -240,3 +324,7 @@ function estructurarObj(obj, nivelMax = Infinity) {
   }
   return descomponer(obj);
 }
+
+module.exports = {
+  ejecutarTareasAutoconsciencia
+};
