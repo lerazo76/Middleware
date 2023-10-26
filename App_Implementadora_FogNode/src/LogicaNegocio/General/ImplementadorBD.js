@@ -176,3 +176,86 @@ function crearTbPostgres(tabla){
 //const uri = dataStore.uri ? dataStore.uri : name + "://" + user + ":" + password + "@" + host + ":" + port + "/" + dbname;
 //const uri = dataStore.uri ? dataStore.uri : "MQTT" + "://" + user + ":" + password + "@" + host + ":" + 1883 + "/" + dbname;
 
+
+
+//Codigo Alex ver como unir 
+let modelo = require('../../../modelos/modeloObjeto.json');
+const { Client } = require("pg");
+
+//buscar la bd correspondiente al nodo
+function ObtenerBD(){
+  modelo.forEach(resource => {
+    resource.containsResource.forEach(properties => {
+        if (properties['xsi:type'] === 'MonitorIoT:DataBase') {
+          console.log("properties bd ", properties.name);  
+          // dataStore = properties;
+          return properties.name.toLowerCase();
+        }
+    })
+});
+}
+
+// const basedatos = ObtenerBD(); 
+const createTableQuery = `
+  CREATE TABLE IF NOT EXISTS public.metricas
+  (
+      id serial NOT NULL,
+      pid integer,
+      sid integer,
+      sidname text COLLATE pg_catalog."default",
+      oid integer,
+      oidname text COLLATE pg_catalog."default",
+      aid integer,
+      aidname text COLLATE pg_catalog."default",
+      mid integer,
+      midname text COLLATE pg_catalog."default",
+      valor real,
+      fecha timestamp with time zone,
+      tipo text COLLATE pg_catalog."default",
+      umbral text COLLATE pg_catalog."default",
+      interpretacion text COLLATE pg_catalog."default",
+      recomendacion text COLLATE pg_catalog."default",
+      nombresimulacion text COLLATE pg_catalog."default",
+      descripcionsimulacion text COLLATE pg_catalog."default",
+      valorsimulacion integer,
+      pidname text COLLATE pg_catalog."default",
+      CONSTRAINT metricas_pkey PRIMARY KEY (id)
+  )
+  TABLESPACE pg_default;
+  
+  ALTER TABLE IF EXISTS public.metricas
+      OWNER to postgres;
+`;
+async function crearTablaMetricas(basedatos) {
+  
+  // Configura la conexión a la base de datos
+  const client = new Client({
+    user: "postgres",
+    host: "localhost",
+    database: basedatos,
+    database: "postgresqllocal",
+    password: "postgres",
+    port: 5432, // Puerto por defecto de PostgreSQL
+  });
+  try {
+    // Conectar a la base de datos
+    await client.connect();
+    console.log("Conexión exitosa a la base de datos");
+
+    // Ejecutar la consulta para crear la tabla
+    await client.query(createTableQuery);
+    console.log("Implementando/reconfigurando la estructura de las bases de datos que almacenan las metricas de autoconsciencia...");
+    console.log("Tabla MetricaAutoconsciencia implementada (OK)");
+
+  } catch (err) {
+    console.error("Error al crear la tabla:", err);
+  } finally {
+    // Cerrar la conexión a la base de datos
+    await client.end();
+    // console.log("Conexión cerrada correctamente");
+  }
+}
+crearTablaMetricas();
+module.exports = {
+  crearTablaMetricas
+};
