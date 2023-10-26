@@ -6,6 +6,7 @@ const globalConfig = require('../../../modelos/modeloJSON.json');
 const gestorManipulacion = require('../../LogicaNegocio/General/GestorManipulacionBD')
 const protocolos = require('../../../src/LogicaNegocio/Monitoreo/ImplementadorApis')
 const app = require('../../../src/LogicaNegocio/Monitoreo/ImplementadorAplicaciones')
+const ejeTar = require('../../LogicaNegocio/General/EjecutorTareas')
 const bd = require('../../Datos/BD');
 const e = require('express');
 
@@ -47,41 +48,52 @@ middleware && middleware.containsService && middleware.containsService.length > 
     let hasLinkServiceToDataTable;
 
     if (api.hasLinkServiceToDataTable) {    
-        // Busco el link para establecer el servicio con la base de datos
-        hasLinkServiceToDataTable = api.hasLinkServiceToDataTable.split(" ");
-        //let dataflow=globalConfig["ArchitectureSelfAwarenessIoT"].containsLink[hasLinkServiceToDataTable[0].split(".")[1]].$.supports;
-        //tipo=globalConfig["ArchitectureSelfAwarenessIoT"].containsDataFlow[dataflow.split(".")[1]].$.dataFlowType;
+        /* hasLinkServiceToDataTable = api.hasLinkServiceToDataTable.split(" ");
+        console.log(hasLinkServiceToDataTable); */
+
+
+        const procesosenjson = ejeTar.buscarValor(globalConfig, api.name, 8); 
+        // Obtenemos el link de enlace a la base de datos correspondiente al flujo de recoleccion de datos para los servicios
+        ejeTar.cambiarValorPropiedad(procesosenjson, "hasLinkServiceToDataTable", globalConfig, "$");
+        // Obtenemos el flujo de datos que es soporta cada enlace de conexion
+        ejeTar.cambiarValorPropiedad(procesosenjson, "supports", globalConfig, "$");
+        // Verificamos el tipo de flujo de agregación de datos que tiene
+        ejeTar.cambiarValorPropiedad(procesosenjson, "dataFlowType", globalConfig, "$");
         
-        // REVISAR ESTA PARTE DEL CODIGO ----> OJOOOOOOOOOOOO
-        // Verificar si se puede tener mas de un link 
-        // Revisar containsLink 22 y 23
+        try{
+            if(procesosenjson[0].hasLinkServiceToDataTable.supports.dataFlowType){
+                tipo = procesosenjson[0].hasLinkServiceToDataTable.supports.dataFlowType;
+            }
+        }catch(error){
+            console.log(null);
+        }
+        if(api.hasLinkServiceToDataTable){
+            hasLinkServiceToDataTable = api.hasLinkServiceToDataTable.split(" ");
+        }
 
-        //let dataflow;
-        /* hasLinkServiceToDataTable && hasLinkServiceToDataTable.forEach(linkService => {
-            // Obtenemos Flujo de datos
-            dataflow = globalConfig["ArchitectureSelfAwarenessIoT"].containsLink[linkService.split(".")[1]].$.supports;   
-
-            //console.log(dataflow);
-            
-            // Obtenemos el Tipo de flujo de datos
-            tipo = globalConfig["ArchitectureSelfAwarenessIoT"].containsDataFlow[dataflow.split(".")[1]].$.dataFlowType;
-
-            console.log(tipo);
-        }) */
+        // Busco las rutas con la que se va a establecer conexion a las distintas bases de datos para los servicios
+        /* hasLinkServiceToDataTable = api.hasLinkServiceToDataTable.split(" ");
+        let dataflow=globalConfig["ArchitectureSelfAwarenessIoT"].containsLink[hasLinkServiceToDataTable[0].split(".")[1]].$.supports;
+        tipo=globalConfig["ArchitectureSelfAwarenessIoT"].containsDataFlow[dataflow.split(".")[1]].$.dataFlowType; */
+        // Descomentar
     }
 
     // eliminar esta linea una vez identifique de donde obtengo el tipo
-    tipo='a';
+    //tipo='a';
     if(tipo){
         // Creamos un nuevo servicio web para intercambiar datos entre los nodos
-        //router[api.$.method ? api.$.method.toLowerCase() : "get"]("/" + api.$.endPoint + "/3", async (req, res, next) => {
-        router[api.method ? "get" : "get"]("/" + api.endPoint + "/3", async (req, res, next) => {
-
+        //router[api.$.method ? api.method.toLowerCase() : "get"]("/" + api.$.endPoint + "/3", async (req, res, next) => {
+        router[api.method ? "get" : "get"]("/" + api.endPoint + "/1", async (req, res, next) => {
+        
             let result;
             let tableInfo;
             let tableref;
+           
+
             if (hasLinkServiceToDataTable.length > 0) {
+             
                 for(var i=0;i<hasLinkServiceToDataTable.length;i++){
+                    
                     const linkRef = hasLinkServiceToDataTable[i].split("/@");
                     let index = linkRef[1].split(".")[1];
                     let tipo=globalConfig["ArchitectureSelfAwarenessIoT"].containsLink[index].$.type;
@@ -94,52 +106,60 @@ middleware && middleware.containsService && middleware.containsService.length > 
                     if(tipo){
                         // Obtiene informacion de cada columna de cada tabla de la Base de Datos
                         let columna=tableInfo.composedOfDataColumn;
-                        
+
+                        // ------------------
+                        const procesosenjsonc = ejeTar.buscarValor(globalConfig, tableInfo.$.name, 8); 
+                        ejeTar.cambiarValorPropiedad(procesosenjsonc, "composedOfDataColumn", globalConfig, "$");
                         let data={};
-                        for(var f=0;f<columna.length;f++){  
+                        for(var f = 0; f < procesosenjsonc[0].composedOfDataColumn.length; f++){
                            
-                            // Verificamos que tipo de columna es, para crear el valor correspondiente para la columna   
-                            if(columna[f].$.dataColumnType){
-                               //metadata
-                                if(columna[f].$.formulaExpression){        
-                                   eval("function temp(){"+columna[f].$.formulaExpression+"}");
-                                   let val=temp();
-                                   data[columna[f].$.name] = val;  
-                                }else{ // Revisar esta parte OJOOOOO, que valor se debe colocar
-                                    data[columna[f].$.name] = 1;
+                            if(procesosenjsonc[0].composedOfDataColumn[f].dataColumnType){
+                                
+                                if(procesosenjsonc[0].composedOfDataColumn[f].formulaExpression){
+                                    // En este caso obtenemos el valor de acuerdo a la formula que se va a ejecutar
+                                    eval("function temp(){"+procesosenjsonc[0].composedOfDataColumn[f].formulaExpression+"}");
+                                    let val=temp();
+                                    data[procesosenjsonc[0].composedOfDataColumn[f].name] = val; 
+                                }else{
+                                    // En este caso obtenemos el valor en caso de ser un tipo de MetaData correspondiente a la regla de asignacion de datos
+                                    const procesosenjsonrul = ejeTar.buscarValor(globalConfig, procesosenjsonc[0].composedOfDataColumn[f].hasRulePropertyToDataColumn, 5); 
+                                    let valorMetaData;
+                                    if(procesosenjsonrul[1]){
+                                        valorMetaData = ejeTar.buscarValor(globalConfig, procesosenjsonrul[1].hasRulePropertyToDataColumn, 8);
+                                    }
+                                    // En el primer caso puede hacer referencia a ContainsComputingNode y el segundo caso es a ContainsSubPhysicalEntity
+                                    if(valorMetaData){
+                                        data[procesosenjsonc[0].composedOfDataColumn[f].name] = valorMetaData[0].value != undefined ? valorMetaData[0].value : valorMetaData[1].value;
+                                    }else{
+                                        data[procesosenjsonc[0].composedOfDataColumn[f].name] = 0;
+                                    }
                                 }
-                                
-                            }
-                            else{ // En caso de la columna no ser de tipo Metadata
-                                
-                                // hasRulePropertyToDataColumn
-                                //let qr=columna[f].$.hasRuleAsDestination.split(" ");
-                                let qr=columna[f].$.hasRulePropertyToDataColumn.split(" ");
-                               
-                                for(var qi=0;qi<qr.length;qi++){
-                                    
-                                    let qrr=qr[qi].split("/@")[1];
-                                    if(df==="//@"+qrr){
-                                        let r=qr[qi].split("/@");
-                                        // REVISAR OJOOOOO
+                            }else{ // En caso de la columna no ser de tipo Metadata
+                                //let propertyColumn=columna[f].$.hasRuleAsDestination.split(" ");       
+                                let propertyColumn = [];     
+                                if(columna[f].$.hasRulePropertyToDataColumn){                   
+                                    propertyColumn = columna[f].$.hasRulePropertyToDataColumn.split(" ");                              
+                                }
+                                for(var qi=0;qi<propertyColumn.length;qi++){
+                                    let propertyColumnr=propertyColumn[qi].split("/@")[1];
+                                    if(df==="//@"+propertyColumnr){
+                                        let r=propertyColumn[qi].split("/@");
                                         //let rut=globalConfig["ArchitectureSelfAwarenessIoT"].containsDataFlow[r[1].split(".")[1]].containsDataMappingRule[r[2].split(".")[1]].$.relatesSourceColumn;
                                         // Obtiene la ruta del campo, para saber a que tabla y base de datos corresponde
                                         let rut=globalConfig["ArchitectureSelfAwarenessIoT"].containsDataFlow[r[1].split(".")[1]].containsDataMappingRule[r[2].split(".")[1]].$.relatesColumn;
-                                        // 
+                                        // Obtiene la regla de mapeo o el campo de la base de datos donde se va almacenar el dato
                                         let mappingRule=globalConfig["ArchitectureSelfAwarenessIoT"].containsDataFlow[r[1].split(".")[1]].containsDataMappingRule[r[2].split(".")[1]]; 
                                         // Obtiene las Bases de Datos y el nodo al que hace referencia cada una
                                         let rr= bd.getReferencestrace(globalConfig,rut);
                                         // Informacion de cada Tabla de la Base de Datos 
                                         let sourceDataTable=rr[rr.length-2];
                                         // Informacion de cada Campo de cada Tabla de la Base de Datos
-                                        let sourceColumn=rr[rr.length-1].$.name;                                    
+                                        let sourceColumn=rr[rr.length-1].$.name;  
                                         // Obtiene la direccion para conectarse a la Base de Datos
                                         tableref2 = bd.getTablenodo(globalConfig,sourceDataTable.$.hasLinkServiceToDatable.split(".")[sourceDataTable.$.hasLinkServiceToDatable.split(".").length-1]);
                                         // Obtenemos informacion de la Base de Datos
                                         let data2 = gestorManipulacion.getMethod(sourceDataTable,tableref2);
-
                                         let result = 0;
-
                                         data2.then( res => {
                                             if (mappingRule.$.aggregationOperation === "Mean") {    
                                                 res.forEach(e => {
@@ -150,23 +170,36 @@ middleware && middleware.containsService && middleware.containsService.length > 
                                                 res.forEach(e => {
                                                     result += parseInt(e[sourceColumn]);
                                                 });
-                                            }
+                                            } 
                                         }).catch(e => {
                                             console.log('Error');
                                         })
-                                        
+
+                                        if(!result){
+                                            if(sourceColumn === "cargaCPU"){
+                                                result = require('../../../src/LogicaNegocio/Monitoreo/ImplementadorApis').obtenerCargaCPU().cargaCPU;
+                                            }else if(sourceColumn === "CO"){
+                                                result = Math.random() * (1000 - 0) + 0;
+                                                result = result.toFixed(2);
+                                            }else if(sourceColumn === "temperatura"){ 
+                                                result = Math.random() * (22 - 18) + 18;
+                                                result = result.toFixed(2);
+                                            }else if(sourceColumn === "humedad"){
+                                                result = Math.random() * (60 - 40) + 40;
+                                                result = result.toFixed(2);
+                                            }
+                                        }
                                         data[columna[f].$.name] = result;
-                                        qi=qr.length;                               
+                                        qi=propertyColumn.length;                           
                                     }
                                 }
-                                
+
                             }
                         }
-
                         result = gestorManipulacion.postMethod(tableInfo, data, tableref);
-                        /* result.then( res => {
+                        result.then( res => {
                             console.log(res);
-                        }) */
+                        })
                     }
                 }
             }
@@ -177,6 +210,10 @@ middleware && middleware.containsService && middleware.containsService.length > 
 
         // Descomentar cuando ya este todo creado OJOO*******
         //router[api.$.method ? api.$.method.toLowerCase() : "get"]("/" + api.$.endPoint + "/1", async (req, res, next) => {
+        //console.log('hereeeeeeeeeee');
+        router[api.method ? api.method.toLowerCase() : "get"]("/" + api.endPoint + "/1", async (req, res, next) => {
+      
+        console.log(req.body);
            
         // Descomentar desde aqui ------------------------------------
         let result;
@@ -185,79 +222,95 @@ middleware && middleware.containsService && middleware.containsService.length > 
 
         if (hasLinkServiceToDataTable.length > 0) {
             for(var i=0;i<hasLinkServiceToDataTable.length;i++){
+                // Obtiene los links de servicio con la tabla de la base de datos
                 const linkRef = hasLinkServiceToDataTable[i].split("/@");
-                let index = linkRef[1].split(".")[1];
+                let index = linkRef[1].split(".")[1];   
+                // Obtiene el tipo de procedimiento que se va a realizar como INSERT/UPDATE/DELETE
                 let tipo = globalConfig["ArchitectureSelfAwarenessIoT"].containsLink[index].$.type;
-                
                 // Funcion para obtener informacion sobre una tabla de la base de datos
                 tableInfo = bd.getTableInfo(globalConfig, index);
-
                 // Funcion para obtener informacion sobre el nodo al que hace referencia la tabla de la base de datos
                 tableref = bd.getTablenodo(globalConfig, index);
-
                 if(tipo){
                     console.log("******** Post Data ********");
-                    let tapi=bd.getApis(globalConfig, req.body.link.split(".")[1]);
-                    console.log(tapi);
-                    let api=tapi[tapi.length-1];
+                    // Obtiene todas las apis de acuerdo a lo recivido en el cuerpo de la peticion
+                    let tapi=protocolos.getApis(globalConfig, req.body.link.split(".")[1]);
+                    // Obtiene la informacion de la API como el nombre, descripcion, instrunccion
+                    let api=tapi[tapi.length-1];                    
+                    // Obtenemos los nombres de campos de la base de datos con los cuales se va a operar (cargaCPU)
                     let valoresnames =[];
                     api.containsReturnVariable.forEach((retorno)=>{
                         valoresnames.push(retorno.$.name);
                     });
+                    // Obtiene el nombre de la API
                     let apiname=api.$.name;
                     let data={};
                     let j=0;
                     let i=0;
+
                     tableInfo.composedOfDataColumn.forEach((columna)=>{
-                        if(columna.$.dataColumnType){
+                        if(columna.$.dataType){
                             //metadata
+                            //console.log(columna.$.name);
                             if(columna.$.formulaExpression){ 
-                                console.log(columna.$.formulaExpression)
                                 eval("function temp(){"+columna.$.formulaExpression+"}");
                                 let val=temp();
-                                data[columna.$.name] = val;  
+                                data[columna.$.name] = val;
                             }
                             else{
                                 let val;
-                                let qr=columna.$.hasRulePropertyToDataColumn.split(" ");
-                                let apiflow=globalConfig["ArchitectureSelfAwarenessIoT"].containsLink[req.body.link.split(".")[1]].$.supports;
-                                for(var qi=0;qi<qr.length;qi++){
-                                    let qrr=qr[qi].split("/@")[1];   
-                                    if(apiflow==="//@"+qrr){
-                                        let r=qr[qi].split("/@");
+                                // Obtiene las propiedades y reglas de mapeo de las columnas de las bases de datos
+                                let propertyColumn=columna.$.hasRulePropertyToDataColumn.split(" ");
+                                
+                                // Contains Data Flow
+                                let apiflow=globalConfig["ArchitectureSelfAwarenessIoT"].containsLink[req.body.link.split(".")[1]].$.supports;                              
+                                
+                                for(var qi=0;qi<propertyColumn.length;qi++){
+                                    let propertyColumnr=propertyColumn[qi].split("/@")[1];   
+                                    if(apiflow==="//@"+propertyColumnr){
+                                        let r=propertyColumn[qi].split("/@");
                                         let rut=globalConfig["ArchitectureSelfAwarenessIoT"].containsDataFlow[r[1].split(".")[1]].containsDataMappingRule[r[2].split(".")[1]].$.relatesSpecificProperty;
-                                        let rr=ProtRef.getReferencestrace(globalConfig,rut);
-                                        val=rr[rr.length-1].$.value;
-                                        qi=qr.length;
+                                        let rr=protocolos.getReferencestrace(globalConfig,rut);
+                                        val = rr[rr.length-1].$.value != undefined ? rr[rr.length-1].$.value : 0.0;
+                                        qi=propertyColumn.length;
                                     }
                                 }
-                                data[columna.$.name] = val;                               
+                                let k;
+                                if(val==0){
+                                     k=Object.keys(req.body.body[apiname]);
+                                     let v = parseFloat(req.body.body[apiname][k[i]]);
+                                     data[columna.$.name] = v;  
+                                     i++;
+                                }else{
+                                    data[columna.$.name] = val;  
+                                }
+                                /* console.log(valoresnames[i]);
+                                
+                                data[valoresnames[i]] = req.body.body[apiname][k[i]];   
+                                                           */
                             }
-                        }
-                        else{
+                        }else{
                             let k=Object.keys(req.body.body[apiname]);
-                            //console.log(req.body.body);
-                            //console.log(k);
-                            //console.log(valoresnames[i]);
                             data[valoresnames[i]] = req.body.body[apiname][k[i]];
                             i++;
                         }
                         j++;
                     });
-                    result = postMethod(tableInfo, data, tableref);
+                    result = gestorManipulacion.postMethod(tableInfo, data, tableref);
                     result.then(r => {
-                        console.log(r,' ddddd');
+                        console.log(r);
                     })
                 }
             }
         }
         // Hasta aqui --------------
             
-        //});
-        
+        });
+
+        // Consultado 07/10/2023 Actualmente no se utiliza no hay problema, queda para otras cosas del futuro
         // api.$.hasLinkServiceToAPI    Consultar no existe este parametro en el modelo JSON   OJOOOOOOOOO
         
-        if(api.hasLinkAppToAPI){
+        if(api.hasLinkServiceToAPI){
             let apis=[];
             let apinames=[];
             let rutas=[];
@@ -305,11 +358,11 @@ middleware && middleware.containsService && middleware.containsService.length > 
                 function ejapi2(i){
                     eval(Codigoo);
                 }
-                for(var i=0;i<apis.length;i++){
+                /* for(var i=0;i<apis.length;i++){
                     console.log(i+"se supone 1");
                     ejapi(i);
-                }
-            }
+                }*/
+            } 
 //
         }     
     }

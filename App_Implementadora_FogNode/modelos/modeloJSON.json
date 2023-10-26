@@ -1,0 +1,2376 @@
+{
+    "ArchitectureSelfAwarenessIoT": {
+        "$": {
+            "xmi:version": "2.0",
+            "xmlns:xmi": "http://www.omg.org/XMI",
+            "xmlns:xsi": "http://www.w3.org/2001/XMLSchema-instance",
+            "xmlns:MonitorIoT": "http://www.uazuay.edu.ec/MonitorIoT",
+            "name": "Modelos de arquitectura y autoconsciencia del subsistema SCA.",
+            "description": "Modelos del Subsistema de Control Ambiental (SCA) que soporta los procesos de monitoreo y autoconsciencia, a nivel de las capas Edge, Fog y Cloud.",
+            "author": "Lenin Erazo Garzon"
+        },
+        "containsEntity": [
+            {
+                "$": {
+                    "xsi:type": "MonitorIoT:CloudNode",
+                    "isPartOf": "//@containsIoTSystem.0/@containsIoTSubSystem.0",
+                    "id": "11",
+                    "name": "CEDIACloud",
+                    "description": "Nodo de computación en la nube para almacenar el resumen diario de la frecuencia cardíaca del adulto mayor.",
+                    "isGrouped": "//@containsEntityCategory.0",
+                    "serviceModel": "PaaS",
+                    "platform": "Node.js, PostgreSQL",
+                    "selfAwareMiddlewarePort": "9998"
+                },
+                "containsResource": [
+                    {
+                        "$": {
+                            "xsi:type": "MonitorIoT:DataBase",
+                            "isPartOf": "//@containsIoTSystem.0/@containsIoTSubSystem.0",
+                            "id": "25",
+                            "name": "PostgresSQLCloud ",
+                            "description": "Base de datos ubicada en el nodo Cloud. Almacena el resumen diario de la concentración de CO en la cocina.",
+                            "uri": "postgresql://postgres:admin@172.16.1.10:5433/postgresqlcloud",
+                            "user": "postgres",
+                            "password": "admin",
+                            "usesProtocol": "//@containsEntity.4/@containsProtocol.1"
+                        },
+                        "containsDataTable": [
+                            {
+                                "$": {
+                                    "name": "ResumenDiarioCO",
+                                    "persistenceType": "Permanent",
+                                    "hasLinkServiceToDatable": "//@containsLink.24"
+                                },
+                                "composedOfDataColumn": [
+                                    {
+                                        "$": {
+                                            "name": "promedioCO",
+                                            "hasRuleAsDestination": "//@containsDataFlow.3/@containsDataMappingRule.0",
+                                            "dataType": "Float"
+                                        }
+                                    },
+                                    {
+                                        "$": {
+                                            "name": "maximaCO",
+                                            "hasRuleAsDestination": "//@containsDataFlow.3/@containsDataMappingRule.1",
+                                            "dataType": "Float"
+                                        }
+                                    },
+                                    {
+                                        "$": {
+                                            "name": "minimaCO",
+                                            "hasRuleAsSource": "//@containsDataFlow.3/@containsDataMappingRule.2",
+                                            "hasRuleAsDestination": "//@containsDataFlow.3/@containsDataMappingRule.2",
+                                            "dataType": "Float",
+                                            "formulaExpression": ""
+                                        }
+                                    },
+                                    {
+                                        "$": {
+                                            "name": "idSensor",
+                                            "dataColumnType": "MetaData",
+                                            "dataType": "Integer",
+                                            "formulaExpression": "let a=Math.random() * (3 - 0) + 0; a=parseInt(a);return a;"
+                                        }
+                                    },
+                                    {
+                                        "$": {
+                                            "name": "fecha",
+                                            "dataColumnType": "MetaData",
+                                            "dataType": "Date",
+                                            "formulaExpression": "return new Date().toISOString();"
+                                        }
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "$": {
+                            "xsi:type": "MonitorIoT:NetworkInterface",
+                            "isPartOf": "//@containsIoTSystem.0/@containsIoTSubSystem.0",
+                            "id": "37",
+                            "name": "CEDIA Cloud",
+                            "description": "Adaptador de red del nodo cloud de CEDIA.",
+                            "connects": "//@containsEntity.4",
+                            "networkAddress": "localhost",
+                            "communicationTechnology": "Ethernet"
+                        }
+                    }
+                ]
+            },
+            {
+                "$": {
+                    "xsi:type": "MonitorIoT:PhysicalEntity",
+                    "isPartOf": "//@containsIoTSystem.0/@containsIoTSubSystem.0",
+                    "id": "4",
+                    "name": "Casa",
+                    "description": "Casa donde vive el adulto mayor."
+                },
+                "containsComputingNode": [
+                    {
+                        "$": {
+                            "xsi:type": "MonitorIoT:FogNode",
+                            "isPartOf": "//@containsIoTSystem.0/@containsIoTSubSystem.0",
+                            "id": "10",
+                            "name": "HPProliantMicroserver ",
+                            "description": "Nodo de computación ubicado en la casa del adulto mayor con capacidad de almacenar y procesar los datos crudos provenientes de los sensores.",
+                            "isGrouped": "//@containsEntityCategory.0",
+                            "deploymentModel": "Private",
+                            "platform": "Node.js, PostgreSQL, Mosquitto",
+                            "selfAwareMiddlewarePort": "9999"
+                        },
+                        "hasProperty": [
+                            {
+                                "$": {
+                                    "id": "41",
+                                    "isBasedOn": "//@containsEntityCategory.0/@hasPropertyTemplate.0",
+                                    "hasRulePropertyToDataColumn": "//@containsDataFlow.2/@containsDataMappingRule.0",
+                                    "name": "cargaCPU"
+                                },
+                                "isCollectedBy": "//@containsIoTSystem.0/@containsIoTSubSystem.0/@constainsSelfAwarenessProcess.2/@usesCollectionMethod.0"
+                            },
+                            {
+                                "$": {
+                                    "id": "42",
+                                    "isBasedOn": "//@containsEntityCategory.0/@hasPropertyTemplate.2",
+                                    "hasRulePropertyToDataColumn": "//@containsDataFlow.2/@containsDataMappingRule.2",
+                                    "name": "idCPU",
+                                    "value": "1"
+                                }
+                            },
+                            {
+                                "$": {
+                                    "id": "43",
+                                    "isBasedOn": "//@containsEntityCategory.0/@hasPropertyTemplate.1",
+                                    "hasRulePropertyToDataColumn": "//@containsDataFlow.2/@containsDataMappingRule.1",
+                                    "name": "nroSensoresControlados",
+                                    "value": "2"
+                                }
+                            }
+                        ],
+                        "containsResource": [
+                            {
+                                "$": {
+                                    "xsi:type": "MonitorIoT:DataBase",
+                                    "id": "24",
+                                    "name": "PostgreSQLLocal ",
+                                    "description": "Base de datos ubicada en el nodo Fog.  Almacena los datos crudos provenientes de los sensores.",
+                                    "uri": "postgresql://postgres:admin@192.168.1.11:5433/postgresqllocal",
+                                    "user": "postgres",
+                                    "password": "admin",
+                                    "usesProtocol": "//@containsEntity.2/@containsProtocol.1"
+                                },
+                                "containsDataTable": [
+                                    {
+                                        "$": {
+                                            "name": "CargaCPUFog",
+                                            "persistenceType": "Permanent",
+                                            "hasLinkServiceToDatable": "//@containsLink.18"
+                                        },
+                                        "composedOfDataColumn": [
+                                            {
+                                                "$": {
+                                                    "name": "cargaCPU",
+                                                    "hasRulePropertyToDataColumn": "//@containsDataFlow.2/@containsDataMappingRule.0",
+                                                    "dataType": "Float"
+                                                }
+                                            },
+                                            {
+                                                "$": {
+                                                    "name": "nroSensoresControlados",
+                                                    "hasRulePropertyToDataColumn": "//@containsDataFlow.2/@containsDataMappingRule.1",
+                                                    "dataColumnType": "MetaData",
+                                                    "dataType": "Integer",
+                                                    "formulaExpression": "let a=Math.random() * (3 - 0) + 0; a=parseInt(a);return a;"
+                                                },
+                                                "isUsedIn": "//@containsIoTSystem.0/@containsIoTSubSystem.0/@constainsSelfAwarenessProcess.5/@usesCalculationMethod.0/@containsArgumentToParameterMapping.1"
+                                            },
+                                            {
+                                                "$": {
+                                                    "name": "idCPU",
+                                                    "hasRulePropertyToDataColumn": "//@containsDataFlow.2/@containsDataMappingRule.2",
+                                                    "dataColumnType": "MetaData",
+                                                    "dataType": "Integer"
+                                                }
+                                            },
+                                            {
+                                                "$": {
+                                                    "name": "fechaHora",
+                                                    "dataColumnType": "MetaData",
+                                                    "dataType": "Date",
+                                                    "formulaExpression": "return new Date().toISOString();"
+                                                }
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "$": {
+                                            "name": "AmbienteDormitorio",
+                                            "persistenceType": "Permanent",
+                                            "hasLinkServiceToDatable": "//@containsLink.19"
+                                        },
+                                        "composedOfDataColumn": [
+                                            {
+                                                "$": {
+                                                    "name": "temperatura",
+                                                    "hasRulePropertyToDataColumn": "//@containsDataFlow.0/@containsDataMappingRule.0",
+                                                    "dataType": "Float"
+                                                }
+                                            },
+                                            {
+                                                "$": {
+                                                    "name": "humedad",
+                                                    "hasRulePropertyToDataColumn": "//@containsDataFlow.0/@containsDataMappingRule.1",
+                                                    "dataType": "Float"
+                                                }
+                                            },
+                                            {
+                                                "$": {
+                                                    "name": "idSensor",
+                                                    "hasRulePropertyToDataColumn": "//@containsDataFlow.0/@containsDataMappingRule.2",
+                                                    "dataColumnType": "MetaData",
+                                                    "dataType": "Integer"
+                                                }
+                                            },
+                                            {
+                                                "$": {
+                                                    "name": "fechaHora",
+                                                    "dataColumnType": "MetaData",
+                                                    "dataType": "Date",
+                                                    "formulaExpression": "return new Date().toISOString();"
+                                                }
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "$": {
+                                            "name": "AmbienteCocina",
+                                            "persistenceType": "Permanent",
+                                            "hasLinkServiceToDatable": "//@containsLink.20 //@containsLink.26"
+                                        },
+                                        "composedOfDataColumn": [
+                                            {
+                                                "$": {
+                                                    "name": "CO",
+                                                    "hasRulePropertyToDataColumn": "//@containsDataFlow.1/@containsDataMappingRule.0",
+                                                    "hasRuleAsSource": "//@containsDataFlow.3/@containsDataMappingRule.0 //@containsDataFlow.3/@containsDataMappingRule.1",
+                                                    "dataType": "Float"
+                                                }
+                                            },
+                                            {
+                                                "$": {
+                                                    "name": "idSensor",
+                                                    "hasRulePropertyToDataColumn": "//@containsDataFlow.1/@containsDataMappingRule.1",
+                                                    "dataColumnType": "MetaData",
+                                                    "dataType": "Integer"
+                                                }
+                                            },
+                                            {
+                                                "$": {
+                                                    "name": "fechaHora",
+                                                    "dataColumnType": "MetaData",
+                                                    "dataType": "Date",
+                                                    "formulaExpression": "return new Date().toISOString();"
+                                                }
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "$": {
+                                    "xsi:type": "MonitorIoT:Middleware",
+                                    "isPartOf": "//@containsIoTSystem.0/@containsIoTSubSystem.0",
+                                    "id": "18",
+                                    "name": "Express",
+                                    "description": "Servidor de aplicaciones web que pública los servicios RESTful para el intercambio, agregación y almacenamiento de datos.",
+                                    "usesProtocol": "//@containsEntity.2/@containsProtocol.0"
+                                },
+                                "containsService": [
+                                    {
+                                        "$": {
+                                            "isPartOf": "//@containsIoTSystem.0/@containsIoTSubSystem.0",
+                                            "id": "20",
+                                            "name": "guardarCargaCPU",
+                                            "description": "Servicio RESTful que almacena los datos recolectados de la carga de CPU, en la base de datos de monitoreo del nodo Fog.",
+                                            "endPoint": "cargacpu",
+                                            "method": "POST",
+                                            "hasLinkAppToService": "//@containsLink.10",
+                                            "hasLinkServiceToDataTable": "//@containsLink.18"
+                                        },
+                                        "containsParameter": [
+                                            {
+                                                "$": {
+                                                    "ordinal": "1",
+                                                    "name": "cargaCPU",
+                                                    "dataType": "Float",
+                                                    "receives": "//@containsEntityCategory.0/@hasPropertyTemplate.0"
+                                                }
+                                            },
+                                            {
+                                                "$": {
+                                                    "ordinal": "2",
+                                                    "name": "idCPU",
+                                                    "dataType": "Integer",
+                                                    "receives": "//@containsEntityCategory.0/@hasPropertyTemplate.2"
+                                                }
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "$": {
+                                            "isPartOf": "//@containsIoTSystem.0/@containsIoTSubSystem.0",
+                                            "id": "21",
+                                            "name": "guardarTemperaturaHumedad",
+                                            "description": "Servicio RESTful que almacena los datos recolectados de la temperatura y humedad del dormitorio, en la base de datos de monitoreo del nodo Fog.",
+                                            "endPoint": "temperaturahumedad",
+                                            "method": "POST",
+                                            "hasLinkAppToService": "//@containsLink.4 //@containsLink.12",
+                                            "hasLinkServiceToDataTable": "//@containsLink.19"
+                                        },
+                                        "containsParameter": [
+                                            {
+                                                "$": {
+                                                    "ordinal": "1",
+                                                    "name": "temperatura",
+                                                    "dataType": "Float",
+                                                    "receives": "//@containsEntityCategory.1/@hasPropertyTemplate.0"
+                                                }
+                                            },
+                                            {
+                                                "$": {
+                                                    "ordinal": "2",
+                                                    "name": "humedad",
+                                                    "dataType": "Float",
+                                                    "receives": "//@containsEntityCategory.1/@hasPropertyTemplate.1"
+                                                }
+                                            },
+                                            {
+                                                "$": {
+                                                    "ordinal": "3",
+                                                    "name": "idSensor",
+                                                    "dataType": "Integer",
+                                                    "receives": "//@containsEntityCategory.2/@hasPropertyTemplate.0"
+                                                }
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "$": {
+                                            "isPartOf": "//@containsIoTSystem.0/@containsIoTSubSystem.0",
+                                            "id": "22",
+                                            "name": "guardarCO",
+                                            "description": "Servicio RESTful que almacena los datos recolectados de la carga de CPU, en la base de datos de monitoreo del nodo Fog.",
+                                            "endPoint": "co",
+                                            "method": "POST",
+                                            "hasLinkServiceToDataTable": "//@containsLink.20",
+                                            "hasLinkServiceToTopic": "//@containsLink.13"
+                                        },
+                                        "containsParameter": [
+                                            {
+                                                "$": {
+                                                    "ordinal": "1",
+                                                    "name": "CO",
+                                                    "dataType": "Float",
+                                                    "receives": "//@containsEntityCategory.1/@hasPropertyTemplate.2"
+                                                }
+                                            },
+                                            {
+                                                "$": {
+                                                    "ordinal": "2",
+                                                    "name": "idSensor",
+                                                    "dataType": "Integer",
+                                                    "receives": "//@containsEntityCategory.2/@hasPropertyTemplate.0"
+                                                }
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "$": {
+                                            "isPartOf": "//@containsIoTSystem.0/@containsIoTSubSystem.0",
+                                            "id": "23",
+                                            "name": "guardarResumenDiarioCO",
+                                            "description": "Servicio RESTful que calcula el promedio, máximo y mínimo diario de la concentración de CO en la cocina y lo almacena en la base de datos del nodo Cloud.",
+                                            "endPoint": "resumendiarioco",
+                                            "method": "POST",
+                                            "hasLinkAppToService": "//@containsLink.21",
+                                            "hasLinkServiceToDataTable": "//@containsLink.23 //@containsLink.24 //@containsLink.26"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "$": {
+                                    "xsi:type": "MonitorIoT:Broker",
+                                    "id": "19",
+                                    "name": "Mosquitto",
+                                    "description": "Broker que soporta la comunicación asíncrona entre la puerta de enlace y el nodo Fog.",
+                                    "usesProtocol": "//@containsEntity.2/@containsProtocol.2"
+                                },
+                                "containsTopic": [
+                                    {
+                                        "$": {
+                                            "incluyes": "//@containsEntity.1/@containsSubPhysicalEntity.0/@hasProperty.0",
+                                            "id": "26",
+                                            "name": "datosAmbienteCocina",
+                                            "hasLinkServiceToTopic": "//@containsLink.13",
+                                            "hasLinkAppToTopic": "//@containsLink.5 //@containsLink.11"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "$": {
+                                    "xsi:type": "MonitorIoT:API",
+                                    "id": "14",
+                                    "name": "obtenerCargaCPU",
+                                    "description": "Función API que obtiene el porcentaje de uso de la CPU del nodo Fog.",
+                                    "instructions": "const child = require('child_process');let com=\"wmic cpu get loadpercentage /value\";let valor=child.spawnSync('cmd.exe',['/c',com]);valor=valor.output[1].toString().trim().split(\"=\")[1];return {\"cargaCPU\": valor}",
+                                    "hasLinkAppToAPI": "//@containsLink.9"
+                                },
+                                "containsReturnVariable": [
+                                    {
+                                        "$": {
+                                            "ordinal": "1",
+                                            "name": "cargaCPU",
+                                            "dataType": "Float",
+                                            "returns": "//@containsEntityCategory.0/@hasPropertyTemplate.0"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "$": {
+                                    "xsi:type": "MonitorIoT:NetworkInterface",
+                                    "isPartOf": "//@containsIoTSystem.0/@containsIoTSubSystem.0",
+                                    "id": "36",
+                                    "name": "Ethernet - Nodo Fog",
+                                    "description": "Adaptador de red Ethernet del nodo Fog HP Proliant Microserver.",
+                                    "connects": "//@containsEntity.2 //@containsEntity.4",
+                                    "macAddress": "50-5B-C2-D5-AE-8D",
+                                    "networkAddress": "localhost",
+                                    "communicationTechnology": "Ethernet"
+                                }
+                            },
+                            {
+                                "$": {
+                                    "xsi:type": "MonitorIoT:Application",
+                                    "isPartOf": "//@containsIoTSystem.0/@containsIoTSubSystem.0",
+                                    "id": "16",
+                                    "name": "controladorCargaCPU",
+                                    "description": "Aplicación que invoca a la API correspondiente, a fin de obtener el porcentaje de uso de CPU del nodo Fog. Luego, consume un servicio web para el almacenamiento de estos datos en el nodo Fog.",
+                                    "type": "Desktop",
+                                    "hasLinkAppToService": "//@containsLink.10",
+                                    "hasLinkAppToAPI": "//@containsLink.9"
+                                }
+                            },
+                            {
+                                "$": {
+                                    "xsi:type": "MonitorIoT:Application",
+                                    "isPartOf": "//@containsIoTSystem.0/@containsIoTSubSystem.0",
+                                    "id": "17",
+                                    "name": "controladorResumenCO",
+                                    "description": "Aplicación que consume un servicio web para obtener diariamente los datos de CO almacenados en la base de datos del nodo Fog, aplicar operaciones de agregación (promedio, máximo, mínimo) sobre los mismos; y, almacenar los datos resumidos en la base de datos del nodo Cloud. ",
+                                    "type": "Desktop",
+                                    "hasLinkAppToService": "//@containsLink.21"
+                                }
+                            }
+                        ],
+                        "has": "//@containsSelfAwarenessAspect.2 //@containsSelfAwarenessAspect.5"
+                    },
+                    {
+                        "$": {
+                            "xsi:type": "MonitorIoT:IoTGateway",
+                            "isPartOf": "//@containsIoTSystem.0/@containsIoTSubSystem.0",
+                            "id": "9",
+                            "name": "RaspberryPI3 ",
+                            "description": "Puerta de enlace en la que se ejecutan aplicaciones y APIs de software para recolectar los datos crudos desde los sensores DHT11 y MQ-7.",
+                            "isGrouped": "//@containsEntityCategory.0",
+                            "controls": "//@containsEntity.1/@containsSubPhysicalEntity.1/@containsComputingNode.0 //@containsEntity.1/@containsSubPhysicalEntity.0/@containsComputingNode.0",
+                            "gatewayType": "Microcontroller",
+                            "selfAwareMiddlewarePort": "9997"
+                        },
+                        "containsResource": [
+                            {
+                                "$": {
+                                    "xsi:type": "MonitorIoT:Application",
+                                    "isPartOf": "//@containsIoTSystem.0/@containsIoTSubSystem.0",
+                                    "id": "15",
+                                    "name": "controladorAmbienteCasa",
+                                    "description": "Aplicación de software que invoca a las APIs correspondientes, a fin de obtener los datos de temperatura, humedad y CO desde los sensores. Luego, envía estos datos al nodo Fog, por medio de un servicio web o broker, para su respectivo almacenamiento.",
+                                    "type": "Desktop",
+                                    "hasLinkAppToService": "//@containsLink.12",
+                                    "hasLinkAppToAPI": "//@containsLink.7 //@containsLink.8",
+                                    "hasLinkAppToTopic": "//@containsLink.11"
+                                }
+                            },
+                            {
+                                "$": {
+                                    "xsi:type": "MonitorIoT:API",
+                                    "isPartOf": "//@containsIoTSystem.0/@containsIoTSubSystem.0",
+                                    "id": "12",
+                                    "name": "obtenerTemperaturaHumedad",
+                                    "description": "Función API que obtiene la temperatura y humedad desde el sensor DHT11.",
+                                    "instructions": "let a=Math.random() * (50 - 10) + 10; a=a.toFixed(2);let b=Math.random() * (50 - 10) + 10; b=b.toFixed(2);return {\"temp\":a,\"hum\":b}",
+                                    "hasLinkAppToAPI": "//@containsLink.7",
+                                    "hasLinkAPIToIoTDevice": "//@containsLink.25"
+                                },
+                                "containsParameter": [
+                                    {
+                                        "$": {
+                                            "ordinal": "3",
+                                            "name": "idSensor",
+                                            "dataType": "Integer",
+                                            "receives": "//@containsEntityCategory.2/@hasPropertyTemplate.0"
+                                        }
+                                    }
+                                ],
+                                "containsReturnVariable": [
+                                    {
+                                        "$": {
+                                            "ordinal": "1",
+                                            "name": "temperatura",
+                                            "dataType": "Float",
+                                            "returns": "//@containsEntityCategory.1/@hasPropertyTemplate.0"
+                                        }
+                                    },
+                                    {
+                                        "$": {
+                                            "ordinal": "2",
+                                            "name": "humedad",
+                                            "dataType": "Float",
+                                            "returns": "//@containsEntityCategory.1/@hasPropertyTemplate.1"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "$": {
+                                    "xsi:type": "MonitorIoT:API",
+                                    "isPartOf": "//@containsIoTSystem.0/@containsIoTSubSystem.0",
+                                    "id": "13",
+                                    "name": "obtenerCO",
+                                    "description": "Función que obtiene la concentración de CO desde el sensor MQ-7.",
+                                    "instructions": "let a=Math.random() * (1000 - 0) + 0; a=a.toFixed(2); return { \"co\": a }",
+                                    "hasLinkAppToAPI": "//@containsLink.8",
+                                    "hasLinkAPIToIoTDevice": "//@containsLink.6"
+                                },
+                                "containsParameter": [
+                                    {
+                                        "$": {
+                                            "ordinal": "2",
+                                            "name": "idSensor",
+                                            "dataType": "Integer",
+                                            "receives": "//@containsEntityCategory.2/@hasPropertyTemplate.0"
+                                        }
+                                    }
+                                ],
+                                "containsReturnVariable": [
+                                    {
+                                        "$": {
+                                            "ordinal": "1",
+                                            "name": "CO",
+                                            "dataType": "Float",
+                                            "returns": "//@containsEntityCategory.1/@hasPropertyTemplate.2"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "$": {
+                                    "xsi:type": "MonitorIoT:NetworkInterface",
+                                    "isPartOf": "//@containsIoTSystem.0/@containsIoTSubSystem.0",
+                                    "id": "35",
+                                    "name": "Wi-Fi - Raspberry PI 3",
+                                    "description": "Adaptador de red Wi-Fi de la puerta de enlace Raspberry PI 3.",
+                                    "connects": "//@containsEntity.2",
+                                    "macAddress": "DC-A6-32-4A-FC-68",
+                                    "networkAddress": "localhost"
+                                }
+                            }
+                        ]
+                    }
+                ],
+                "containsSubPhysicalEntity": [
+                    {
+                        "$": {
+                            "isPartOf": "//@containsIoTSystem.0/@containsIoTSubSystem.0",
+                            "id": "6",
+                            "name": "Cocina",
+                            "description": "Lugar donde cocina el adulto mayor, cuya presencia de monóxido de carbono (CO) es monitoreada.",
+                            "isGrouped": "//@containsEntityCategory.1"
+                        },
+                        "hasProperty": [
+                            {
+                                "$": {
+                                    "id": "40",
+                                    "isBasedOn": "//@containsEntityCategory.1/@hasPropertyTemplate.2",
+                                    "isIncluded": "//@containsEntity.1/@containsComputingNode.0/@containsResource.2/@containsTopic.0",
+                                    "hasRulePropertyToDataColumn": "//@containsDataFlow.1/@containsDataMappingRule.0",
+                                    "name": "CO"
+                                },
+                                "isCollectedBy": "//@containsIoTSystem.0/@containsIoTSubSystem.0/@constainsSelfAwarenessProcess.1/@usesCollectionMethod.0"
+                            }
+                        ],
+                        "containsComputingNode": [
+                            {
+                                "$": {
+                                    "xsi:type": "MonitorIoT:Sensor",
+                                    "isPartOf": "//@containsIoTSystem.0/@containsIoTSubSystem.0",
+                                    "id": "8",
+                                    "name": "CO (MQ-7)",
+                                    "description": "Dispositivo IoT que monitorea la presencia de monóxido de carbono (CO) en la cocina.",
+                                    "isGrouped": "//@containsEntityCategory.2",
+                                    "isControlled": "//@containsEntity.1/@containsComputingNode.1",
+                                    "hasLinkAPIToIoTDevice": "//@containsLink.6",
+                                    "sensorType": "Proximity"
+                                },
+                                "hasProperty": [
+                                    {
+                                        "$": {
+                                            "id": "100",
+                                            "isBasedOn": "//@containsEntityCategory.2/@hasPropertyTemplate.0",
+                                            "hasRulePropertyToDataColumn": "//@containsDataFlow.1/@containsDataMappingRule.1",
+                                            "name": "idSensor",
+                                            "value": "3"
+                                        }
+                                    }
+                                ]
+                            }
+                        ],
+                        "has": "//@containsSelfAwarenessAspect.1 //@containsSelfAwarenessAspect.4"
+                    },
+                    {
+                        "$": {
+                            "isPartOf": "//@containsIoTSystem.0/@containsIoTSubSystem.0",
+                            "id": "5",
+                            "name": "Dormitorio",
+                            "description": "Dormitorio del adulto mayor, cuya temperatura y humedad es monitoreada.",
+                            "isGrouped": "//@containsEntityCategory.1"
+                        },
+                        "hasProperty": [
+                            {
+                                "$": {
+                                    "id": "38",
+                                    "isBasedOn": "//@containsEntityCategory.1/@hasPropertyTemplate.0",
+                                    "hasRulePropertyToDataColumn": "//@containsDataFlow.0/@containsDataMappingRule.0",
+                                    "name": "temperatura"
+                                },
+                                "isCollectedBy": "//@containsIoTSystem.0/@containsIoTSubSystem.0/@constainsSelfAwarenessProcess.0/@usesCollectionMethod.0"
+                            },
+                            {
+                                "$": {
+                                    "id": "39",
+                                    "isBasedOn": "//@containsEntityCategory.1/@hasPropertyTemplate.1",
+                                    "hasRulePropertyToDataColumn": "//@containsDataFlow.0/@containsDataMappingRule.1",
+                                    "name": "humedad"
+                                }
+                            }
+                        ],
+                        "containsComputingNode": [
+                            {
+                                "$": {
+                                    "xsi:type": "MonitorIoT:Sensor",
+                                    "isPartOf": "//@containsIoTSystem.0/@containsIoTSubSystem.0",
+                                    "id": "7",
+                                    "name": "Temperatura&amp;Humedad (DHT11)",
+                                    "description": "Dispositivo IoT que monitorea la temperatura y humedad del dormitorio del adulto mayor.",
+                                    "isGrouped": "//@containsEntityCategory.2",
+                                    "isControlled": "//@containsEntity.1/@containsComputingNode.1",
+                                    "hasLinkAPIToIoTDevice": "//@containsLink.25",
+                                    "sensorType": "Proximity"
+                                },
+                                "hasProperty": [
+                                    {
+                                        "$": {
+                                            "id": "99",
+                                            "isBasedOn": "//@containsEntityCategory.2/@hasPropertyTemplate.0",
+                                            "hasRulePropertyToDataColumn": "//@containsDataFlow.0/@containsDataMappingRule.2",
+                                            "name": "idSensor",
+                                            "value": "17"
+                                        }
+                                    }
+                                ]
+                            }
+                        ],
+                        "has": "//@containsSelfAwarenessAspect.0 //@containsSelfAwarenessAspect.3"
+                    }
+                ]
+            },
+            {
+                "$": {
+                    "xsi:type": "MonitorIoT:Network",
+                    "isPartOf": "//@containsIoTSystem.0/@containsIoTSubSystem.0",
+                    "id": "30",
+                    "name": "LAN",
+                    "description": "Red de área Local Wifi que comunica la puerta de enlace (microcontrolador Raspberry PI 3) con el nodo Fog y sus recursos.",
+                    "isConnected": "//@containsEntity.1/@containsComputingNode.0/@containsResource.4 //@containsEntity.1/@containsComputingNode.1/@containsResource.3"
+                },
+                "containsProtocol": [
+                    {
+                        "$": {
+                            "isUsedByMiddleware": "//@containsEntity.1/@containsComputingNode.0/@containsResource.1",
+                            "id": "31",
+                            "name": "HTTP",
+                            "port": "9999"
+                        }
+                    },
+                    {
+                        "$": {
+                            "isUsedByDataStore": "//@containsEntity.1/@containsComputingNode.0/@containsResource.0",
+                            "id": "32",
+                            "name": "PostgreSQL",
+                            "port": "5432"
+                        }
+                    },
+                    {
+                        "$": {
+                            "isUsedByMiddleware": "//@containsEntity.1/@containsComputingNode.0/@containsResource.2",
+                            "id": "33",
+                            "name": "MQTT",
+                            "port": "1883"
+                        }
+                    }
+                ]
+            },
+            {
+                "$": {
+                    "xsi:type": "MonitorIoT:Network",
+                    "isPartOf": "//@containsIoTSystem.0/@containsIoTSubSystem.0",
+                    "id": "34",
+                    "name": "ProximidadGPIO",
+                    "description": "Interfaz de comunicación GPIO que comunica el sensor de DHT11 y el sensor MQ-7 con el microcontrolador Raspberry PI 3."
+                }
+            },
+            {
+                "$": {
+                    "xsi:type": "MonitorIoT:Network",
+                    "isPartOf": "//@containsIoTSystem.0/@containsIoTSubSystem.0",
+                    "id": "27",
+                    "name": "Internet",
+                    "description": "Red de Internet para acceder a los recursos del nodo Cloud.",
+                    "isConnected": "//@containsEntity.0/@containsResource.1 //@containsEntity.1/@containsComputingNode.0/@containsResource.4"
+                },
+                "containsProtocol": [
+                    {
+                        "$": {
+                            "id": "28",
+                            "name": "HTTP",
+                            "port": "9999"
+                        }
+                    },
+                    {
+                        "$": {
+                            "isUsedByDataStore": "//@containsEntity.0/@containsResource.0",
+                            "id": "29",
+                            "name": "PostgreSQL",
+                            "port": "5432"
+                        }
+                    }
+                ]
+            }
+        ],
+        "containsIoTSystem": [
+            {
+                "$": {
+                    "id": "1",
+                    "name": "Emergencia",
+                    "description": "Gestiona las emergencias de adultos mayores que viven solos en su hogar.",
+                    "domain": "AAL"
+                },
+                "containsIoTSubSystem": [
+                    {
+                        "$": {
+                            "isComposedOf": "//@containsEntity.1/@containsSubPhysicalEntity.1 //@containsEntity.1/@containsSubPhysicalEntity.1/@containsComputingNode.0 //@containsEntity.1/@containsSubPhysicalEntity.0 //@containsEntity.1/@containsSubPhysicalEntity.0/@containsComputingNode.0 //@containsEntity.1/@containsComputingNode.1/@containsResource.0 //@containsEntity.1/@containsComputingNode.1 //@containsEntity.1 //@containsEntity.3 //@containsEntity.1/@containsComputingNode.0 //@containsEntity.0 //@containsEntity.1/@containsComputingNode.1/@containsResource.1 //@containsEntity.1/@containsComputingNode.1/@containsResource.2 //@containsEntity.1/@containsComputingNode.0/@containsResource.5 //@containsEntity.1/@containsComputingNode.0/@containsResource.6 //@containsEntity.1/@containsComputingNode.0/@containsResource.1 //@containsEntity.1/@containsComputingNode.0/@containsResource.1/@containsService.0 //@containsEntity.1/@containsComputingNode.0/@containsResource.1/@containsService.1 //@containsEntity.1/@containsComputingNode.0/@containsResource.1/@containsService.2 //@containsEntity.1/@containsComputingNode.0/@containsResource.1/@containsService.3 //@containsEntity.0/@containsResource.0 //@containsEntity.1/@containsComputingNode.1/@containsResource.3 //@containsEntity.2 //@containsEntity.4 //@containsEntity.0/@containsResource.1 //@containsEntity.1/@containsComputingNode.0/@containsResource.4",
+                            "id": "2",
+                            "name": "ControlAmbiental",
+                            "description": "Monitorea la temperatura, humedad y presencia de monóxido de carbono (CO) en el ambiente de una casa.",
+                            "domain": "AAL"
+                        },
+                        "containsSelfAwarenessProcess": [
+                            {
+                                "$": {
+                                    "id": 1,
+                                    "xsi:type": "pre-reflexive",
+                                    "computingNode": "//@containsEntity.1/@containsComputingNode.0",
+                                    "name": "PID1",
+                                    "description": "Captura el conocimiento sobre la temperatura ambiente actual (en tiempo real) del dormitorio y el nivel de satisfacción del usuario",
+                                    "executionPeriodStart": "2023-01-01T05:00:00.000Z",
+                                    "executionPeriodEnd": "2023-12-31T05:00:00.000Z",
+                                    "executionType": "PREDEFINIDO",
+                                    "unitOfTime": "MINUTO",
+                                    "executionTimeInterval": 10,
+                                    "executionTime": null
+                                },
+                                "usesCollectionMethod": [
+                                    {
+                                        "$": {
+                                            "id": 1,
+                                            "collectionScope": "SiNCRONA"
+                                        },
+                                        "columns_paths": "//@containsEntity.1/@containsComputingNode.0/@containsResource.0/@containsDataTable.1/@composedOfDataColumn.0",
+                                        "produces": "//@containsMetric.0",
+                                        "collectsProperty": "//@containsEntity.1/@containsSubPhysicalEntity.1/@hasProperty.0",
+                                        "isSupportedBy": "//@containsDataFlow.0"
+                                    }
+                                ],
+                                "usesAnalysisModel": [
+                                    {
+                                        "$": {
+                                            "id": 2,
+                                            "implementationResourceType": "FUNCION"
+                                        },
+                                        "containsAction": [
+                                            {
+                                                "$": {
+                                                    "id": 1,
+                                                    "description": "El subsistema SCA debe calibrar el aire acondicionado de la habitación (auto-adaptación)"
+                                                },
+                                                "isRecommendedIn": "//@containsDecisionCriteria.0/@containsThreshold.1"
+                                            }
+                                        ],
+                                        "containsArgumentToParameterMapping": [
+                                            {
+                                                "$": {
+                                                    "id": 1
+                                                },
+                                                "relatesParameter": "//@containsImplementationResource.0/@containsParameter.0",
+                                                "relatesMetric": "//@containsMetric.0"
+                                            }
+                                        ],
+                                        "isImplementedBy": "//@containsImplementationResource.0",
+                                        "produces": "//@containsMetric.1",
+                                        "uses": "//@containsDecisionCriteria.0"
+                                    }
+                                ],
+                                "captures": "//@containsSelfAwarenessAspect.0"
+                            },
+                            {
+                                "$": {
+                                    "id": 2,
+                                    "xsi:type": "pre-reflexive",
+                                    "computingNode": "//@containsEntity.1/@containsComputingNode.0",
+                                    "name": "PID2",
+                                    "description": "Captura el conocimiento sobre la concentración y nivel de riesgo actual (en tiempo real) de CO en el ambiente de la cocina",
+                                    "executionPeriodStart": "2023-01-01T05:00:00.000Z",
+                                    "executionPeriodEnd": "2023-12-31T05:00:00.000Z",
+                                    "executionType": "PREDEFINIDO",
+                                    "unitOfTime": "MINUTO",
+                                    "executionTimeInterval": 10,
+                                    "executionTime": null
+                                },
+                                "usesCollectionMethod": [
+                                    {
+                                        "$": {
+                                            "id": 3,
+                                            "collectionScope": "ASiNCRONA"
+                                        },
+                                        "columns_paths": "//@containsEntity.1/@containsComputingNode.0/@containsResource.0/@containsDataTable.2/@composedOfDataColumn.0",
+                                        "produces": "//@containsMetric.2",
+                                        "collectsProperty": "//@containsEntity.1/@containsSubPhysicalEntity.0/@hasProperty.0",
+                                        "isSupportedBy": "//@containsDataFlow.1"
+                                    }
+                                ],
+                                "usesAnalysisModel": [
+                                    {
+                                        "$": {
+                                            "id": 4,
+                                            "implementationResourceType": "FUNCION"
+                                        },
+                                        "containsAction": [
+                                            {
+                                                "$": {
+                                                    "id": 2,
+                                                    "description": "El subsistema SCA debe encender una alerta auditiva intermitente"
+                                                },
+                                                "isRecommendedIn": "//@containsDecisionCriteria.1/@containsThreshold.1"
+                                            },
+                                            {
+                                                "$": {
+                                                    "id": 3,
+                                                    "description": "El subsistema SCA debe notificar a la central de monitoreo"
+                                                },
+                                                "isRecommendedIn": "//@containsDecisionCriteria.1/@containsThreshold.1"
+                                            },
+                                            {
+                                                "$": {
+                                                    "id": 4,
+                                                    "description": "El subsistema SCA debe encender una alerta auditiva permanente"
+                                                },
+                                                "isRecommendedIn": "//@containsDecisionCriteria.1/@containsThreshold.2"
+                                            },
+                                            {
+                                                "$": {
+                                                    "id": 5,
+                                                    "description": "El subsistema SCA debe notificar a la central de monitoreo"
+                                                },
+                                                "isRecommendedIn": "//@containsDecisionCriteria.1/@containsThreshold.2"
+                                            }
+                                        ],
+                                        "containsArgumentToParameterMapping": [
+                                            {
+                                                "$": {
+                                                    "id": 2
+                                                },
+                                                "relatesParameter": "//@containsImplementationResource.1/@containsParameter.0",
+                                                "relatesMetric": "//@containsMetric.2"
+                                            }
+                                        ],
+                                        "isImplementedBy": "//@containsImplementationResource.1",
+                                        "produces": "//@containsMetric.3",
+                                        "uses": "//@containsDecisionCriteria.1"
+                                    }
+                                ],
+                                "captures": "//@containsSelfAwarenessAspect.1"
+                            },
+                            {
+                                "$": {
+                                    "id": 3,
+                                    "xsi:type": "pre-reflexive",
+                                    "computingNode": "//@containsEntity.1/@containsComputingNode.0",
+                                    "name": "PID3",
+                                    "description": "Captura el conocimiento sobre la carga de procesamiento de la CPU del nodo fog en tiempo real",
+                                    "executionPeriodStart": "2023-01-01T05:00:00.000Z",
+                                    "executionPeriodEnd": "2023-12-31T05:00:00.000Z",
+                                    "executionType": "PREDEFINIDO",
+                                    "unitOfTime": "MINUTO",
+                                    "executionTimeInterval": 10,
+                                    "executionTime": null
+                                },
+                                "usesCollectionMethod": [
+                                    {
+                                        "$": {
+                                            "id": 5,
+                                            "collectionScope": "SiNCRONA"
+                                        },
+                                        "columns_paths": "//@containsEntity.1/@containsComputingNode.0/@containsResource.0/@containsDataTable.0/@composedOfDataColumn.0",
+                                        "produces": "//@containsMetric.4",
+                                        "collectsProperty": "//@containsEntity.1/@containsComputingNode.0/@hasProperty.0",
+                                        "isSupportedBy": "//@containsDataFlow.2"
+                                    }
+                                ],
+                                "usesAnalysisModel": [
+                                    {
+                                        "$": {
+                                            "id": 6,
+                                            "implementationResourceType": "FUNCION"
+                                        },
+                                        "containsAction": [
+                                            {
+                                                "$": {
+                                                    "id": 6,
+                                                    "description": "El subsistema SCA debe verificar la disponibilidad o frecuencia de lectura de los sensores (auto-recuperación)"
+                                                },
+                                                "isRecommendedIn": "//@containsDecisionCriteria.2/@containsThreshold.0"
+                                            },
+                                            {
+                                                "$": {
+                                                    "id": 7,
+                                                    "description": "El subsistema SCA debe verificar la correcta operación de la red de comunicación (auto-recuperación)"
+                                                },
+                                                "isRecommendedIn": "//@containsDecisionCriteria.2/@containsThreshold.0"
+                                            },
+                                            {
+                                                "$": {
+                                                    "id": 8,
+                                                    "description": "El subsistema SCA debe notificar a la central de monitoreo"
+                                                },
+                                                "isRecommendedIn": "//@containsDecisionCriteria.2/@containsThreshold.0"
+                                            },
+                                            {
+                                                "$": {
+                                                    "id": 9,
+                                                    "description": "El subsistema SCA debe verificar la frecuencia de lectura de los sensores o en su defecto incrementar la capacidad de procesamiento del nodo fog (auto-adaptación)"
+                                                },
+                                                "isRecommendedIn": "//@containsDecisionCriteria.2/@containsThreshold.2"
+                                            },
+                                            {
+                                                "$": {
+                                                    "id": 10,
+                                                    "description": "El subsistema SCA debe notificar a la central de monitoreo"
+                                                },
+                                                "isRecommendedIn": "//@containsDecisionCriteria.2/@containsThreshold.2"
+                                            }
+                                        ],
+                                        "containsArgumentToParameterMapping": [
+                                            {
+                                                "$": {
+                                                    "id": 3
+                                                },
+                                                "relatesParameter": "//@containsImplementationResource.2/@containsParameter.0",
+                                                "relatesMetric": "//@containsMetric.4"
+                                            }
+                                        ],
+                                        "isImplementedBy": "//@containsImplementationResource.2",
+                                        "produces": "//@containsMetric.5",
+                                        "uses": "//@containsDecisionCriteria.2"
+                                    }
+                                ],
+                                "captures": "//@containsSelfAwarenessAspect.2"
+                            },
+                            {
+                                "$": {
+                                    "id": 4,
+                                    "xsi:type": "reflexive",
+                                    "computingNode": "//@containsEntity.1/@containsComputingNode.0",
+                                    "name": "PID4",
+                                    "description": "Captura el conocimiento sobre la variabilidad diaria y nivel de aceptabilidad de la temperatura ambiente del dormitorio",
+                                    "executionPeriodStart": "2023-01-01T05:00:00.000Z",
+                                    "executionPeriodEnd": "2023-12-31T05:00:00.000Z",
+                                    "executionType": "PREDEFINIDO",
+                                    "unitOfTime": "DIA",
+                                    "executionTimeInterval": 1,
+                                    "executionTime": "23:55"
+                                },
+                                "usesAnalysisModel": [
+                                    {
+                                        "$": {
+                                            "id": 8,
+                                            "implementationResourceType": "FUNCION"
+                                        },
+                                        "containsAction": [
+                                            {
+                                                "$": {
+                                                    "id": 11,
+                                                    "description": "El subsistema SCA debe notificar a la central de monitoreo"
+                                                },
+                                                "isRecommendedIn": "//@containsDecisionCriteria.3/@containsThreshold.1"
+                                            }
+                                        ],
+                                        "containsArgumentToParameterMapping": [
+                                            {
+                                                "$": {
+                                                    "id": 5
+                                                },
+                                                "relatesParameter": "//@containsImplementationResource.3/@containsParameter.0",
+                                                "relatesMetric": "//@containsMetric.7"
+                                            }
+                                        ],
+                                        "isImplementedBy": "//@containsImplementationResource.3",
+                                        "produces": "//@containsMetric.6",
+                                        "uses": "//@containsDecisionCriteria.3"
+                                    }
+                                ],
+                                "usesCalculationMethod": [
+                                    {
+                                        "$": {
+                                            "id": 7,
+                                            "implementationResourceType": "FUNCION",
+                                            "calculationPeriodStart": null,
+                                            "calculationPeriodEnd": null,
+                                            "unitDataPeriod": "DIA",
+                                            "dataRange": 1
+                                        },
+                                        "containsSimulationScenario": [],
+                                        "containsSimulationVariable": [],
+                                        "containsArgumentToParameterMapping": [
+                                            {
+                                                "$": {
+                                                    "id": 4
+                                                },
+                                                "relatesParameter": "//@containsImplementationResource.4/@containsParameter.0",
+                                                "relatesMetric": "//@containsMetric.0"
+                                            }
+                                        ],
+                                        "isImplementedBy": "//@containsImplementationResource.4",
+                                        "produces": "//@containsMetric.7"
+                                    }
+                                ],
+                                "captures": "//@containsSelfAwarenessAspect.3"
+                            },
+                            {
+                                "$": {
+                                    "id": 5,
+                                    "xsi:type": "reflexive",
+                                    "computingNode": "//@containsEntity.1/@containsComputingNode.0",
+                                    "name": "PID5",
+                                    "description": "Captura el conocimiento sobre la concentración y nivel de riesgo promedio diario del monóxido de carbono (CO) en el ambiente de la cocina.",
+                                    "executionPeriodStart": "2023-01-01T05:00:00.000Z",
+                                    "executionPeriodEnd": "2023-12-31T05:00:00.000Z",
+                                    "executionType": "PREDEFINIDO",
+                                    "unitOfTime": "DIA",
+                                    "executionTimeInterval": 1,
+                                    "executionTime": "23:55"
+                                },
+                                "usesAnalysisModel": [
+                                    {
+                                        "$": {
+                                            "id": 10,
+                                            "implementationResourceType": "FUNCION"
+                                        },
+                                        "containsAction": [
+                                            {
+                                                "$": {
+                                                    "id": 12,
+                                                    "description": "El subsistema SCA debe encender una alerta auditiva intermitente"
+                                                },
+                                                "isRecommendedIn": "//@containsDecisionCriteria.1/@containsThreshold.1"
+                                            },
+                                            {
+                                                "$": {
+                                                    "id": 13,
+                                                    "description": "El subsistema SCA debe notificar a la central de monitoreo"
+                                                },
+                                                "isRecommendedIn": "//@containsDecisionCriteria.1/@containsThreshold.1"
+                                            },
+                                            {
+                                                "$": {
+                                                    "id": 14,
+                                                    "description": "El subsistema SCA debe encender una alerta auditiva permanente"
+                                                },
+                                                "isRecommendedIn": "//@containsDecisionCriteria.1/@containsThreshold.2"
+                                            },
+                                            {
+                                                "$": {
+                                                    "id": 15,
+                                                    "description": "El subsistema SCA debe notificar a la central de monitoreo"
+                                                },
+                                                "isRecommendedIn": "//@containsDecisionCriteria.1/@containsThreshold.2"
+                                            }
+                                        ],
+                                        "containsArgumentToParameterMapping": [
+                                            {
+                                                "$": {
+                                                    "id": 7
+                                                },
+                                                "relatesParameter": "//@containsImplementationResource.1/@containsParameter.0",
+                                                "relatesMetric": "//@containsMetric.8"
+                                            }
+                                        ],
+                                        "isImplementedBy": "//@containsImplementationResource.1",
+                                        "produces": "//@containsMetric.3",
+                                        "uses": "//@containsDecisionCriteria.1"
+                                    }
+                                ],
+                                "usesCalculationMethod": [
+                                    {
+                                        "$": {
+                                            "id": 9,
+                                            "implementationResourceType": "FUNCION",
+                                            "calculationPeriodStart": null,
+                                            "calculationPeriodEnd": null,
+                                            "unitDataPeriod": "DIA",
+                                            "dataRange": 1
+                                        },
+                                        "containsSimulationScenario": [],
+                                        "containsSimulationVariable": [],
+                                        "containsArgumentToParameterMapping": [
+                                            {
+                                                "$": {
+                                                    "id": 6
+                                                },
+                                                "relatesParameter": "//@containsImplementationResource.5/@containsParameter.0",
+                                                "relatesMetric": "//@containsMetric.2"
+                                            }
+                                        ],
+                                        "isImplementedBy": "//@containsImplementationResource.5",
+                                        "produces": "//@containsMetric.8"
+                                    }
+                                ],
+                                "captures": "//@containsSelfAwarenessAspect.4"
+                            },
+                            {
+                                "$": {
+                                    "id": 6,
+                                    "xsi:type": "reflexive",
+                                    "computingNode": "//@containsEntity.1/@containsComputingNode.0",
+                                    "name": "PID6",
+                                    "description": "Predice la carga de procesamiento requerida por la CPU del nodo Fog para controlar el doble de sensores que operan actualmente",
+                                    "executionPeriodStart": "2023-01-01T05:00:00.000Z",
+                                    "executionPeriodEnd": "2023-12-31T05:00:00.000Z",
+                                    "executionType": "PREDEFINIDO",
+                                    "unitOfTime": "DIA",
+                                    "executionTimeInterval": 1,
+                                    "executionTime": "23:55"
+                                },
+                                "usesAnalysisModel": [
+                                    {
+                                        "$": {
+                                            "id": 12,
+                                            "implementationResourceType": "FUNCION"
+                                        },
+                                        "containsAction": [
+                                            {
+                                                "$": {
+                                                    "id": 16,
+                                                    "description": "Se deberá incrementar la capacidad de procesamiento del nodo Fog (auto-adaptación)"
+                                                },
+                                                "isRecommendedIn": "//@containsDecisionCriteria.2/@containsThreshold.2"
+                                            }
+                                        ],
+                                        "containsArgumentToParameterMapping": [
+                                            {
+                                                "$": {
+                                                    "id": 11
+                                                },
+                                                "relatesParameter": "//@containsImplementationResource.2/@containsParameter.0",
+                                                "relatesMetric": "//@containsMetric.9"
+                                            }
+                                        ],
+                                        "isImplementedBy": "//@containsImplementationResource.2",
+                                        "produces": "//@containsMetric.5",
+                                        "uses": "//@containsDecisionCriteria.2"
+                                    }
+                                ],
+                                "usesCalculationMethod": [
+                                    {
+                                        "$": {
+                                            "id": 11,
+                                            "implementationResourceType": "SERVICIO",
+                                            "calculationPeriodStart": "2023-01-01T05:00:00.000Z",
+                                            "calculationPeriodEnd": null,
+                                            "unitDataPeriod": "NINGUNO",
+                                            "dataRange": null
+                                        },
+                                        "containsSimulationScenario": [
+                                            {
+                                                "$": {
+                                                    "id": 1,
+                                                    "name": "Duplicar la cantidad de sensores que operan actualmente",
+                                                    "description": "Escenario utilizado para predecir la carga de procesamiento de la CPU del nodo Fog para controlar el doble de sensores que operan actualmente"
+                                                },
+                                                "uses": "//@containsIoTSystem.0/@containsIoTSubSystem.0/@constainsSelfAwarenessProcess.5/@usesCalculationMethod.0/@containsSimulationVariable.0/@containsSimulationValue.0"
+                                            }
+                                        ],
+                                        "containsSimulationVariable": [
+                                            {
+                                                "$": {
+                                                    "id": 1,
+                                                    "name": "nroSensoresSimular"
+                                                },
+                                                "containsSimulationValue": [
+                                                    {
+                                                        "$": {
+                                                            "value": 4
+                                                        },
+                                                        "isUsed": "//@containsIoTSystem.0/@containsIoTSubSystem.0/@constainsSelfAwarenessProcess.5/@usesCalculationMethod.0/@containsSimulationScenario.0"
+                                                    }
+                                                ],
+                                                "isUsedIn": "//@containsIoTSystem.0/@containsIoTSubSystem.0/@constainsSelfAwarenessProcess.5/@usesCalculationMethod.0/@containsArgumentToParameterMapping.2"
+                                            }
+                                        ],
+                                        "containsArgumentToParameterMapping": [
+                                            {
+                                                "$": {
+                                                    "id": 8
+                                                },
+                                                "relatesParameter": "//@containsImplementationResource.6/@containsParameter.0",
+                                                "relatesMetric": "//@containsMetric.4"
+                                            },
+                                            {
+                                                "$": {
+                                                    "id": 9
+                                                },
+                                                "relatesMetaData": "//@containsEntity.1/@containsComputingNode.0/@containsResource.0/@containsDataTable.0/@composedOfDataColumn.1",
+                                                "relatesParameter": "//@containsImplementationResource.6/@containsParameter.1"
+                                            },
+                                            {
+                                                "$": {
+                                                    "id": 10
+                                                },
+                                                "relatesSimulationVariable": "//@containsIoTSystem.0/@containsIoTSubSystem.0/@constainsSelfAwarenessProcess.5/@usesCalculationMethod.0/@containsSimulationVariable.0",
+                                                "relatesParameter": "//@containsImplementationResource.6/@containsParameter.2"
+                                            }
+                                        ],
+                                        "isImplementedBy": "//@containsImplementationResource.6",
+                                        "produces": "//@containsMetric.9"
+                                    }
+                                ],
+                                "captures": "//@containsSelfAwarenessAspect.5"
+                            }
+                        ]
+                    },
+                    {
+                        "$": {
+                            "id": "3",
+                            "name": "Salud",
+                            "description": "Monitorea los signos vitales (frecuencia cardíaca) del adulto mayor.",
+                            "domain": "AAL"
+                        }
+                    }
+                ]
+            }
+        ],
+        "containsDataFlow": [
+            {
+                "$": {
+                    "id": "54",
+                    "description": "Flujo de recolección de datos de la temperatura y humedad del dormitorio.",
+                    "isSupported": "//@containsLink.25 //@containsLink.7 //@containsLink.12 //@containsLink.19",
+                    "communicationType": "Synchronous",
+                    "unitOfTime": "Minute",
+                    "flowExecutionTimeInterval": "10"
+                },
+                "containsDataMappingRule": [
+                    {
+                        "$": {
+                            "xsi:type": "MonitorIoT:PropertyToDataColumn",
+                            "id": "55",
+                            "relatesColumn": "//@containsEntity.1/@containsComputingNode.0/@containsResource.0/@containsDataTable.1/@composedOfDataColumn.0",
+                            "relatesSpecificProperty": "//@containsEntity.1/@containsSubPhysicalEntity.1/@hasProperty.0"
+                        }
+                    },
+                    {
+                        "$": {
+                            "xsi:type": "MonitorIoT:PropertyToDataColumn",
+                            "id": "56",
+                            "relatesColumn": "//@containsEntity.1/@containsComputingNode.0/@containsResource.0/@containsDataTable.1/@composedOfDataColumn.1",
+                            "relatesSpecificProperty": "//@containsEntity.1/@containsSubPhysicalEntity.1/@hasProperty.1"
+                        }
+                    },
+                    {
+                        "$": {
+                            "xsi:type": "MonitorIoT:PropertyToDataColumn",
+                            "id": "57",
+                            "relatesColumn": "//@containsEntity.1/@containsComputingNode.0/@containsResource.0/@containsDataTable.1/@composedOfDataColumn.2",
+                            "relatesSpecificProperty": "//@containsEntity.1/@containsSubPhysicalEntity.1/@containsComputingNode.0/@hasProperty.0"
+                        }
+                    }
+                ],
+                "support": "//@containsIoTSystem.0/@containsIoTSubSystem.0/@constainsSelfAwarenessProcess.0/@usesCollectionMethod.0"
+            },
+            {
+                "$": {
+                    "id": "58",
+                    "description": "Flujo de recolección de datos de la concentración de CO en la cocina",
+                    "isSupported": "//@containsLink.6 //@containsLink.8 //@containsLink.11 //@containsLink.13 //@containsLink.20",
+                    "unitOfTime": "Minute",
+                    "flowExecutionTimeInterval": "10"
+                },
+                "containsDataMappingRule": [
+                    {
+                        "$": {
+                            "xsi:type": "MonitorIoT:PropertyToDataColumn",
+                            "id": "59",
+                            "relatesColumn": "//@containsEntity.1/@containsComputingNode.0/@containsResource.0/@containsDataTable.2/@composedOfDataColumn.0",
+                            "relatesSpecificProperty": "//@containsEntity.1/@containsSubPhysicalEntity.0/@hasProperty.0"
+                        }
+                    },
+                    {
+                        "$": {
+                            "xsi:type": "MonitorIoT:PropertyToDataColumn",
+                            "id": "60",
+                            "relatesColumn": "//@containsEntity.1/@containsComputingNode.0/@containsResource.0/@containsDataTable.2/@composedOfDataColumn.1",
+                            "relatesSpecificProperty": "//@containsEntity.1/@containsSubPhysicalEntity.0/@containsComputingNode.0/@hasProperty.0"
+                        }
+                    }
+                ],
+                "support": "//@containsIoTSystem.0/@containsIoTSubSystem.0/@constainsSelfAwarenessProcess.1/@usesCollectionMethod.0"
+            },
+            {
+                "$": {
+                    "id": "61",
+                    "description": "Flujo de recolección de datos de la carga de CPU del nodo Fog.",
+                    "isSupported": "//@containsLink.9 //@containsLink.10 //@containsLink.18",
+                    "communicationType": "Synchronous",
+                    "unitOfTime": "Minute",
+                    "flowExecutionTimeInterval": "10"
+                },
+                "containsDataMappingRule": [
+                    {
+                        "$": {
+                            "xsi:type": "MonitorIoT:PropertyToDataColumn",
+                            "id": "62",
+                            "relatesColumn": "//@containsEntity.1/@containsComputingNode.0/@containsResource.0/@containsDataTable.0/@composedOfDataColumn.0",
+                            "relatesSpecificProperty": "//@containsEntity.1/@containsComputingNode.0/@hasProperty.0"
+                        }
+                    },
+                    {
+                        "$": {
+                            "xsi:type": "MonitorIoT:PropertyToDataColumn",
+                            "id": "63",
+                            "relatesColumn": "//@containsEntity.1/@containsComputingNode.0/@containsResource.0/@containsDataTable.0/@composedOfDataColumn.1",
+                            "relatesSpecificProperty": "//@containsEntity.1/@containsComputingNode.0/@hasProperty.2"
+                        }
+                    },
+                    {
+                        "$": {
+                            "xsi:type": "MonitorIoT:PropertyToDataColumn",
+                            "id": "64",
+                            "relatesColumn": "//@containsEntity.1/@containsComputingNode.0/@containsResource.0/@containsDataTable.0/@composedOfDataColumn.2",
+                            "relatesSpecificProperty": "//@containsEntity.1/@containsComputingNode.0/@hasProperty.1"
+                        }
+                    }
+                ],
+                "support": "//@containsIoTSystem.0/@containsIoTSubSystem.0/@constainsSelfAwarenessProcess.2/@usesCollectionMethod.0"
+            },
+            {
+                "$": {
+                    "id": "65",
+                    "description": "Flujo de agregación que calcula el valor promedio, máximo y mínimo diario de la concentración de CO en la cocina.",
+                    "isSupported": "//@containsLink.21 //@containsLink.26 //@containsLink.24",
+                    "dataFlowType": "DataAggregationFlow",
+                    "communicationType": "Synchronous",
+                    "unitOfTime": "Day",
+                    "flowExecutionTimeInterval": "1"
+                },
+                "containsDataMappingRule": [
+                    {
+                        "$": {
+                            "xsi:type": "MonitorIoT:DataColumnToDataColumn",
+                            "id": "66",
+                            "aggregationOperation": "Mean",
+                            "relatesSourceColumn": "//@containsEntity.1/@containsComputingNode.0/@containsResource.0/@containsDataTable.2/@composedOfDataColumn.0",
+                            "relatesDestinationColumn": "//@containsEntity.0/@containsResource.0/@containsDataTable.0/@composedOfDataColumn.0",
+                            "groupBy": "idSensor"
+                        }
+                    },
+                    {
+                        "$": {
+                            "xsi:type": "MonitorIoT:DataColumnToDataColumn",
+                            "id": "67",
+                            "aggregationOperation": "Maximum",
+                            "relatesSourceColumn": "//@containsEntity.1/@containsComputingNode.0/@containsResource.0/@containsDataTable.2/@composedOfDataColumn.0",
+                            "relatesDestinationColumn": "//@containsEntity.0/@containsResource.0/@containsDataTable.0/@composedOfDataColumn.1",
+                            "groupBy": "idSensor"
+                        }
+                    },
+                    {
+                        "$": {
+                            "xsi:type": "MonitorIoT:DataColumnToDataColumn",
+                            "id": "68",
+                            "aggregationOperation": "Minimum",
+                            "relatesSourceColumn": "//@containsEntity.0/@containsResource.0/@containsDataTable.0/@composedOfDataColumn.2",
+                            "relatesDestinationColumn": "//@containsEntity.0/@containsResource.0/@containsDataTable.0/@composedOfDataColumn.2",
+                            "where": "fechaHora::date=current_date",
+                            "groupBy": "idSensor"
+                        }
+                    }
+                ]
+            }
+        ],
+        "containsLink": [
+            {
+                "$": {
+                    "xsi:type": "MonitorIoT:LinkAPIToIoTDevice"
+                }
+            },
+            {
+                "$": {
+                    "xsi:type": "MonitorIoT:LinkAPIToIoTDevice",
+                    "id": "50"
+                }
+            },
+            {
+                "$": {
+                    "xsi:type": "MonitorIoT:LinkAppToAPI",
+                    "previousLink": "//@containsLink.0"
+                }
+            },
+            {
+                "$": {
+                    "xsi:type": "MonitorIoT:LinkAppToAPI",
+                    "previousLink": "//@containsLink.1",
+                    "id": "18"
+                }
+            },
+            {
+                "$": {
+                    "xsi:type": "MonitorIoT:LinkAppToService",
+                    "previousLink": "//@containsLink.2",
+                    "linksService": "//@containsEntity.1/@containsComputingNode.0/@containsResource.1/@containsService.1"
+                }
+            },
+            {
+                "$": {
+                    "xsi:type": "MonitorIoT:LinkAppToTopic",
+                    "previousLink": "//@containsLink.3",
+                    "linksTopic": "//@containsEntity.1/@containsComputingNode.0/@containsResource.2/@containsTopic.0"
+                }
+            },
+            {
+                "$": {
+                    "xsi:type": "MonitorIoT:LinkAPIToIoTDevice",
+                    "supports": "//@containsDataFlow.1",
+                    "id": "73",
+                    "linksIoTDevice": "//@containsEntity.1/@containsSubPhysicalEntity.0/@containsComputingNode.0",
+                    "linksAPI": "//@containsEntity.1/@containsComputingNode.1/@containsResource.2"
+                }
+            },
+            {
+                "$": {
+                    "xsi:type": "MonitorIoT:LinkAppToAPI",
+                    "supports": "//@containsDataFlow.0",
+                    "previousLink": "//@containsLink.25",
+                    "id": "70",
+                    "linksAPI": "//@containsEntity.1/@containsComputingNode.1/@containsResource.1",
+                    "linksApp": "//@containsEntity.1/@containsComputingNode.1/@containsResource.0"
+                }
+            },
+            {
+                "$": {
+                    "xsi:type": "MonitorIoT:LinkAppToAPI",
+                    "supports": "//@containsDataFlow.1",
+                    "previousLink": "//@containsLink.6",
+                    "id": "74",
+                    "linksAPI": "//@containsEntity.1/@containsComputingNode.1/@containsResource.2",
+                    "linksApp": "//@containsEntity.1/@containsComputingNode.1/@containsResource.0"
+                }
+            },
+            {
+                "$": {
+                    "xsi:type": "MonitorIoT:LinkAppToAPI",
+                    "supports": "//@containsDataFlow.2",
+                    "id": "78",
+                    "linksAPI": "//@containsEntity.1/@containsComputingNode.0/@containsResource.3",
+                    "linksApp": "//@containsEntity.1/@containsComputingNode.0/@containsResource.5"
+                }
+            },
+            {
+                "$": {
+                    "xsi:type": "MonitorIoT:LinkAppToService",
+                    "supports": "//@containsDataFlow.2",
+                    "previousLink": "//@containsLink.9",
+                    "id": "79",
+                    "linksApp": "//@containsEntity.1/@containsComputingNode.0/@containsResource.5",
+                    "linksService": "//@containsEntity.1/@containsComputingNode.0/@containsResource.1/@containsService.0"
+                }
+            },
+            {
+                "$": {
+                    "xsi:type": "MonitorIoT:LinkAppToTopic",
+                    "supports": "//@containsDataFlow.1",
+                    "previousLink": "//@containsLink.8",
+                    "id": "75",
+                    "linksTopic": "//@containsEntity.1/@containsComputingNode.0/@containsResource.2/@containsTopic.0",
+                    "linksApplication": "//@containsEntity.1/@containsComputingNode.1/@containsResource.0"
+                }
+            },
+            {
+                "$": {
+                    "xsi:type": "MonitorIoT:LinkAppToService",
+                    "supports": "//@containsDataFlow.0",
+                    "previousLink": "//@containsLink.7",
+                    "id": "71",
+                    "linksApp": "//@containsEntity.1/@containsComputingNode.1/@containsResource.0",
+                    "linksService": "//@containsEntity.1/@containsComputingNode.0/@containsResource.1/@containsService.1"
+                }
+            },
+            {
+                "$": {
+                    "xsi:type": "MonitorIoT:LinkServiceToTopic",
+                    "supports": "//@containsDataFlow.1",
+                    "previousLink": "//@containsLink.11",
+                    "id": "76",
+                    "linksService": "//@containsEntity.1/@containsComputingNode.0/@containsResource.1/@containsService.2",
+                    "linksTopic": "//@containsEntity.1/@containsComputingNode.0/@containsResource.2/@containsTopic.0"
+                }
+            },
+            {
+                "$": {
+                    "xsi:type": "MonitorIoT:LinkServiceToTopic",
+                    "previousLink": "//@containsLink.15",
+                    "id": "92"
+                }
+            },
+            {
+                "$": {
+                    "xsi:type": "MonitorIoT:LinkAppToTopic",
+                    "previousLink": "//@containsLink.16",
+                    "id": "91"
+                }
+            },
+            {
+                "$": {
+                    "xsi:type": "MonitorIoT:LinkAppToAPI",
+                    "previousLink": "//@containsLink.17",
+                    "id": "90"
+                }
+            },
+            {
+                "$": {
+                    "xsi:type": "MonitorIoT:LinkAPIToIoTDevice",
+                    "id": "89"
+                }
+            },
+            {
+                "$": {
+                    "xsi:type": "MonitorIoT:LinkServiceToDataTable",
+                    "supports": "//@containsDataFlow.2",
+                    "previousLink": "//@containsLink.10",
+                    "id": "80",
+                    "linkService": "//@containsEntity.1/@containsComputingNode.0/@containsResource.1/@containsService.0",
+                    "linksDataTable": "//@containsEntity.1/@containsComputingNode.0/@containsResource.0/@containsDataTable.0",
+                    "type": "Insert"
+                }
+            },
+            {
+                "$": {
+                    "xsi:type": "MonitorIoT:LinkServiceToDataTable",
+                    "supports": "//@containsDataFlow.0",
+                    "previousLink": "//@containsLink.12",
+                    "id": "72",
+                    "linkService": "//@containsEntity.1/@containsComputingNode.0/@containsResource.1/@containsService.1",
+                    "linksDataTable": "//@containsEntity.1/@containsComputingNode.0/@containsResource.0/@containsDataTable.1",
+                    "type": "Insert"
+                }
+            },
+            {
+                "$": {
+                    "xsi:type": "MonitorIoT:LinkServiceToDataTable",
+                    "supports": "//@containsDataFlow.1",
+                    "previousLink": "//@containsLink.13",
+                    "id": "77",
+                    "linkService": "//@containsEntity.1/@containsComputingNode.0/@containsResource.1/@containsService.2",
+                    "linksDataTable": "//@containsEntity.1/@containsComputingNode.0/@containsResource.0/@containsDataTable.2",
+                    "type": "Insert"
+                }
+            },
+            {
+                "$": {
+                    "xsi:type": "MonitorIoT:LinkAppToService",
+                    "supports": "//@containsDataFlow.3",
+                    "id": "81",
+                    "linksApp": "//@containsEntity.1/@containsComputingNode.0/@containsResource.6",
+                    "linksService": "//@containsEntity.1/@containsComputingNode.0/@containsResource.1/@containsService.3"
+                }
+            },
+            {
+                "$": {
+                    "xsi:type": "MonitorIoT:LinkServiceToDataTable",
+                    "previousLink": "//@containsLink.14",
+                    "id": "93",
+                    "type": "Insert"
+                }
+            },
+            {
+                "$": {
+                    "xsi:type": "MonitorIoT:LinkServiceToDataTable",
+                    "previousLink": "//@containsLink.3",
+                    "id": "19",
+                    "linkService": "//@containsEntity.1/@containsComputingNode.0/@containsResource.1/@containsService.3"
+                }
+            },
+            {
+                "$": {
+                    "xsi:type": "MonitorIoT:LinkServiceToDataTable",
+                    "supports": "//@containsDataFlow.3",
+                    "previousLink": "//@containsLink.3",
+                    "id": "83",
+                    "linkService": "//@containsEntity.1/@containsComputingNode.0/@containsResource.1/@containsService.3",
+                    "linksDataTable": "//@containsEntity.0/@containsResource.0/@containsDataTable.0",
+                    "type": "Insert"
+                }
+            },
+            {
+                "$": {
+                    "xsi:type": "MonitorIoT:LinkAPIToIoTDevice",
+                    "supports": "//@containsDataFlow.0",
+                    "id": "69",
+                    "linksIoTDevice": "//@containsEntity.1/@containsSubPhysicalEntity.1/@containsComputingNode.0",
+                    "linksAPI": "//@containsEntity.1/@containsComputingNode.1/@containsResource.1"
+                }
+            },
+            {
+                "$": {
+                    "xsi:type": "MonitorIoT:LinkServiceToDataTable",
+                    "supports": "//@containsDataFlow.3",
+                    "id": "82",
+                    "linkService": "//@containsEntity.1/@containsComputingNode.0/@containsResource.1/@containsService.3",
+                    "linksDataTable": "//@containsEntity.1/@containsComputingNode.0/@containsResource.0/@containsDataTable.2"
+                }
+            }
+        ],
+        "containsEntityCategory": [
+            {
+                "$": {
+                    "id": "50",
+                    "name": "Servidor",
+                    "description": "Equipo que procesa, almacena y distribuye la información",
+                    "groups": "//@containsEntity.1/@containsComputingNode.0 //@containsEntity.1/@containsComputingNode.1 //@containsEntity.0"
+                },
+                "hasPropertyTemplate": [
+                    {
+                        "$": {
+                            "id": "51",
+                            "name": "cargaCPU",
+                            "definition": "Carga de procesamiento utilizada por el servidor.",
+                            "isParticularized": "//@containsEntity.1/@containsComputingNode.0/@hasProperty.0",
+                            "isReturned": "//@containsEntity.1/@containsComputingNode.0/@containsResource.3/@containsReturnVariable.0",
+                            "isReceived": "//@containsEntity.1/@containsComputingNode.0/@containsResource.1/@containsService.0/@containsParameter.0",
+                            "propertyType": "State",
+                            "dataType": "Float"
+                        }
+                    },
+                    {
+                        "$": {
+                            "id": "52",
+                            "name": "nroSensoresControlados",
+                            "definition": "Cantidad de sensores activos controlados por el servidor en ese momento.",
+                            "isParticularized": "//@containsEntity.1/@containsComputingNode.0/@hasProperty.2",
+                            "dataType": "Integer"
+                        }
+                    },
+                    {
+                        "$": {
+                            "id": "53",
+                            "name": "idCPU",
+                            "definition": "Identificador de la CPU del servidor.",
+                            "isParticularized": "//@containsEntity.1/@containsComputingNode.0/@hasProperty.1",
+                            "isReceived": "//@containsEntity.1/@containsComputingNode.0/@containsResource.1/@containsService.0/@containsParameter.1",
+                            "identifier": "true",
+                            "dataType": "Integer",
+                            "assignedAtDesignTime": "true"
+                        }
+                    }
+                ]
+            },
+            {
+                "$": {
+                    "id": "44",
+                    "name": "Habitacion",
+                    "description": "Parte separada por paredes o tabiques en que se divide una casa.",
+                    "groups": "//@containsEntity.1/@containsSubPhysicalEntity.0 //@containsEntity.1/@containsSubPhysicalEntity.1"
+                },
+                "hasPropertyTemplate": [
+                    {
+                        "$": {
+                            "id": "45",
+                            "name": "temperatura",
+                            "definition": "Temperatura ambiente de un lugar de la casa.",
+                            "isParticularized": "//@containsEntity.1/@containsSubPhysicalEntity.1/@hasProperty.0",
+                            "isReturned": "//@containsEntity.1/@containsComputingNode.1/@containsResource.1/@containsReturnVariable.0",
+                            "isReceived": "//@containsEntity.1/@containsComputingNode.0/@containsResource.1/@containsService.1/@containsParameter.0",
+                            "propertyType": "Telemetry",
+                            "dataType": "Float"
+                        }
+                    },
+                    {
+                        "$": {
+                            "id": "46",
+                            "name": "humedad",
+                            "definition": "Humedad relativa de un lugar de la casa.",
+                            "isParticularized": "//@containsEntity.1/@containsSubPhysicalEntity.1/@hasProperty.1",
+                            "isReturned": "//@containsEntity.1/@containsComputingNode.1/@containsResource.1/@containsReturnVariable.1",
+                            "isReceived": "//@containsEntity.1/@containsComputingNode.0/@containsResource.1/@containsService.1/@containsParameter.1",
+                            "propertyType": "Telemetry",
+                            "dataType": "Float"
+                        }
+                    },
+                    {
+                        "$": {
+                            "id": "47",
+                            "name": "CO",
+                            "definition": "Concentración de monóxido de carbono presente en un lugar de la casa.",
+                            "isParticularized": "//@containsEntity.1/@containsSubPhysicalEntity.0/@hasProperty.0",
+                            "isReturned": "//@containsEntity.1/@containsComputingNode.1/@containsResource.2/@containsReturnVariable.0",
+                            "isReceived": "//@containsEntity.1/@containsComputingNode.0/@containsResource.1/@containsService.2/@containsParameter.0",
+                            "propertyType": "Telemetry",
+                            "dataType": "Float"
+                        }
+                    }
+                ]
+            },
+            {
+                "$": {
+                    "id": "48",
+                    "name": "Sensor",
+                    "description": "Dispositivo IoT que percibe o monitorea ciertas propiedades de una entidad física y las transforma en datos digitales para que puedan transmitirse a través de una red.",
+                    "groups": "//@containsEntity.1/@containsSubPhysicalEntity.1/@containsComputingNode.0 //@containsEntity.1/@containsSubPhysicalEntity.0/@containsComputingNode.0"
+                },
+                "hasPropertyTemplate": [
+                    {
+                        "$": {
+                            "id": "49",
+                            "name": "idSensor",
+                            "definition": "Identificador de los sensores físicos.",
+                            "isParticularized": "//@containsEntity.1/@containsSubPhysicalEntity.0/@containsComputingNode.0/@hasProperty.0 //@containsEntity.1/@containsSubPhysicalEntity.1/@containsComputingNode.0/@hasProperty.0",
+                            "isReceived": "//@containsEntity.1/@containsComputingNode.1/@containsResource.1/@containsParameter.0 //@containsEntity.1/@containsComputingNode.1/@containsResource.2/@containsParameter.0 //@containsEntity.1/@containsComputingNode.0/@containsResource.1/@containsService.2/@containsParameter.1 //@containsEntity.1/@containsComputingNode.0/@containsResource.1/@containsService.1/@containsParameter.2",
+                            "identifier": "true",
+                            "dataType": "Integer",
+                            "assignedAtDesignTime": "true"
+                        }
+                    }
+                ]
+            }
+        ],
+        "containsSelfAwarenessAspect": [
+            {
+                "$": {
+                    "id": 1,
+                    "name": "Temperatura ambiente en tiempo real del dormitorio",
+                    "description": "Conocer la temperatura ambiente en tiempo real del dormitorio del adulto mayor y comprender el nivel de satisfacción del usuario",
+                    "type": "ESTADO",
+                    "weight": 0.4
+                },
+                "isCaptured": "//@containsIoTSystem.0/@containsIoTSubSystem.0/@constainsSelfAwarenessProcess.0",
+                "belongsTo": "//@containsEntity.1/@containsSubPhysicalEntity.1",
+                "isEvaluatedBy": "//@containsMetric.0 //@containsMetric.1"
+            },
+            {
+                "$": {
+                    "id": 2,
+                    "name": "Variabilidad diaria de la temperatura ambiente del dormitorio",
+                    "description": "Conocer la variabilidad diaria de la temperatura ambiente del dormitorio del adulto mayor y el nivel de aceptabilidad del usuario",
+                    "type": "ESTADO",
+                    "weight": 0.4
+                },
+                "isCaptured": "//@containsIoTSystem.0/@containsIoTSubSystem.0/@constainsSelfAwarenessProcess.3",
+                "belongsTo": "//@containsEntity.1/@containsSubPhysicalEntity.0",
+                "isEvaluatedBy": "//@containsMetric.6 //@containsMetric.7"
+            },
+            {
+                "$": {
+                    "id": 3,
+                    "name": "Concentración en tiempo real de CO en el ambiente de la cocina",
+                    "description": "Conocer la concentración en tiempo real de monóxido de carbono (CO) en el ambiente de la cocina e intuir el nivel de riesgo que tiene para la salud y vida del adulto mayor",
+                    "type": "ESTADO",
+                    "weight": 0.6
+                },
+                "isCaptured": "//@containsIoTSystem.0/@containsIoTSubSystem.0/@constainsSelfAwarenessProcess.1",
+                "belongsTo": "//@containsEntity.1/@containsComputingNode.0",
+                "isEvaluatedBy": "//@containsMetric.2 //@containsMetric.3"
+            },
+            {
+                "$": {
+                    "id": 4,
+                    "name": "Concentración promedio diario de CO en el ambiente de la cocina",
+                    "description": "Conocer el promedio diario de concentración de monóxido de carbono (CO) en el ambiente de la cocina y entender su nivel de riesgo",
+                    "type": "ESTADO",
+                    "weight": 0.6
+                },
+                "isCaptured": "//@containsIoTSystem.0/@containsIoTSubSystem.0/@constainsSelfAwarenessProcess.4",
+                "belongsTo": "//@containsEntity.1/@containsSubPhysicalEntity.1",
+                "isEvaluatedBy": "//@containsMetric.3 //@containsMetric.8"
+            },
+            {
+                "$": {
+                    "id": 5,
+                    "name": "Carga de procesamiento en tiempo real de la CPU del nodo Fog",
+                    "description": "Determinar la carga de procesamiento en tiempo real (alta, media, baja) de la CPU del nodo Fog",
+                    "type": "ESTADO",
+                    "weight": 0.6
+                },
+                "isCaptured": "//@containsIoTSystem.0/@containsIoTSubSystem.0/@constainsSelfAwarenessProcess.2",
+                "belongsTo": "//@containsEntity.1/@containsSubPhysicalEntity.0",
+                "isEvaluatedBy": "//@containsMetric.4 //@containsMetric.5"
+            },
+            {
+                "$": {
+                    "id": 6,
+                    "name": "Predecir la carga de procesamiento de la CPU del nodo Fog",
+                    "description": "Predecir la carga de procesamiento de la CPU del nodo Fog para gestionar un cierto número de sensores a futuro",
+                    "type": "PREDICCION",
+                    "weight": 0.4
+                },
+                "isCaptured": "//@containsIoTSystem.0/@containsIoTSubSystem.0/@constainsSelfAwarenessProcess.5",
+                "belongsTo": "//@containsEntity.1/@containsComputingNode.0",
+                "isEvaluatedBy": "//@containsMetric.5 //@containsMetric.9"
+            }
+        ],
+        "containsDecisionCriteria": [
+            {
+                "$": {
+                    "id": 1,
+                    "name": "Nivel de satisfacción del usuario sobre la temperatura ambiente",
+                    "description": "Evalúa cualitativamente el nivel de satisfacción del usuario con la temperatura ambiente"
+                },
+                "isUsedBy": "//@containsIoTSystem.0/@containsIoTSubSystem.0/@constainsSelfAwarenessProcess.0/@usesAnalysisModel.0",
+                "containsThreshold": [
+                    {
+                        "$": {
+                            "id": 1,
+                            "name": "Satisfactorio",
+                            "interpretation": "Temperatura ambiente confortable para el usuario",
+                            "lowerThreshold": "100.0",
+                            "upperThreshold": "100.0"
+                        }
+                    },
+                    {
+                        "$": {
+                            "id": 2,
+                            "name": "Insatisfactorio",
+                            "interpretation": "Temperatura ambiente no confortable para el usuario",
+                            "lowerThreshold": "0.0",
+                            "upperThreshold": "0.0"
+                        },
+                        "recommends": "//@containsIoTSystem.0/@containsIoTSubSystem.0/@constainsSelfAwarenessProcess.0/@usesAnalysisModel.0/@containsAction.0"
+                    }
+                ]
+            },
+            {
+                "$": {
+                    "id": 3,
+                    "name": "Nivel de riesgo de la concentración de CO",
+                    "description": "Evalúa cualitativamente el nivel de riesgo para el usuario de la concentración de monóxido de carbono (CO) en el ambiente"
+                },
+                "isUsedBy": "//@containsIoTSystem.0/@containsIoTSubSystem.0/@constainsSelfAwarenessProcess.1/@usesAnalysisModel.0 //@containsIoTSystem.0/@containsIoTSubSystem.0/@constainsSelfAwarenessProcess.4/@usesAnalysisModel.0",
+                "containsThreshold": [
+                    {
+                        "$": {
+                            "id": 5,
+                            "name": "Ausencia de riesgo",
+                            "interpretation": "El usuario no sufre ningún síntoma ante una exposición prolongada",
+                            "lowerThreshold": "0.0",
+                            "upperThreshold": "3.5"
+                        }
+                    },
+                    {
+                        "$": {
+                            "id": 6,
+                            "name": "Riesgo medio",
+                            "interpretation": "El usuario puede experimentar dolor de cabeza, pecho, fatiga o nauseas",
+                            "lowerThreshold": "3.5",
+                            "upperThreshold": "20.0"
+                        },
+                        "recommends": "//@containsIoTSystem.0/@containsIoTSubSystem.0/@constainsSelfAwarenessProcess.4/@usesAnalysisModel.0/@containsAction.1"
+                    },
+                    {
+                        "$": {
+                            "id": 7,
+                            "name": "Riesgo alto",
+                            "interpretation": "El usuario puede experimentar desorientación, pérdida del conocimiento e incluso la muerte",
+                            "lowerThreshold": "20.0",
+                            "upperThreshold": null
+                        },
+                        "recommends": "//@containsIoTSystem.0/@containsIoTSubSystem.0/@constainsSelfAwarenessProcess.4/@usesAnalysisModel.0/@containsAction.3"
+                    }
+                ]
+            },
+            {
+                "$": {
+                    "id": 4,
+                    "name": "Nivel de carga de procesamiento de la CPU",
+                    "description": "Evalúa cualitativamente el nivel de uso de la CPU"
+                },
+                "isUsedBy": "//@containsIoTSystem.0/@containsIoTSubSystem.0/@constainsSelfAwarenessProcess.2/@usesAnalysisModel.0 //@containsIoTSystem.0/@containsIoTSubSystem.0/@constainsSelfAwarenessProcess.5/@usesAnalysisModel.0",
+                "containsThreshold": [
+                    {
+                        "$": {
+                            "id": 8,
+                            "name": "Baja",
+                            "interpretation": "Baja carga de procesamiento de la CPU",
+                            "lowerThreshold": "0.0",
+                            "upperThreshold": "30.0"
+                        },
+                        "recommends": "//@containsIoTSystem.0/@containsIoTSubSystem.0/@constainsSelfAwarenessProcess.2/@usesAnalysisModel.0/@containsAction.2"
+                    },
+                    {
+                        "$": {
+                            "id": 9,
+                            "name": "Normal",
+                            "interpretation": "Normal carga de procesamiento de la CPU",
+                            "lowerThreshold": "30.0",
+                            "upperThreshold": "80.0"
+                        }
+                    },
+                    {
+                        "$": {
+                            "id": 10,
+                            "name": "Alta",
+                            "interpretation": "Alta carga de procesamiento de la CPU",
+                            "lowerThreshold": "80.0",
+                            "upperThreshold": null
+                        },
+                        "recommends": "//@containsIoTSystem.0/@containsIoTSubSystem.0/@constainsSelfAwarenessProcess.5/@usesAnalysisModel.0/@containsAction.0"
+                    }
+                ]
+            },
+            {
+                "$": {
+                    "id": 2,
+                    "name": "Nivel de aceptabilidad de la variabilidad de la temperatura ambiente",
+                    "description": "Evalúa cualitativamente el nivel de aceptabilidad de la variabilidad de la temperatura ambiente"
+                },
+                "isUsedBy": "//@containsIoTSystem.0/@containsIoTSubSystem.0/@constainsSelfAwarenessProcess.3/@usesAnalysisModel.0",
+                "containsThreshold": [
+                    {
+                        "$": {
+                            "id": 3,
+                            "name": "Aceptable",
+                            "interpretation": "Aceptable nivel de variabilidad de la temperatura ambiente",
+                            "lowerThreshold": "100.0",
+                            "upperThreshold": "100.0"
+                        }
+                    },
+                    {
+                        "$": {
+                            "id": 4,
+                            "name": "Inaceptable",
+                            "interpretation": "Inaceptable nivel de variabilidad de la temperatura ambiente",
+                            "lowerThreshold": "0.0",
+                            "upperThreshold": "0.0"
+                        },
+                        "recommends": "//@containsIoTSystem.0/@containsIoTSubSystem.0/@constainsSelfAwarenessProcess.3/@usesAnalysisModel.0/@containsAction.0"
+                    }
+                ]
+            }
+        ],
+        "containsImplementationResource": [
+            {
+                "$": {
+                    "id": 5,
+                    "name": "obtenerNivelSatisfaccionTemperatura",
+                    "description": "Obtiene el nivel de satisfacción porcentual del usuario sobre la temperatura ambiente",
+                    "returnDataType": "INTEGER",
+                    "path": "",
+                    "instructions": "if (temperatura&gt;=17 &amp;&amp; temperatura&lt;=25) return 100; else return 0;"
+                },
+                "containsParameter": [
+                    {
+                        "$": {
+                            "id": 7,
+                            "ordinal": 7,
+                            "name": "temperatura",
+                            "dataType": "FLOAT",
+                            "optional": true
+                        },
+                        "isUsedIn": "//@containsIoTSystem.0/@containsIoTSubSystem.0/@constainsSelfAwarenessProcess.0/@usesAnalysisModel.0/@containsArgumentToParameterMapping.0"
+                    }
+                ],
+                "implementsAnalysisModel": "//@containsIoTSystem.0/@containsIoTSubSystem.0/@constainsSelfAwarenessProcess.0/@usesAnalysisModel.0"
+            },
+            {
+                "$": {
+                    "id": 7,
+                    "name": "obtenerNivelRiesgoCO",
+                    "description": "Obtiene el nivel de riesgo porcentual de la concentración de monóxido de carbono CO",
+                    "returnDataType": "FLOAT",
+                    "path": "",
+                    "instructions": "return (monoxidoCarbono/1000)*100;"
+                },
+                "containsParameter": [
+                    {
+                        "$": {
+                            "id": 9,
+                            "ordinal": 9,
+                            "name": "monoxidoCarbono",
+                            "dataType": "FLOAT",
+                            "optional": true
+                        },
+                        "isUsedIn": "//@containsIoTSystem.0/@containsIoTSubSystem.0/@constainsSelfAwarenessProcess.1/@usesAnalysisModel.0/@containsArgumentToParameterMapping.0 //@containsIoTSystem.0/@containsIoTSubSystem.0/@constainsSelfAwarenessProcess.4/@usesAnalysisModel.0/@containsArgumentToParameterMapping.0"
+                    }
+                ],
+                "implementsAnalysisModel": "//@containsIoTSystem.0/@containsIoTSubSystem.0/@constainsSelfAwarenessProcess.1/@usesAnalysisModel.0 //@containsIoTSystem.0/@containsIoTSubSystem.0/@constainsSelfAwarenessProcess.4/@usesAnalysisModel.0"
+            },
+            {
+                "$": {
+                    "id": 4,
+                    "name": "obtenerIndicadorMetricaPorcentual",
+                    "description": "Asigna una métrica porcentual (sea directa o indirecta) como indicador",
+                    "returnDataType": "FLOAT",
+                    "path": "",
+                    "instructions": "return metricaPorcentual;"
+                },
+                "containsParameter": [
+                    {
+                        "$": {
+                            "id": 6,
+                            "ordinal": 6,
+                            "name": "metricaPorcentual",
+                            "dataType": "FLOAT",
+                            "optional": true
+                        },
+                        "isUsedIn": "//@containsIoTSystem.0/@containsIoTSubSystem.0/@constainsSelfAwarenessProcess.2/@usesAnalysisModel.0/@containsArgumentToParameterMapping.0 //@containsIoTSystem.0/@containsIoTSubSystem.0/@constainsSelfAwarenessProcess.5/@usesAnalysisModel.0/@containsArgumentToParameterMapping.0"
+                    }
+                ],
+                "implementsAnalysisModel": "//@containsIoTSystem.0/@containsIoTSubSystem.0/@constainsSelfAwarenessProcess.2/@usesAnalysisModel.0 //@containsIoTSystem.0/@containsIoTSubSystem.0/@constainsSelfAwarenessProcess.5/@usesAnalysisModel.0"
+            },
+            {
+                "$": {
+                    "id": 6,
+                    "name": "obtenerNivelAceptabilidadTemperatura",
+                    "description": "Obtiene el nivel de aceptabilidad sobre la variabilidad de la temperatura ambiente",
+                    "returnDataType": "INTEGER",
+                    "path": "",
+                    "instructions": "if (temperatura&gt;=0 &amp;&amp; temperatura&lt;=4) return 100; else return 0;"
+                },
+                "containsParameter": [
+                    {
+                        "$": {
+                            "id": 8,
+                            "ordinal": 8,
+                            "name": "temperatura",
+                            "dataType": "FLOAT",
+                            "optional": true
+                        },
+                        "isUsedIn": "//@containsIoTSystem.0/@containsIoTSubSystem.0/@constainsSelfAwarenessProcess.3/@usesAnalysisModel.0/@containsArgumentToParameterMapping.0"
+                    }
+                ],
+                "implementsAnalysisModel": "//@containsIoTSystem.0/@containsIoTSubSystem.0/@constainsSelfAwarenessProcess.3/@usesAnalysisModel.0"
+            },
+            {
+                "$": {
+                    "id": 2,
+                    "name": "obtenerDesviacionEstandar",
+                    "description": "Obtiene la desviación estándar de un conjunto de datos",
+                    "returnDataType": "FLOAT",
+                    "path": "",
+                    "instructions": "const math = require('mathjs');\nreturn math.std(datos);"
+                },
+                "containsParameter": [
+                    {
+                        "$": {
+                            "id": 2,
+                            "ordinal": 2,
+                            "name": "datos",
+                            "dataType": "FLOAT",
+                            "optional": true
+                        },
+                        "isUsedIn": "//@containsIoTSystem.0/@containsIoTSubSystem.0/@constainsSelfAwarenessProcess.3/@usesCalculationMethod.0/@containsArgumentToParameterMapping.0"
+                    }
+                ]
+            },
+            {
+                "$": {
+                    "id": 1,
+                    "name": "obtenerPromedio",
+                    "description": "Obtiene la media o promedio de un conjunto de datos",
+                    "returnDataType": "FLOAT",
+                    "path": "",
+                    "instructions": "const math = require('mathjs');\nreturn math.mean(datos);"
+                },
+                "containsParameter": [
+                    {
+                        "$": {
+                            "id": 1,
+                            "ordinal": 1,
+                            "name": "datos",
+                            "dataType": "FLOAT",
+                            "optional": true
+                        },
+                        "isUsedIn": "//@containsIoTSystem.0/@containsIoTSubSystem.0/@constainsSelfAwarenessProcess.4/@usesCalculationMethod.0/@containsArgumentToParameterMapping.0"
+                    }
+                ]
+            },
+            {
+                "$": {
+                    "id": 3,
+                    "name": "obtenerRegresionLinealSimple",
+                    "description": "Construye un modelo de regresión lineal simple para extrapolar una variable dependiente a partir de una variable independiente",
+                    "returnDataType": "FLOAT",
+                    "endPoint": "obtenerRegresionLinealSimple",
+                    "computingNode": "//@containsEntity.1/@containsComputingNode.0",
+                    "middleware": "//@contaisnEntity.1/@containsComputingNode.0/@containsResource.1",
+                    "instructions": "const ml = require('ml-regression');\nconst regression = new ml.SimpleLinearRegression(varIndependiente,varDependiente);\nreturn regression.predict(varSimulacion);",
+                    "DataFormatType": "JSON"
+                },
+                "containsParameter": [
+                    {
+                        "$": {
+                            "id": 3,
+                            "ordinal": 3,
+                            "name": "varDependiente",
+                            "dataType": "FLOAT",
+                            "optional": true
+                        },
+                        "isUsedIn": "//@containsIoTSystem.0/@containsIoTSubSystem.0/@constainsSelfAwarenessProcess.5/@usesCalculationMethod.0/@containsArgumentToParameterMapping.0"
+                    },
+                    {
+                        "$": {
+                            "id": 4,
+                            "ordinal": 4,
+                            "name": "varIndependiente",
+                            "dataType": "FLOAT",
+                            "optional": true
+                        },
+                        "isUsedIn": "//@containsIoTSystem.0/@containsIoTSubSystem.0/@constainsSelfAwarenessProcess.5/@usesCalculationMethod.0/@containsArgumentToParameterMapping.1"
+                    },
+                    {
+                        "$": {
+                            "id": 5,
+                            "ordinal": 5,
+                            "name": "varSimulacion",
+                            "dataType": "FLOAT",
+                            "optional": true
+                        },
+                        "isUsedIn": "//@containsIoTSystem.0/@containsIoTSubSystem.0/@constainsSelfAwarenessProcess.5/@usesCalculationMethod.0/@containsArgumentToParameterMapping.2"
+                    }
+                ],
+                "implementsCalculationMethod": "//@containsIoTSystem.0/@containsIoTSubSystem.0/@constainsSelfAwarenessProcess.5/@usesCalculationMethod.0 //@containsIoTSystem.0/@containsIoTSubSystem.0/@constainsSelfAwarenessProcess.5/@usesCalculationMethod.0 //@containsIoTSystem.0/@containsIoTSubSystem.0/@constainsSelfAwarenessProcess.5/@usesCalculationMethod.0"
+            }
+        ],
+        "containsMetric": [
+            {
+                "$": {
+                    "id": 1,
+                    "name": "Grados Celsius temperatura ambiente actual",
+                    "description": "Grados Celsius temperatura ambiente en el momento actual",
+                    "abbreviation": "GCTAA"
+                },
+                "isProducedBy": "//@containsIoTSystem.0/@containsIoTSubSystem.0/@constainsSelfAwarenessProcess.0/@usesCollectionMethod.0",
+                "isValidatedBy": "//@containsScale.0",
+                "isExpressedIn": "//@containsMeasurementUnit.0",
+                "isUsedIn": "//@containsIoTSystem.0/@containsIoTSubSystem.0/@constainsSelfAwarenessProcess.0/@usesAnalysisModel.0/@containsArgumentToParameterMapping.0 //@containsIoTSystem.0/@containsIoTSubSystem.0/@constainsSelfAwarenessProcess.3/@usesCalculationMethod.0/@containsArgumentToParameterMapping.0",
+                "evaluates": "//@containsSelfAwarenessAspect.0"
+            },
+            {
+                "$": {
+                    "id": 3,
+                    "name": "Nivel de satisfacción del usuario sobre la temperatura ambiente",
+                    "description": "Nivel de satisfacción de la temperatura ambiente para el usuario, a fin de determinar si es necesario alguna acción",
+                    "abbreviation": "NSUTA",
+                    "perspective": 29
+                },
+                "isProducedBy": "//@containsIoTSystem.0/@containsIoTSubSystem.0/@constainsSelfAwarenessProcess.0/@usesAnalysisModel.0",
+                "isValidatedBy": "//@containsScale.1",
+                "isExpressedIn": "//@containsMeasurementUnit.1",
+                "evaluates": "//@containsSelfAwarenessAspect.0"
+            },
+            {
+                "$": {
+                    "id": 5,
+                    "name": "Partes por millón de concentración actual de CO",
+                    "description": "Partes por millón de la concentración actual de monóxido de carbono (CO) en el ambiente",
+                    "abbreviation": "PPMCACO"
+                },
+                "isProducedBy": "//@containsIoTSystem.0/@containsIoTSubSystem.0/@constainsSelfAwarenessProcess.1/@usesCollectionMethod.0",
+                "isValidatedBy": "//@containsScale.2",
+                "isExpressedIn": "//@containsMeasurementUnit.2",
+                "isUsedIn": "//@containsIoTSystem.0/@containsIoTSubSystem.0/@constainsSelfAwarenessProcess.1/@usesAnalysisModel.0/@containsArgumentToParameterMapping.0 //@containsIoTSystem.0/@containsIoTSubSystem.0/@constainsSelfAwarenessProcess.4/@usesCalculationMethod.0/@containsArgumentToParameterMapping.0",
+                "evaluates": "//@containsSelfAwarenessAspect.1"
+            },
+            {
+                "$": {
+                    "id": 7,
+                    "name": "Nivel de riesgo de la concentración de CO",
+                    "description": "Nivel de riesgo de la concentración de monóxido de carbono (CO) para el usuario, a fin de determinar si es necesario alguna acción",
+                    "abbreviation": "NRCCO",
+                    "perspective": 30
+                },
+                "isProducedBy": "//@containsIoTSystem.0/@containsIoTSubSystem.0/@constainsSelfAwarenessProcess.1/@usesAnalysisModel.0 //@containsIoTSystem.0/@containsIoTSubSystem.0/@constainsSelfAwarenessProcess.4/@usesAnalysisModel.0",
+                "isValidatedBy": "//@containsScale.2",
+                "isExpressedIn": "//@containsMeasurementUnit.1",
+                "evaluates": "//@containsSelfAwarenessAspect.1 //@containsSelfAwarenessAspect.4"
+            },
+            {
+                "$": {
+                    "id": 8,
+                    "name": "Porcentaje de carga de procesamiento actual de la CPU",
+                    "description": "Porcentaje de uso o carga de procesamiento de la CPU en el momento actual",
+                    "abbreviation": "PCPACPU"
+                },
+                "isProducedBy": "//@containsIoTSystem.0/@containsIoTSubSystem.0/@constainsSelfAwarenessProcess.2/@usesCollectionMethod.0",
+                "isValidatedBy": "//@containsScale.2",
+                "isExpressedIn": "//@containsMeasurementUnit.1",
+                "isUsedIn": "//@containsIoTSystem.0/@containsIoTSubSystem.0/@constainsSelfAwarenessProcess.2/@usesAnalysisModel.0/@containsArgumentToParameterMapping.0 //@containsIoTSystem.0/@containsIoTSubSystem.0/@constainsSelfAwarenessProcess.5/@usesCalculationMethod.0/@containsArgumentToParameterMapping.0",
+                "evaluates": "//@containsSelfAwarenessAspect.2"
+            },
+            {
+                "$": {
+                    "id": 10,
+                    "name": "Nivel de carga de procesamiento de la CPU",
+                    "description": "Nivel de uso de la CPU, a fin de determinar si es necesario alguna acción",
+                    "abbreviation": "NCPCPU",
+                    "perspective": 30
+                },
+                "isProducedBy": "//@containsIoTSystem.0/@containsIoTSubSystem.0/@constainsSelfAwarenessProcess.2/@usesAnalysisModel.0 //@containsIoTSystem.0/@containsIoTSubSystem.0/@constainsSelfAwarenessProcess.5/@usesAnalysisModel.0",
+                "isValidatedBy": "//@containsScale.2",
+                "isExpressedIn": "//@containsMeasurementUnit.1",
+                "evaluates": "//@containsSelfAwarenessAspect.2 //@containsSelfAwarenessAspect.5"
+            },
+            {
+                "$": {
+                    "id": 4,
+                    "name": "Nivel de aceptabilidad de la variabilidad diaria de la temperatura ambiente",
+                    "description": "Nivel de aceptabilidad de la variabilidad diaria de la temperatura ambiente, a fin de determinar si es necesario alguna acción",
+                    "abbreviation": "NAVDTA",
+                    "perspective": 29
+                },
+                "isProducedBy": "//@containsIoTSystem.0/@containsIoTSubSystem.0/@constainsSelfAwarenessProcess.3/@usesAnalysisModel.0",
+                "isValidatedBy": "//@containsScale.1",
+                "isExpressedIn": "//@containsMeasurementUnit.1",
+                "evaluates": "//@containsSelfAwarenessAspect.3"
+            },
+            {
+                "$": {
+                    "id": 2,
+                    "name": "Grados Celsius de variabilidad diaria de la temperatura ambiente",
+                    "description": "Grados Celsius de variabilidad diaria (desviación estándar) de la temperatura ambiente",
+                    "abbreviation": "GCVDTA"
+                },
+                "isProducedBy": "//@containsIoTSystem.0/@containsIoTSubSystem.0/@constainsSelfAwarenessProcess.3/@usesCalculationMethod.0",
+                "isValidatedBy": "//@containsScale.0",
+                "isExpressedIn": "//@containsMeasurementUnit.0",
+                "isUsedIn": "//@containsIoTSystem.0/@containsIoTSubSystem.0/@constainsSelfAwarenessProcess.3/@usesAnalysisModel.0/@containsArgumentToParameterMapping.0",
+                "evaluates": "//@containsSelfAwarenessAspect.3"
+            },
+            {
+                "$": {
+                    "id": 6,
+                    "name": "Partes por millón de concentración promedio diario de CO",
+                    "description": "Partes por millón de concentración promedio diario de monóxido de carbono (CO) en el ambiente",
+                    "abbreviation": "PPMCPDCO"
+                },
+                "isProducedBy": "//@containsIoTSystem.0/@containsIoTSubSystem.0/@constainsSelfAwarenessProcess.4/@usesCalculationMethod.0",
+                "isValidatedBy": "//@containsScale.2",
+                "isExpressedIn": "//@containsMeasurementUnit.2",
+                "isUsedIn": "//@containsIoTSystem.0/@containsIoTSubSystem.0/@constainsSelfAwarenessProcess.4/@usesAnalysisModel.0/@containsArgumentToParameterMapping.0",
+                "evaluates": "//@containsSelfAwarenessAspect.4"
+            },
+            {
+                "$": {
+                    "id": 9,
+                    "name": "Porcentaje estimado de carga de procesamiento de la CPU",
+                    "description": "Porcentaje estimado o predicho de uso de la CPU para controlar una cierta cantidad de sensores en el futuro",
+                    "abbreviation": "PECPCPU"
+                },
+                "isProducedBy": "//@containsIoTSystem.0/@containsIoTSubSystem.0/@constainsSelfAwarenessProcess.5/@usesCalculationMethod.0",
+                "isValidatedBy": "//@containsScale.2",
+                "isExpressedIn": "//@containsMeasurementUnit.1",
+                "isUsedIn": "//@containsIoTSystem.0/@containsIoTSubSystem.0/@constainsSelfAwarenessProcess.5/@usesAnalysisModel.0/@containsArgumentToParameterMapping.0",
+                "evaluates": "//@containsSelfAwarenessAspect.5"
+            }
+        ],
+        "containsScale": [
+            {
+                "$": {
+                    "id": 1,
+                    "name": "CUANTITATIVA, CONTINUA, INTERVALO",
+                    "validValues": "CONJUNTO DE NUMEROS REALES",
+                    "type": 28
+                },
+                "isUsedBy": "//@containsMetric.0 //@containsMetric.7"
+            },
+            {
+                "$": {
+                    "id": 3,
+                    "name": "CUANTITATIVA, DISCRETA, RATIO",
+                    "validValues": "CONJUNTO DE NUMEROS ENTEROS",
+                    "type": 46
+                },
+                "isUsedBy": "//@containsMetric.1 //@containsMetric.6"
+            },
+            {
+                "$": {
+                    "id": 2,
+                    "name": "CUANTITATIVA, CONTINUA, RATIO",
+                    "validValues": "CONJUNTO DE NUMEROS REALES",
+                    "type": 46
+                },
+                "isUsedBy": "//@containsMetric.2 //@containsMetric.3 //@containsMetric.4 //@containsMetric.5 //@containsMetric.8 //@containsMetric.9"
+            }
+        ],
+        "containsMeasurementUnit": [
+            {
+                "$": {
+                    "id": 1001,
+                    "name": "GRADOS CENTIGRADOS",
+                    "description": "UNIDAD DE TEMPERATURA",
+                    "acronym": "C"
+                },
+                "isUsedBy": "//@containsMetric.0 //@containsMetric.7"
+            },
+            {
+                "$": {
+                    "id": 1003,
+                    "name": "PORCENTAJE",
+                    "description": "NUMERO O CANTIDAD QUE REPRESENTA LA PROPORCIONALIDAD DE UNA PARTE RESPECTO DE UN TOTAL QUE SE CONSIDERA DIVIDIDO EN CIEN UNIDADES.",
+                    "acronym": "%"
+                },
+                "isUsedBy": "//@containsMetric.1 //@containsMetric.3 //@containsMetric.4 //@containsMetric.5 //@containsMetric.6 //@containsMetric.9"
+            },
+            {
+                "$": {
+                    "id": 1002,
+                    "name": "PARTES POR MILLON",
+                    "description": "UNIDAD DE MEDIDA DE LA CONCENTRACION DE MONOXIDO DE CARBONO",
+                    "acronym": "PPM"
+                },
+                "isUsedBy": "//@containsMetric.2 //@containsMetric.8"
+            }
+        ]
+    }
+}

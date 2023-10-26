@@ -1,7 +1,9 @@
-FROM node:18.12.1
-WORKDIR /app-supervisora
-COPY package*.json ./
+FROM node:14.17
+WORKDIR /app-supervisor-nodo-fog-1
+COPY package*.json ./s
 RUN npm install
 RUN npm install ponte
+RUN npm install chokidar
+RUN npm install request
 COPY . .
-CMD ["node", "StartApp.js", "--ruta", "/app-supervisora/modelos/Modelo.json"]
+CMD ["node", "StartApp.js", "--tipoejecucion", "2", "--rutamodelos", "/app-supervisor-nodo-fog-1/modelos/Modelo.json"]
