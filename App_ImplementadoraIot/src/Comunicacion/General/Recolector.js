@@ -18,6 +18,7 @@ try {
     fs.statSync('./modelos/modeloObjeto.json');
     console.log('\nAPI RESTful recolector publicada (OK)');
     routes = require("../../Comunicacion/Monitoreo/ImplementadorServicios");
+   
 } catch (err) {
     if (err.code === 'ENOENT') {
         console.log('******** Esperando configuracion********');

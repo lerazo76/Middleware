@@ -183,7 +183,7 @@
                                                     "hasRulePropertyToDataColumn": "//@containsDataFlow.2/@containsDataMappingRule.1",
                                                     "dataColumnType": "MetaData",
                                                     "dataType": "Integer",
-                                                    "formulaExpression": ""
+                                                    "formulaExpression": "let a=Math.random() * (3 - 0) + 0; a=parseInt(a);return a;"
                                                 },
                                                 "isUsedIn": "//@containsIoTSystem.0/@containsIoTSubSystem.0/@constainsSelfAwarenessProcess.5/@usesCalculationMethod.0/@containsArgumentToParameterMapping.1"
                                             },

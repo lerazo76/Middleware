@@ -1,8 +1,12 @@
 // Archivo para inicializar la aplicacion
 
-let indexPath = process.argv.indexOf('--rutamodelos'); // obtenemos el primer parametro, hace referencia a la ruta del modelo json
-let indexTipoEjecucion = process.argv.indexOf('--tipoejecucion'); // obtenemos el segundo parametro, hace referencia al tipo de ejecucion monitoreo y autoconsciencia
-let indexPuerto = process.argv.indexOf('--puerto'); // puerto en el que se va a ejecutar la App de Monitoreo
+//let indexPath = process.argv.indexOf('--rutamodelos'); // obtenemos el primer parametro, hace referencia a la ruta del modelo json
+//let indexTipoEjecucion = process.argv.indexOf('--tipoejecucion'); // obtenemos el segundo parametro, hace referencia al tipo de ejecucion monitoreo y autoconsciencia
+//let indexPuerto = process.argv.indexOf('--puerto'); // puerto en el que se va a ejecutar la App de Monitoreo
+
+let indexTipoEjecucion = process.argv.indexOf('--tipoejecucion');
+let indexPath = process.argv.indexOf('--rutamodelos');
+
 
 if (indexPath > -1){
   let filePath = process.argv[indexPath+1]; 

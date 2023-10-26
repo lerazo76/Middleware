@@ -4,6 +4,7 @@ let globalConfig = require('../../modelos/modeloJSON.json');
 // Funcion para obtener los datos de la Base de Datos y de la Red
 function obtenerDatosRedBd(modelo){
     let datosRedBd;
+    let dataStore;
     modelo.forEach(resource => {
         resource.containsResource.forEach(properties => {
             if (properties['xsi:type'] === 'MonitorIoT:DataBase') {
@@ -75,11 +76,14 @@ module.exports = {
 // Funcion para obtener informacion del link a la tabla que se va a conectar
 function getTableInfo(globalConfig, index){
     const link = globalConfig["ArchitectureSelfAwarenessIoT"].containsLink[index];
-    const refList = link.$.linksDataTable.split("/@");
-    let auxObjRef = globalConfig["ArchitectureSelfAwarenessIoT"];
-    for (let i = 1; i < refList.length; i++) {
-        let str = refList[i];
-        auxObjRef = auxObjRef[str.split(".")[0]][str.split(".")[1]];
+    let auxObjRef;
+    if (link.$.linksDataTable){
+        const refList = link.$.linksDataTable.split("/@");
+        auxObjRef = globalConfig["ArchitectureSelfAwarenessIoT"];
+        for (let i = 1; i < refList.length; i++) {
+            let str = refList[i];
+            auxObjRef = auxObjRef[str.split(".")[0]][str.split(".")[1]];
+        }
     }
     return auxObjRef;
 };
@@ -105,7 +109,9 @@ function getTablenodo(globalConfig, index){
     let link,refList;
     if(!isNaN(index-0)){
         link = globalConfig["ArchitectureSelfAwarenessIoT"].containsLink[index];
-        refList = link.$.linksDataTable.split("/@");
+        if(link.$.linksDataTable){
+            refList = link.$.linksDataTable.split("/@");
+        }
     }
     else{
         refList = index.split("/@");
@@ -113,27 +119,31 @@ function getTablenodo(globalConfig, index){
 
     let auxObjRef = globalConfig["ArchitectureSelfAwarenessIoT"];
 
-    for (let i = 1; i < refList.length; i++) {
-        let str = refList[i];
-        auxObjRef = auxObjRef[str.split(".")[0]][str.split(".")[1]];
-        
-        if (auxObjRef.$["xsi:type"] === "MonitorIoT:CloudNode" || auxObjRef.$["xsi:type"] === "MonitorIoT:FogNode" || auxObjRef.$["xsi:type"] === "MonitorIoT:IoTGateway"){
-            var uri;
-            let network;
-            let dataStore;
-            auxObjRef.containsResource.forEach(resource => {
-                if (resource.$["xsi:type"] === "MonitorIoT:NetworkInterface") {
-                    network = resource;
-                } else if (resource.$["xsi:type"] === "MonitorIoT:DataBase") {
-                    dataStore = resource;
-                }
-            });
-            uri = getURIDataBase(network, dataStore);
-            // Eliminar la linea cuando suba a dockers OJOOOOOOO
-            uri = "postgres://postgres:postgres@localhost:5432/postgresqllocal";
-            return auxObjRef.$["xsi:type"]+"|"+auxObjRef.$.id+"|"+auxObjRef.$.name+"|"+uri;
+    if(refList){
+        for (let i = 1; i < refList.length; i++) {
+            let str = refList[i];
+            auxObjRef = auxObjRef[str.split(".")[0]][str.split(".")[1]];
+            
+            if (auxObjRef.$["xsi:type"] === "MonitorIoT:CloudNode" || auxObjRef.$["xsi:type"] === "MonitorIoT:FogNode" || auxObjRef.$["xsi:type"] === "MonitorIoT:IoTGateway"){
+                var uri;
+                let network;
+                let dataStore;
+                auxObjRef.containsResource.forEach(resource => {
+                    //console.log('aaa');
+                    if (resource.$["xsi:type"] === "MonitorIoT:NetworkInterface") {
+                        network = resource;
+                    } else if (resource.$["xsi:type"] === "MonitorIoT:DataBase") {
+                        dataStore = resource;
+                    }
+                });
+                uri = getURIDataBase(network, dataStore);
+                // Eliminar la linea cuando suba a dockers OJOOOOOOO
+                uri = "postgres://postgres:postgres@localhost:5432/postgresqllocal";
+                return auxObjRef.$["xsi:type"]+"|"+auxObjRef.$.id+"|"+auxObjRef.$.name+"|"+uri;
+            }
         }
     }
+    return null;
 };
 
 var getURIDataBase = exports.getURIDataBase = function (network, dataStore){
