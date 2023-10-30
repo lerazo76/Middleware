@@ -14,7 +14,7 @@ async function ejecutarDemoniosControlados(nodoComputacion) {
   console.log('\x1b[34m%s\x1b[0m',"Implementando/reconfigurando los demonios de los procesos de autonsciencia...");
   await ImplementarDemonio(preReflexivosMap);
   for (const element of preReflexivosMap) {
-    if (typeof element["unidadTiempo"] !== "undefined" && typeof element["intervalo"] !== "undefined" && element["computingNode"] === nodoComputacion ) { //&& element["computingNode"] === nodoComputacion
+    if (typeof element["unidadTiempo"] !== "undefined" && typeof element["intervalo"] !== "undefined"  ) { //&& element["computingNode"] === nodoComputacion
       await ejecutarDemonio(element);
       console.log("Computing node ", element["computingNode"]);
     }

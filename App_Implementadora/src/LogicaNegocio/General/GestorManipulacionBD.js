@@ -160,6 +160,7 @@ module.exports.getRegistrosBD = async (dbTable, tableref)  => {
 }
 
 //codigo Alex ver como unir
+const funciones = require("../General/EjecutorTareas");
 const { Client } = require("pg");
 
 //funcion para obtener la BD, tabla y columna relacionadas con cada proceso pre-reflexivo (metrica directa)
@@ -167,23 +168,23 @@ function mapearconexionBD(ruta, modelo) {
   const arregloconexiones = [];
   ruta =
     "ArchitectureSelfAwarenessIoT." +
-    EjecutorTareasAutoconsciencia.transformaraRuta(ruta);
+    funciones.transformaraRuta(ruta);
   // let rutabd = ruta.replace(/(@containsResource\.\d+).*/, "$1");
   let rutabd = ruta.match(/^(.*?containsResource\.\d+)/)[1];
   let rutatabla = ruta.match(/^(.*?containsDataTable\.\d+)/)[1];
   let rutacolumna = ruta.match(/^(.*?composedOfDataColumn\.\d+)/)[1];
-  let conexionbd = EjecutorTareasAutoconsciencia.buscarValorConRuta(
+  let conexionbd = funciones.buscarValorConRuta(
     modelo,
     rutabd,
     "$"
   );
   
-  let conexiontb = EjecutorTareasAutoconsciencia.buscarValorConRuta(
+  let conexiontb = funciones.buscarValorConRuta(
     modelo,
     rutatabla,
     "$"
   );
-  let conexioncol = EjecutorTareasAutoconsciencia.buscarValorConRuta(
+  let conexioncol = funciones.buscarValorConRuta(
     modelo,
     rutacolumna,
     "$"
