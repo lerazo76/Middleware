@@ -104,37 +104,41 @@ function transformaraRuta(cadena) {
     return sinBarrasYarroba; // Devolver el valor final de que es la ruta
 }
 
+//subfuncion para cambiar el path de una propiedad por el valor
 function buscarValorConRuta(objeto, ruta, propiedadExtraer) {
-    const propiedades = ruta.split("."); // Dividir la ruta en propiedades separadas por puntos
+  const propiedades = ruta.split("."); // Dividir la ruta en propiedades separadas por puntos
   //   console.log("propiedades: ", propiedades);
-    let valor = objeto; // Inicializar "valor" con el objeto de entrada
+  let valor = objeto; // Inicializar "valor" con el objeto de entrada
   //   console.log(".......................");
-    for (let prop of propiedades) {
-      // Iterar sobre cada propiedad en el arreglo "propiedades"
-      valor = valor[prop]; // Acceder a la propiedad actual en el objeto "valor"
-      if (valor === undefined) {
-        // Si el valor es indefinido,la ruta no es válida
-        //console.log("Entro a undefined");
-        return undefined;
-      }
+  for (let prop of propiedades) {
+    // Iterar sobre cada propiedad en el arreglo "propiedades"
+    valor = valor[prop]; // Acceder a la propiedad actual en el objeto "valor"
+    if (valor === undefined) {
+      // Si el valor es indefinido,la ruta no es válida
+      console.log("Entro a undefined");
+      return undefined;
     }
-  
-    valor = obtenerParesClaveValor(valor[`${propiedadExtraer}`]); // Obtener los pares clave-valor del objeto en la propiedad "$"
-   //   valor = obtenerParesClaveValor(valor, propiedadExtraer); //mejora en caso que no tenga la propiedad buscada deje igual
-    // valor = obtenerParesClaveValor(valor["containsThreshold"]); //para el caso de obtener las recomendaciones
-    return valor; //Devolver el valor buscado con la ruta
+  }
+  if(propiedadExtraer != null){ //verifica si se envio la propiedad a extraer y obtiene los pares clave valor de esa propiedad
+    valor = obtenerParesClaveValor(valor[`${propiedadExtraer}`]); 
+  }
+  return valor; //Devolver el valor buscado con la ruta
 }
 
+//subfuncion para cambiar el path de una propiedad por el valor y obtener los pares clave
 function obtenerParesClaveValor(objeto) {
-    if (!objeto) {
-      return objeto; // Si el objeto es nulo o undefined, devolverlo sin cambios
-    }
-    const resultado = {}; // Objeto vacío para almacenar los pares clave-valor resultantes
-    for (let clave in objeto) {
-      // Iterar sobre cada clave en el objeto de entrada
-      resultado[clave] = objeto[clave]; // Asignar el valor correspondiente a la clave en el objeto de entrada al objeto resultado
-    }
-    return resultado; // Devolver el objeto resultado
+  if (!objeto) {
+    return objeto; // Si el objeto es nulo o undefined, devolverlo sin cambios
+  }
+  if (!Array.isArray(objeto)) {
+    return objeto; // Si el objeto no es un array, devolverlo sin cambios
+  }
+  const resultado = {}; // Objeto vacío para almacenar los pares clave-valor resultantes
+  for (let clave in objeto) {
+    // Iterar sobre cada clave en el objeto de entrada
+    resultado[clave] = objeto[clave]; // Asignar el valor correspondiente a la clave en el objeto de entrada al objeto resultado
+  }
+  return resultado; // Devolver el objeto resultado
 }
 
 //VER BIEN COMO IMPORTAR ESTAS FUNCIONES
@@ -210,5 +214,7 @@ function estructurarObj(obj, nivelMax = Infinity) {
   
 module.exports = {
     buscarValor,
-    cambiarValorPropiedad
+    cambiarValorPropiedad,
+    transformaraRuta,
+    buscarValorConRuta
 }
