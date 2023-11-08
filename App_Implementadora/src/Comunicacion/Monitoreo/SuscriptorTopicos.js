@@ -43,8 +43,8 @@ if(network && broker){
     }
 
     // Obtiene la direccion del broker
-    const uri = protocol ? protocol.name.toLowerCase() + "://" + network.networkAddress + ":" + protocol.port : "";
-
+    //const uri = protocol ? protocol.name.toLowerCase() + "://" + network.networkAddress + ":" + protocol.port : "";
+    let uri = "mqtt://mosquitto-nodo-fog-1:1883"
     // Crea un cliente MQTT y conéctate al broker
     client = protocol.name.toLowerCase() == "mqtt" && mqtt.connect(uri)
 }

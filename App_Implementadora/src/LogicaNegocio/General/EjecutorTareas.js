@@ -18,12 +18,19 @@ if (tipoEjecucion === 1){
         ejecutorTareasMonitoreo()   
     }, 4000)
      
+    /* setTimeout(() => {
+        ejecutorTareasAutoconsciencia()   
+    }, 4000) */
 }else{
     // Codigo para ejecutar tanto monitoreo como autoconsciencia 
 }
 
 function ejecutorTareasMonitoreo(){
     require('../Monitoreo/EjecutorTareasMonitoreo')
+}
+
+function ejecutorTareasAutoconsciencia(){
+  require('../Autoconsciencia/EjecutorTareasAutoconsciencia')
 }
 
 function ImplementadorBD(){

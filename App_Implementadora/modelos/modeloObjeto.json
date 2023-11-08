@@ -268,7 +268,7 @@
                 "description": "Adaptador de red Ethernet del nodo Fog HP Proliant Microserver.",
                 "connects": "//@containsEntity.2 //@containsEntity.4",
                 "macAddress": "50-5B-C2-D5-AE-8D",
-                "networkAddress": "localhost",
+                "networkAddress": "app-implementadora-nodo-fog-1",
                 "communicationTechnology": "Ethernet"
             },
             {

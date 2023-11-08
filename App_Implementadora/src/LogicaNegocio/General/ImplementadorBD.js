@@ -26,7 +26,7 @@ function getlinkDataBase(network, dataStore){
         const host = network.networkAddress;
         const {port,name} = getLocalProtocol(globalConfig, dataStore.usesProtocol.split("/@"));
         //return dataStore.uri ? dataStore.uri : name + "://" + user + ":" + password + "@" + host + ":" + port + "/" + dbname;
-        return "postgres://postgres:postgres@localhost:5432/postgresqllocal";
+        return "postgres://postgres:postgres@db-nodo-fog-1:5432/postgresqllocal";
     }
 }
 
@@ -49,7 +49,7 @@ if (network && dataStore){
     const { Client } = require('pg');
     // Creo un nuevo client para realizar la conexion a la BD
     client = new Client({ connectionString: uri });
-
+    
     try{
         client.connect(err=>{
             if(err){
@@ -64,8 +64,17 @@ if (network && dataStore){
                     }
                 }
                 
+                
                 // Creo un nuevo cliente con la nueva uri
                 client = new Client({ connectionString: uri });
+                /*client = new Client({
+                    host: 'postgres',
+                    port: 5432,
+                    user: 'postgres',
+                    password: 'postgres',
+                    database: 'postgres'
+
+                })*/
                 client.connect(err => {
                     if(err){
                         console.error('No mismo existe', err.stack);
@@ -229,10 +238,11 @@ const createTableQuery = `
 async function crearTablaMetricas(basedatos) {
   
   // Configura la conexión a la base de datos
+  console.log(basedatos);
   const client = new Client({
     user: "postgres",
-    host: "localhost",
-    database: basedatos,
+    host: "db-nodo-fog-1",
+    //database: basedatos,
     database: "postgresqllocal",
     password: "postgres",
     port: 5432, // Puerto por defecto de PostgreSQL
@@ -240,7 +250,7 @@ async function crearTablaMetricas(basedatos) {
   try {
     // Conectar a la base de datos
     await client.connect();
-    console.log("Conexión exitosa a la base de datos");
+    //console.log("Conexión exitosa a la base de datos");
 
     // Ejecutar la consulta para crear la tabla
     await client.query(createTableQuery);

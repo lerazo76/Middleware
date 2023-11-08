@@ -6,4 +6,4 @@ RUN npm install ponte
 RUN npm install chokidar
 RUN npm install request
 COPY . .
-CMD ["node", "StartApp.js", "--tipoejecucion", "2", "--rutamodelos", "/app-supervisor-nodo-fog-1/modelos/Modelo.json"]
+CMD ["node", "StartApp.js", "--tipoejecucion", "2", "--rutamodelos", "./modelos"]

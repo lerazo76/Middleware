@@ -418,8 +418,9 @@ middleware && middleware.containsService && middleware.containsService.length > 
                             j++;
                         });
                         result = gestorManipulacion.postMethod(tableInfo, data, tableref);
+                        
                         result.then(r => {
-                            console.log(r[0]);
+                            console.log(r);
                         })
                     }
                 }

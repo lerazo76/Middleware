@@ -38,12 +38,13 @@ function getLocalProtocol (globalConfig, index){
 // Funcion para obtener el link de enlace de conexion a la base de datos 
 function getlinkDataBase(network, dataStore){
     if(dataStore){
-        const dbname = dataStore.name;
+        const dbname = dataStore.name.toLowerCase();
         const user = dataStore.user ? dataStore.user : "user";
         const password = dataStore.password ? dataStore.password : "****";
         const host = network.networkAddress;
         const {port,name} = getLocalProtocol(globalConfig, dataStore.usesProtocol.split("/@"));
         //return dataStore.uri ? dataStore.uri : name + "://" + user + ":" + password + "@" + host + ":" + port + "/" + dbname;
+        //return name + "://" + user + ":" + password + "@" + host + ":" + port + "/" + dbname;
         return "postgres://postgres:postgres@localhost:5432/postgresqllocal";
     }
 }
@@ -54,7 +55,12 @@ var uri = getlinkDataBase(datos.network, datos.dataStore);
 
 const { Client } = require('pg');
 
-const client = new Client({connectionString: uri});
+//const client = new Client({connectionString: uri});
+client = new Client({user: "postgres",
+                     host: "db-nodo-fog-1",
+                     database: "postgresqllocal",
+                     password: "postgres",
+                     port: 5432});
 
 async function connectDB() {
     try {

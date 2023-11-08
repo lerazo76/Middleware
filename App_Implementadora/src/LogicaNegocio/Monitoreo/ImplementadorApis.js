@@ -141,6 +141,7 @@ exports.getServiceURI = function (globalConfig, index){
                 protocol = getLocalProtocol(globalConfig, index, index2);
             }
             const url = "http://" + network.$.networkAddress + ":" + protocol.port + "/" + service.$.endPoint;             
+            //const url = "http://" + "mosquitto-nodo-fog-1" + ":" + protocol.port + "/" + service.$.endPoint;             
             return url;
         } else {
             return "";
@@ -220,7 +221,9 @@ exports.getBrokerURI = function(globalConfig, index){
                 let index2= protocolRef[2].split(".")[1];
                 protocol = getLocalProtocol(globalConfig, index, index2);
             }
-            const url = protocol.name.toLowerCase() + "://" + network.$.networkAddress + ":" + protocol.port;
+            //const url = protocol.name.toLowerCase() + "://" + network.$.networkAddress + ":" + protocol.port;
+            const url = protocol.name.toLowerCase() + "://" + "mosquitto-nodo-fog-1" + ":" + protocol.port;
+
             return url;
         } else {
             return "";

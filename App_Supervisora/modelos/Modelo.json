@@ -94,7 +94,7 @@
                       "name":"CEDIA Cloud",
                       "description":"Adaptador de red del nodo cloud de CEDIA.",
                       "connects":"//@containsEntity.4",
-                      "networkAddress":"localhost",
+                      "networkAddress":"app-implementadora-nodo-cloud-1",
                       "communicationTechnology":"Ethernet"
                    }
                 }
@@ -450,7 +450,7 @@
                             "description":"Adaptador de red Ethernet del nodo Fog HP Proliant Microserver.",
                             "connects":"//@containsEntity.2 //@containsEntity.4",
                             "macAddress":"50-5B-C2-D5-AE-8D",
-                            "networkAddress":"localhost",
+                            "networkAddress":"app-implementadora-nodo-fog-1",
                             "communicationTechnology":"Ethernet"
                          }
                       },
@@ -587,7 +587,7 @@
                             "description":"Adaptador de red Wi-Fi de la puerta de enlace Raspberry PI 3.",
                             "connects":"//@containsEntity.2",
                             "macAddress":"DC-A6-32-4A-FC-68",
-                            "networkAddress":"localhost"
+                            "networkAddress":"app-implementadora-nodo-edge-1"
                          }
                       }
                    ]

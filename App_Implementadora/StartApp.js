@@ -1,17 +1,21 @@
-let indexPuerto = process.argv.indexOf('--puerto');
-//let indexPuerto = process.env.puerto;
-console.log(indexPuerto);
+//let indexPuerto = process.argv.indexOf('--puerto');
+let env_puerto = process.env.puerto;
+
 // obtengo el puerto para ejecutar la Aplicacion Implementadora
-if(indexPuerto > -1){
-  let puerto = process.argv[indexPuerto+1];
+if(env_puerto > -1){
+  /*let puerto = process.argv[indexPuerto+1];
   module.exports = {
     puerto: puerto
+  }*/
+
+  module.exports = {
+    puerto: env_puerto
   }
-  console.log(`\nIniciando servidor de aplicaciones en http://localhost:${puerto}`);
+  console.log(`\nIniciando servidor de aplicaciones en http://localhost:${env_puerto}`);
   recolector(); 
 
 }else{
-  console.log('\x1b[31m%s\x1b[0m','Ok Error al Iniciar Aplicacion Implementadora, no se especifico el puerto para ejecutar.');
+  console.log('\x1b[31m%s\x1b[0m','Error al Iniciar Aplicacion Implementadora, no se especifico el puerto.');
 }
 
 // Funcion para llamar al Recolector
