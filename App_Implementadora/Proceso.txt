@@ -1,5 +1,0 @@
-1. Primero se ejecuta StartApp para iniciar la Aplicacion Implementadora
-
-2. Despues del StartApp, se ejecuta el Recolector, ubicado en la carpeta Comunicacion/General/recolector
-
-3. 
