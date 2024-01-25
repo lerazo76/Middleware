@@ -1,11 +1,12 @@
 version: "3.8"
 
 services:
-  postgres:
+  db-nodo-fog-1:
+    user: root
     image: postgres
     restart: always
     ports: 
-      - "5432:5432"
+      - "5432:5432" 
     environment:
       DATABASE_HOST: 127.0.0.1
       DATABASE_USER: postgres
@@ -15,33 +16,91 @@ services:
       POSTGRES_PASSWORD: postgres
     volumes:
       - ./postgres-msn-data:/var/lib/postgresql/data
-
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 30s
+      timeout: 15s
+      retries: 3
   pgadmin:
     image: dpage/pgadmin4
+    user: root
     environment:
       PGADMIN_DEFAULT_EMAIL: "admin@pg.com"
       PGADMIN_DEFAULT_PASSWORD: "admin"
     volumes:
       - ./pgadmin-msn-servers:/var/lib/pgadmin
     ports: 
-      - "80:80"
+      - "9696:80"
     depends_on:
-      - postgres
-
-  FogNode:
-    image: lerazo/app-implementadora-nodo-fog-1:1.0.0
-    restart: always
+      - db-nodo-fog-1
+  mosquitto-nodo-fog-1:
+    image: eclipse-mosquitto
+    ports:
+      - "1883:1883"
+      - "5683:5683"
     volumes:
-      - ./App_Implementadora_FogNode/modelos:/FogNode/baseAnterior
+      - ./mqtt:/mosquitto/:rw
+  app-implementadora-nodo-fog-1:
+    image: lerazo/app-implementadora-nodo-fog-1
+    restart: always
+    depends_on:
+      db-nodo-fog-1:
+        condition: service_healthy
+    volumes:
+      - ./App_Implementadora_FogNode/modelos:/app-implementadora-nodo-fog-1/modelos
+    environment:
+      puerto: 9999
+      app: 0
     ports: 
       - "9999:9999"
+  app-implementadora-nodo-edge-1:
+    image: lerazo/app-implementadora-nodo-edge-1
+    restart: always
     depends_on:
-      - postgres
-  
-  AppSupervisor:
-    image: lerazo/app-supervisor-nodo-fog-1:1.0.0
+      db-nodo-fog-1:
+        condition: service_healthy
+    volumes:
+      - ./App_Implementadora_EdgeNode/modelos:/app-implementadora-nodo-edge-1/modelos
+    environment:
+      puerto: 9997
+      app: 0
+    ports: 
+      - "9997:9997"
+  app-implementadora-nodo-cloud-1:
+    image: lerazo/app-implementadora-nodo-cloud-1
+    restart: always
+    depends_on:
+      db-nodo-fog-1:
+        condition: service_healthy
+    volumes:
+      - ./App_Implementadora_CloudNode/modelos:/app-implementadora-nodo-cloud-1/modelos
+    environment:
+      puerto: 9998
+      app: 0
+    ports: 
+      - "9998:9998"
+  app-supervisor-nodo-fog-1:
+    image: lerazo/app-supervisor-nodo-fog-1
+    depends_on:
+      - app-implementadora-nodo-fog-1
+      - app-implementadora-nodo-edge-1
+      - app-implementadora-nodo-cloud-1
     restart: always
     volumes:
-      - ./modelos:/AppSupervisor/modelos
+      - ./App_Supervisora/modelos:/app-supervisor-nodo-fog-1/modelos
+  visor-autoconsciencia-1:
+    image: lerazo/visor-autoconsciencia-1:1.0
     depends_on:
-      - FogNode
+      db-nodo-fog-1:
+        condition: service_healthy
+    restart: always
+    ports:
+      - "9914:9914"
+    volumes:
+      - ./selfAwareModel:/visor-autoconsciencia-1/selfAwareModel
+
+    
+    
+
+
+  
