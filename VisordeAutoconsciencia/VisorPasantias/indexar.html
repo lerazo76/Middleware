@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="es">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Monitorización</title>
+        <link rel="stylesheet" type="text/css" href="recursos/css/normalize.css" />
+        <link rel="stylesheet" type="text/css" href="recursos/css/index_desktop.css" media="all" />
+        <link href="https://fonts.googleapis.com/css2?family=Lato:wght@700&display=swap" rel="stylesheet"> <!--Fuente para el documento-->
+        <link rel="stylesheet" type="text/css" href="recursos/iconos/css/all.min.css" /> <!--iconos de font awesome-->
+        <script src="./recursos/javascript/chart.js"></script>
+        <script src="./recursos/javascript/Archivo.js"></script>
+    </head>
+
+    <body>
+        <p class="titulo">Visor de monitorización y autoconsciencia para sistemas IoT</p>
+        <div class="container-general">
+            <div class="barra_lateral">
+                <div class="sistema-container">
+                    <p class="titulo__menu">Sistema</p>
+                    <div class="combobox-container">
+                        <select class="combo" name="select">
+                            <option value="Seleccione" selected>Seleccione</option>
+                            <option value="Opcion_1" >Opción 1</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="entidades-container">
+                    <p class="titulo__menu">Entidades</p>
+                    <div class="arbol-container">
+                        <nav>
+                            <ul class="menu" id="arb">                         
+                            </ul>            
+                        </nav>
+                    </div>
+
+                </div>
+                <div class="propiedades-container" id="propc">
+                    <p class="titulo__menu">Propiedades</p>
+                    <div class="lista-container">
+                        <nav class="menu__container">
+                            <ul class="menu" id="prop">
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+                <div class="propiedadest-container" id="propct">
+                    <p class="titulo__menu">Tablas</p>
+                    <div class="lista-container">
+                        <nav class="menu__container">
+                            <ul class="menu" id="propt">   
+                            </ul>
+                        </nav>
+                    </div>
+                </div>            
+            </div>
+            <div class="container-informacion">
+                <div class = "container-botones">
+                    <div class="botones">
+                        <a href="#" class="boton" id="btn-1"><i class="fas fa-satellite"></i>En tiempo real</a>
+                        <a href="#" class="boton" id="btn-form"><i class="fas fa-history"></i>Histórico</a>
+                    </div>
+                    <div class="radio-botones">
+                        <a class="rad-boton" href="#"><i class="fas fa-circle blue"></i>Monitorización</a>
+                        <a class="rad-boton" href="index..html"><i class="fas fa-circle white"></i>Autoconsciencia</a>
+                    </div>
+                </div>
+                <div class="ocultar" id="fechas">
+                    <form action="#"></form>
+                        <label for="desde">Desde: </label>
+                        <input type="text" id="desde" name="des">
+                        <label for="hasta">Hasta: </label>
+                        <input type="text" id="hasta" name="hast">
+                        <input class="boton-form" type="submit" id="btn1" value="Mostrar">                 
+                </div>
+                <div class="tabla-container" >  
+                    <table id="tabla-informacion">
+                        <thead>
+                            <tr>
+                                <th>Datos</th>
+                                <th>Metadatos</th>
+                                <th>fecha</th>
+                                <th>Sensores</th>
+                            </tr>
+                        </thead>
+                        <tbody>  
+                            <tr>
+                                <td>Datos</td>
+                                <td>Metas</td>
+                                <td>Julio</td>
+                                <td>Sensor1</td>
+                            </tr>
+                            <tr>
+                                <td>Datos</td>
+                                <td>Metas</td>
+                                <td>Julio</td>
+                                <td>Sensor1</td>
+                            </tr>
+                            <tr>
+                                <td>Datos</td>
+                                <td>Metas</td>
+                                <td>Julio</td>
+                                <td>Sensor1</td>
+                            </tr>
+                            <tr>
+                                <td>Datos</td>
+                                <td>Metas</td>
+                                <td>Julio</td>
+                                <td>Sensor1</td>
+                            </tr>
+                            <tr>
+                                <td>Datos</td>
+                                <td>Metas</td>
+                                <td>Julio</td>
+                                <td>Sensor1</td>
+                            </tr>
+                            <tr>
+                                <td>Datos</td>
+                                <td>Metas</td>
+                                <td>Julio</td>
+                                <td>Sensor1</td>
+                            </tr>
+                            <tr>
+                                <td>Datos</td>
+                                <td>Metas</td>
+                                <td>Julio</td>
+                                <td>Sensor1</td>
+                            </tr>
+                            <tr>
+                                <td>Datos</td>
+                                <td>Metas</td>
+                                <td>Julio</td>
+                                <td>Sensor1</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="grafico-container">
+                    <p class="titulo-grafico">Gráfico</p>
+                    <div class="grafico"> 
+                        <canvas id="myChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <script>armarestructura();</script>
+        <script src="./recursos/javascript/menu.js"></script>        
+        <script>
+            const labels = [
+                'January',
+                'February',
+                'March',
+                'April',
+                'May',
+                'June',
+                'fg'
+            ];
+            const dat = [0, 20, 5, 2, 20, 30, 45];
+            grafico("data",dat,labels);
+        </script>
+    </body>
+</html>

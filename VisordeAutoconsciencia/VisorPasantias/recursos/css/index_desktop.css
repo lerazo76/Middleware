@@ -1,0 +1,319 @@
+.titulo{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #0070B4;
+    font-size: 1.3vw;
+    color: #fff;
+    height: 6vh;
+}
+.barra_lateral{
+    /* overflow: scroll; para que siempre tenga una sola pagina que mostrar*/
+    background-color: #8f8e8e75;
+    width: 17%;
+    height: 94vh;
+}
+.container-general{
+    display: flex;
+    /* min-height: 94vh; En caso de querer scroll a la pagina entera */
+    height: 94vh;
+}
+
+
+
+.sistema-container{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 10%;
+}
+
+.combobox-container{
+    display: flex;
+    height: 100%;
+    width: 90%;
+    justify-content: center;
+    align-items: center;
+}
+
+.combo{
+    height: 75%;
+    width: 100%;
+}
+
+.titulo__menu{
+    width: 100%;
+    text-align: center;
+    background-color: #30393A;
+    color: #fff;
+    padding: 1vh 0 1vh 0;
+    font-size: 1vw;
+    /* text-decoration: underline; Para poner un subrayado*/
+}
+
+.entidades-container{
+    display: flex;
+    flex-direction: column;
+    height: 45%;
+}
+
+.arbol-container{
+    height: 100%;
+    overflow: auto;
+}
+
+.propiedades-container{
+    display: flex;
+    flex-direction: column;
+    height: 25%;
+}
+.propiedadest-container{
+    display: flex;
+    flex-direction: column;
+    height: 20%;
+}
+.lista-container{
+    height: 100%;
+    overflow: auto;
+}
+
+.menu, .submenu{
+    list-style: none;
+}
+
+.submenu .menu__link{
+    display: block;
+    padding: 0 0 0.5vh 2.5vw;
+    font-size: 0.5vw;
+}
+.submenu1{
+    display: block;
+    padding: 0 0 0.5vh 2.5vw;
+    font-size: 0.5vw;
+}
+.submenu2{
+    display: block;
+    padding: 0 0 0.5vh 2.5vw;
+    font-size: 0.5vw;
+}
+.submenu3{
+    display: block;
+    padding: 0 0 0.5vh 2.5vw;
+    font-size: 0.5vw;
+}
+.submenu4{
+    display: block;
+    padding: 0 0 0.5vh 2.5vw;
+    font-size: 0.5vw;
+}
+.submenu5{
+    display: block;
+    padding: 0 0 0.5vh 2.5vw;
+    font-size: 0.5vw;
+}
+.menu__link{
+    display: flex;
+    text-decoration: none;
+    color: rgb(0, 0, 0);
+    font-size: 1vw;
+    padding: 1vh 0 1vh 0.7vw;
+}
+
+.menu__link i{
+    padding-right: 0.5vw;
+}
+
+/* .rotar-abajo{
+    padding-left: 1vw;
+    transform: rotate(180deg);
+    transition: all 0.3s;
+}
+
+.rotar-arriba{
+    padding-right: 1vw;
+    transform: rotate(360deg);
+    transition: all 0.3s;
+} */
+
+/* .submenu{
+    height: 0;
+    overflow: hidden;
+    transition: all 0.3s;
+} */
+
+.container-informacion{
+    width: 88%;
+}
+
+/* enlaces a en tiempo real/historico */
+.container-botones{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    background-color: #30393A;
+}
+
+.radio-botones{
+    display: flex;
+    align-items: center;
+} 
+
+.boton{
+    text-decoration: none;
+    font-size: 1vw;
+    cursor: pointer;
+    color: #ffffffbd;
+    padding: 1.5vh 2vw 1.5vh 2vw;
+    transition: all 0.2s;
+}
+
+
+.boton i{
+    padding-right: 0.5vw;
+}
+
+.boton:hover{
+    color: #ffffff;
+    transition: all 0.2s;
+}
+
+.rad-boton{
+    text-decoration: none;
+    font-size: 1vw;
+    cursor: pointer;
+    color: #ffffff;
+    padding: 1.5vh 1.5vw 1.5vh 1.5vw;
+    transition: all 0.2s;
+}
+
+.rad-boton i{
+    padding-right: 0.5vw;
+}
+
+.blue{
+    color: #0070B4;
+}
+
+.white{
+    color: #ffffff;
+}
+
+.container-fechas{
+    transition: all 0.2s;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    padding: 1vh 1vw 1vh 0;
+    font-size: 1vw;
+}
+
+.container-recomendacion{
+    transition: all 0.2s;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    padding: 1vh 1vw 1vh 0;
+    font-size: 1vw;
+}
+
+.ocultar{
+    font-size: 1vw;
+    padding: 0;
+    height: 0;
+    overflow: hidden;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+}
+
+.boton-form{
+    margin-left: 2vw;
+    width: 8vw;
+    padding: 0.5vh;
+    text-decoration: none;
+    cursor: pointer;
+    color: #ffffff;
+    background-color: #0070B4;
+    border-radius: 6px;
+    border: 2px solid #0016b0;
+    font-size: 1vw;
+    transition: all 0.2s;
+}
+
+.boton-form:hover{
+    color: #0070B4;
+    background-color: #ffffff;
+    transition: all 0.2s;
+}
+
+.container-fechas label{
+    padding-left: 2vw;
+    padding-right: 0.5vw;
+}
+
+.container-recomendacion label{
+    padding-left: 2vw;
+    padding-right: 0.5vw;
+}
+
+.tabla-container{
+    display: flex;
+    justify-content: center;
+    height: 35vh;
+    margin-top: 1vh;
+    overflow: auto;
+}
+
+#tabla-informacion{
+    width: 90%;
+    font-size: 1vw;
+    
+}
+
+#tabla-informacion th{
+    /*border: 2px solid rgb(0, 0, 0);*/
+    background: #0070B4;
+    color: #fff;
+    padding: 0.5vh 0 0.5vh 0;
+    position: sticky;
+    top: 0;
+    
+}
+#tabla-informacion td{
+    text-align: center;
+    /*border: 2px solid rgb(151,151,151); */  
+    padding: 0.5vh 0 0.5vh 0;
+    font-size: 0.8vw;
+}
+#tabla-informacion tr:nth-child(odd){
+    background: #d1d1d1;
+}
+#tabla-informacion tr:nth-child(even){
+    background: #e6e6e6;
+}
+
+.grafico-container{
+    display: flex;
+    margin: 3vh;
+    height: 40vh;
+}
+
+.titulo-grafico{
+    font-size: 2vw;
+    padding: 0 2vw 0 2vw;
+}
+
+.grafico{
+    width: 100%;
+    height: 100%;
+    border: 2px solid rgb(0, 0, 0);
+    overflow: scroll;
+}
+
+
+
+
+
+
+

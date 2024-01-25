@@ -1,0 +1,296 @@
+[
+    {
+        "xsi:type": "MonitorIoT:FogNode",
+        "isPartOf": "//@containsIoTSystem.0/@containsIoTSubSystem.0",
+        "id": "10",
+        "name": "HPProliantMicroserver ",
+        "description": "Nodo de computación ubicado en la casa del adulto mayor con capacidad de almacenar y procesar los datos crudos provenientes de los sensores.",
+        "isGrouped": "//@containsEntityCategory.0",
+        "deploymentModel": "Private",
+        "platform": "Node.js, PostgreSQL, Mosquitto",
+        "selfAwareMiddlewarePort": "9999",
+        "hasProperty": [
+            {
+                "id": "41",
+                "isBasedOn": "//@containsEntityCategory.0/@hasPropertyTemplate.0",
+                "hasRulePropertyToDataColumn": "//@containsDataFlow.2/@containsDataMappingRule.0",
+                "name": "cargaCPU",
+                "isCollectedBy": "//@containsIoTSystem.0/@containsIoTSubSystem.0/@containsSelfAwarenessProcess.2/@usesCollectionMethod.0"
+            },
+            {
+                "id": "42",
+                "isBasedOn": "//@containsEntityCategory.0/@hasPropertyTemplate.2",
+                "hasRulePropertyToDataColumn": "//@containsDataFlow.2/@containsDataMappingRule.2",
+                "name": "idCPU",
+                "value": "1"
+            },
+            {
+                "id": "43",
+                "isBasedOn": "//@containsEntityCategory.0/@hasPropertyTemplate.1",
+                "hasRulePropertyToDataColumn": "//@containsDataFlow.2/@containsDataMappingRule.1",
+                "name": "nroSensoresControlados",
+                "value": "2"
+            }
+        ],
+        "containsResource": [
+            {
+                "xsi:type": "MonitorIoT:DataBase",
+                "id": "24",
+                "name": "PostgreSQLLocal ",
+                "description": "Base de datos ubicada en el nodo Fog.  Almacena los datos crudos provenientes de los sensores.",
+                "uri": "postgresql://postgres:admin@192.168.1.11:5433/postgresqllocal",
+                "user": "postgres",
+                "password": "admin",
+                "usesProtocol": "//@containsEntity.2/@containsProtocol.1",
+                "containsDataTable": [
+                    {
+                        "name": "CargaCPUFog",
+                        "persistenceType": "Permanent",
+                        "hasLinkServiceToDatable": "//@containsLink.18",
+                        "composedOfDataColumn": [
+                            {
+                                "name": "cargaCPU",
+                                "hasRulePropertyToDataColumn": "//@containsDataFlow.2/@containsDataMappingRule.0",
+                                "dataType": "Float"
+                            },
+                            {
+                                "name": "nroSensoresControlados",
+                                "hasRulePropertyToDataColumn": "//@containsDataFlow.2/@containsDataMappingRule.1",
+                                "dataColumnType": "MetaData",
+                                "dataType": "Integer",
+                                "formulaExpression": "let a=Math.random() * (3 - 0) + 0; a=parseInt(a);return a;"
+                            },
+                            {
+                                "name": "idCPU",
+                                "hasRulePropertyToDataColumn": "//@containsDataFlow.2/@containsDataMappingRule.2",
+                                "dataColumnType": "MetaData",
+                                "dataType": "Integer"
+                            },
+                            {
+                                "name": "fechaHora",
+                                "dataColumnType": "MetaData",
+                                "dataType": "Date",
+                                "formulaExpression": "return new Date().toISOString();"
+                            }
+                        ]
+                    },
+                    {
+                        "name": "AmbienteDormitorio",
+                        "persistenceType": "Permanent",
+                        "hasLinkServiceToDatable": "//@containsLink.19",
+                        "composedOfDataColumn": [
+                            {
+                                "name": "temperatura",
+                                "hasRulePropertyToDataColumn": "//@containsDataFlow.0/@containsDataMappingRule.0",
+                                "dataType": "Float"
+                            },
+                            {
+                                "name": "humedad",
+                                "hasRulePropertyToDataColumn": "//@containsDataFlow.0/@containsDataMappingRule.1",
+                                "dataType": "Float"
+                            },
+                            {
+                                "name": "idSensor",
+                                "hasRulePropertyToDataColumn": "//@containsDataFlow.0/@containsDataMappingRule.2",
+                                "dataColumnType": "MetaData",
+                                "dataType": "Integer"
+                            },
+                            {
+                                "name": "fechaHora",
+                                "dataColumnType": "MetaData",
+                                "dataType": "Date",
+                                "formulaExpression": "return new Date().toISOString();"
+                            }
+                        ]
+                    },
+                    {
+                        "name": "AmbienteCocina",
+                        "persistenceType": "Permanent",
+                        "hasLinkServiceToDatable": "//@containsLink.20 //@containsLink.26",
+                        "composedOfDataColumn": [
+                            {
+                                "name": "CO",
+                                "hasRulePropertyToDataColumn": "//@containsDataFlow.1/@containsDataMappingRule.0",
+                                "hasRuleAsSource": "//@containsDataFlow.3/@containsDataMappingRule.0 //@containsDataFlow.3/@containsDataMappingRule.1",
+                                "dataType": "Float"
+                            },
+                            {
+                                "name": "idSensor",
+                                "hasRulePropertyToDataColumn": "//@containsDataFlow.1/@containsDataMappingRule.1",
+                                "dataColumnType": "MetaData",
+                                "dataType": "Integer"
+                            },
+                            {
+                                "name": "fechaHora",
+                                "dataColumnType": "MetaData",
+                                "dataType": "Date",
+                                "formulaExpression": "return new Date().toISOString();"
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "xsi:type": "MonitorIoT:Middleware",
+                "isPartOf": "//@containsIoTSystem.0/@containsIoTSubSystem.0",
+                "id": "18",
+                "name": "Express",
+                "description": "Servidor de aplicaciones web que pública los servicios RESTful para el intercambio, agregación y almacenamiento de datos.",
+                "usesProtocol": "//@containsEntity.2/@containsProtocol.0",
+                "containsService": [
+                    {
+                        "isPartOf": "//@containsIoTSystem.0/@containsIoTSubSystem.0",
+                        "id": "20",
+                        "name": "guardarCargaCPU",
+                        "description": "Servicio RESTful que almacena los datos recolectados de la carga de CPU, en la base de datos de monitoreo del nodo Fog.",
+                        "endPoint": "cargacpu",
+                        "method": "POST",
+                        "hasLinkAppToService": "//@containsLink.10",
+                        "hasLinkServiceToDataTable": "//@containsLink.18",
+                        "containsParameter": [
+                            {
+                                "ordinal": "1",
+                                "name": "cargaCPU",
+                                "dataType": "Float",
+                                "receives": "//@containsEntityCategory.0/@hasPropertyTemplate.0"
+                            },
+                            {
+                                "ordinal": "2",
+                                "name": "idCPU",
+                                "dataType": "Integer",
+                                "receives": "//@containsEntityCategory.0/@hasPropertyTemplate.2"
+                            }
+                        ]
+                    },
+                    {
+                        "isPartOf": "//@containsIoTSystem.0/@containsIoTSubSystem.0",
+                        "id": "21",
+                        "name": "guardarTemperaturaHumedad",
+                        "description": "Servicio RESTful que almacena los datos recolectados de la temperatura y humedad del dormitorio, en la base de datos de monitoreo del nodo Fog.",
+                        "endPoint": "temperaturahumedad",
+                        "method": "POST",
+                        "hasLinkAppToService": "//@containsLink.4 //@containsLink.12",
+                        "hasLinkServiceToDataTable": "//@containsLink.19",
+                        "containsParameter": [
+                            {
+                                "ordinal": "1",
+                                "name": "temperatura",
+                                "dataType": "Float",
+                                "receives": "//@containsEntityCategory.1/@hasPropertyTemplate.0"
+                            },
+                            {
+                                "ordinal": "2",
+                                "name": "humedad",
+                                "dataType": "Float",
+                                "receives": "//@containsEntityCategory.1/@hasPropertyTemplate.1"
+                            },
+                            {
+                                "ordinal": "3",
+                                "name": "idSensor",
+                                "dataType": "Integer",
+                                "receives": "//@containsEntityCategory.2/@hasPropertyTemplate.0"
+                            }
+                        ]
+                    },
+                    {
+                        "isPartOf": "//@containsIoTSystem.0/@containsIoTSubSystem.0",
+                        "id": "22",
+                        "name": "guardarCO",
+                        "description": "Servicio RESTful que almacena los datos recolectados de la carga de CPU, en la base de datos de monitoreo del nodo Fog.",
+                        "endPoint": "co",
+                        "method": "POST",
+                        "hasLinkServiceToDataTable": "//@containsLink.20",
+                        "hasLinkServiceToTopic": "//@containsLink.13",
+                        "containsParameter": [
+                            {
+                                "ordinal": "1",
+                                "name": "CO",
+                                "dataType": "Float",
+                                "receives": "//@containsEntityCategory.1/@hasPropertyTemplate.2"
+                            },
+                            {
+                                "ordinal": "2",
+                                "name": "idSensor",
+                                "dataType": "Integer",
+                                "receives": "//@containsEntityCategory.2/@hasPropertyTemplate.0"
+                            }
+                        ]
+                    },
+                    {
+                        "isPartOf": "//@containsIoTSystem.0/@containsIoTSubSystem.0",
+                        "id": "23",
+                        "name": "guardarResumenDiarioCO",
+                        "description": "Servicio RESTful que calcula el promedio, máximo y mínimo diario de la concentración de CO en la cocina y lo almacena en la base de datos del nodo Cloud.",
+                        "endPoint": "resumendiarioco",
+                        "method": "POST",
+                        "hasLinkAppToService": "//@containsLink.21",
+                        "hasLinkServiceToDataTable": "//@containsLink.23 //@containsLink.24 //@containsLink.26"
+                    }
+                ]
+            },
+            {
+                "xsi:type": "MonitorIoT:Broker",
+                "id": "19",
+                "name": "Mosquitto",
+                "description": "Broker que soporta la comunicación asíncrona entre la puerta de enlace y el nodo Fog.",
+                "usesProtocol": "//@containsEntity.2/@containsProtocol.2",
+                "containsTopic": [
+                    {
+                        "incluyes": "//@containsEntity.1/@containsSubPhysicalEntity.0/@hasProperty.0",
+                        "id": "26",
+                        "name": "datosAmbienteCocina",
+                        "hasLinkServiceToTopic": "//@containsLink.13",
+                        "hasLinkAppToTopic": "//@containsLink.5 //@containsLink.11"
+                    }
+                ]
+            },
+            {
+                "xsi:type": "MonitorIoT:API",
+                "id": "14",
+                "name": "obtenerCargaCPU",
+                "description": "Función API que obtiene el porcentaje de uso de la CPU del nodo Fog.",
+                "instructions": "const child = require('child_process');let com=\"wmic cpu get loadpercentage /value\";let valor=child.spawnSync('cmd.exe',['/c',com]);valor=valor.output[1].toString().trim().split(\"=\")[1];return {\"cargaCPU\": valor}",
+                "hasLinkAppToAPI": "//@containsLink.9",
+                "containsReturnVariable": [
+                    {
+                        "ordinal": "1",
+                        "name": "cargaCPU",
+                        "dataType": "Float",
+                        "returns": "//@containsEntityCategory.0/@hasPropertyTemplate.0"
+                    }
+                ]
+            },
+            {
+                "xsi:type": "MonitorIoT:NetworkInterface",
+                "isPartOf": "//@containsIoTSystem.0/@containsIoTSubSystem.0",
+                "id": "36",
+                "name": "Ethernet - Nodo Fog",
+                "description": "Adaptador de red Ethernet del nodo Fog HP Proliant Microserver.",
+                "connects": "//@containsEntity.2 //@containsEntity.4",
+                "macAddress": "50-5B-C2-D5-AE-8D",
+                "networkAddress": "app-implementadora-nodo-fog-1",
+                "communicationTechnology": "Ethernet"
+            },
+            {
+                "xsi:type": "MonitorIoT:Application",
+                "isPartOf": "//@containsIoTSystem.0/@containsIoTSubSystem.0",
+                "id": "16",
+                "name": "controladorCargaCPU",
+                "description": "Aplicación que invoca a la API correspondiente, a fin de obtener el porcentaje de uso de CPU del nodo Fog. Luego, consume un servicio web para el almacenamiento de estos datos en el nodo Fog.",
+                "type": "Desktop",
+                "hasLinkAppToService": "//@containsLink.10",
+                "hasLinkAppToAPI": "//@containsLink.9"
+            },
+            {
+                "xsi:type": "MonitorIoT:Application",
+                "isPartOf": "//@containsIoTSystem.0/@containsIoTSubSystem.0",
+                "id": "17",
+                "name": "controladorResumenCO",
+                "description": "Aplicación que consume un servicio web para obtener diariamente los datos de CO almacenados en la base de datos del nodo Fog, aplicar operaciones de agregación (promedio, máximo, mínimo) sobre los mismos; y, almacenar los datos resumidos en la base de datos del nodo Cloud. ",
+                "type": "Desktop",
+                "hasLinkAppToService": "//@containsLink.21"
+            }
+        ],
+        "has": "//@containsSelfAwarenessAspect.2 //@containsSelfAwarenessAspect.5"
+    }
+]

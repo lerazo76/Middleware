@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="es">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Monitorización</title>
+        <link rel="stylesheet" type="text/css" href="recursos/css/normalize.css" />
+        <link rel="stylesheet" type="text/css" href="recursos/css/auto_desktop.css" media="all" />
+        <link href="https://fonts.googleapis.com/css2?family=Lato:wght@700&display=swap" rel="stylesheet"> <!--Fuente para el documento-->
+        <link rel="stylesheet" type="text/css" href="recursos/iconos/css/all.min.css" /> <!--iconos de font awesome-->
+        <script src="./recursos/javascript/chart.js"></script>
+        <script src="./recursos/javascript/ArchivoAuto.js"></script>
+    </head>
+
+    <body>
+        <p class="titulo">Visor de monitorización y autoconsciencia para sistemas IoT</p>
+        <div class="container-general">
+            <div class="barra_lateral">
+                <div class="sistema-container">
+                    <p class="titulo__menu">Sujetos</p>
+                    <div class="combobox-container">
+                        <select class="combo" name="selectsujeto" id="selectSujeto">
+                            <option value="Seleccione" selected>Seleccione</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="entidades-container">
+                    <p class="titulo__menu">Objetos</p>
+                    <div class="arbol-container">
+                        <nav>
+                            <ul class="menu" id="objetos">                         
+                            </ul>            
+                        </nav>
+                    </div>
+                </div>
+                <div class="propiedades-container">
+                    <p class="titulo__menu">Aspectos</p>
+                    <div class="lista-container">
+                        <nav class="menu__container">
+                            <ul class="menu" id="aspectos">
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+                <div class="propiedadest-container">
+                    <p class="titulo__menu">Métricas</p>
+                    <div class="lista-container">
+                        <nav class="menu__container">
+                            <ul class="menu" id="metricas">   
+                            </ul>
+                        </nav>
+                    </div>
+                </div>            
+            </div>
+            <div class="container-informacion">
+                <div class = "container-botones">
+                    <div class="botones">
+                        <a href="#" class="boton" id="btn-tiempo"><i class="fas fa-satellite"></i>&nbsp;En tiempo real</a>
+                        <a href="#" class="boton" id="btn-fechas"><i class="fas fa-history"></i>&nbsp;Histórico</a>
+                        <a href="#" class="boton" id="btn-recomendacion"><i class="fas fa-magic"></i>&nbsp;Predicción</a>
+                    </div>
+                    <div class="radio-botones">
+                        <div class="radio-botones">
+                            <!-- <a class="rad-boton" href="index.html"><i class="fas fa-circle white"></i>Monitorización</a> -->
+                            <!--<a class="rad-boton" href="#"><i class="fas fa-circle blue"></i>Autoconsciencia</a>-->
+                        </div>
+                    </div>
+                </div>
+                <div class="ocultar" id="fechas">
+                    <form action="#"></form>
+                        <label for="desde">Desde: </label>
+                        <input type="text" id="desde" name="des">
+                        <label for="hasta">Hasta: </label>
+                        <input type="text" id="hasta" name="hast">
+                        <input class="boton-form" type="submit" id="btn-formfechas" value="Mostrar">                 
+                </div>
+                <div class="ocultar" id="recomendacion">
+                    <form action="#"></form>
+                        <!--<label for="recom">Predicción: </label>-->
+                        <!--<label id="recom" name="recomenda"></label>  -->             
+                </div>
+                <div class="ocultar" id="pids">
+                    <label for="selectpids">ID proceso:&nbsp;</label>
+                    <select class="combo-pids" name="selectpids" id="selectpids">
+                    </select>
+                </div>
+                <div class="ocultar" id="tipoVariable">
+                    <label for="tipovariable">Métrica:&nbsp;</label>
+                    <label id="tipovariable" name="variable"></label>               
+                </div>
+                <div class="ocultar tabla-container" id="miTablaDatos">  
+                    <table id="tabla-informacion">
+                    </table>
+                </div>
+
+                <div id="miGrafico" class="ocultar">
+                    <div class="grafico-container">
+                        <!-- <div class="grafico">  -->
+                            <canvas id="myChart" style="max-width:96%; max-height: 100%;"></canvas>
+                        <!-- </div> -->
+                    </div>
+                </div>
+            </div>
+        </div>
+        <script>armarestructura();</script>
+        <script src="./recursos/javascript/menu.js"></script>        
+    </body>
+</html>

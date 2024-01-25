@@ -1,0 +1,47 @@
+version: "3.8"
+
+services:
+  postgres:
+    image: postgres
+    restart: always
+    ports: 
+      - "5432:5432"
+    environment:
+      DATABASE_HOST: 127.0.0.1
+      DATABASE_USER: postgres
+      DATABASE_PASSWORD: postgres
+      DATABASE_DB: postgres
+      DATABASE_HOST_AUTH_METHOD: trust
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - ./postgres-msn-data:/var/lib/postgresql/data
+
+  pgadmin:
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: "admin@pg.com"
+      PGADMIN_DEFAULT_PASSWORD: "admin"
+    volumes:
+      - ./pgadmin-msn-servers:/var/lib/pgadmin
+    ports: 
+      - "80:80"
+    depends_on:
+      - postgres
+
+  FogNode:
+    image: lerazo/app-implementadora-nodo-fog-1:1.0.0
+    restart: always
+    volumes:
+      - ./App_Implementadora_FogNode/modelos:/FogNode/baseAnterior
+    ports: 
+      - "9999:9999"
+    depends_on:
+      - postgres
+  
+  AppSupervisor:
+    image: lerazo/app-supervisor-nodo-fog-1:1.0.0
+    restart: always
+    volumes:
+      - ./modelos:/AppSupervisor/modelos
+    depends_on:
+      - FogNode

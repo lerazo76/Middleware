@@ -1,0 +1,20 @@
+{
+  "name": "nodo_supervisor",
+  "version": "1.0.0",
+  "description": "Nodo Supervisor",
+  "main": "StartApp.js",
+  "scripts": {
+    "start": "nodemon ."
+  },
+  "author": "",
+  "license": "ISC",
+  "keywords": [],
+  "devDependencies": {
+    "nodemon": "^2.0.22"
+  },
+  "dependencies": {
+    "chalk": "^5.3.0",
+    "mqtt": "^5.0.2",
+    "request": "^2.88.2"
+  }
+}
